@@ -19,14 +19,26 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+model ContactGroup {
+  id        Int       @id @default(autoincrement())
+  name      String
+  description String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  contacts  Contact[]
+}
+
 model Contact {
-  id            Int      @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
+  groupId       Int
+  group         ContactGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
   name          String
-  unaccent_name String
+  unaccentName String
   address       String?
   cccd          String?
   taxcode       String?
   phone         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
