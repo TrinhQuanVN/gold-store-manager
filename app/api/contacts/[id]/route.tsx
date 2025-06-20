@@ -1,4 +1,4 @@
-import { pathContactSchema } from "@/app/validation_shema";
+import { pathContactSchema } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,8 +14,9 @@ export async function PATCH(
       status: 400,
     });
   }
+  const _params = await params;
   const contact = await prisma.contact.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(_params.id) },
   });
   if (!contact) {
     return NextResponse.json({ error: "Contact not found" }, { status: 404 });
@@ -32,7 +33,7 @@ export async function PATCH(
   }
 
   const updatedContact = await prisma.contact.update({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(_params.id) },
     data: {
       name: body.name ?? contact.name,
       unaccentName: body.name

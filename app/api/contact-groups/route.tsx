@@ -1,4 +1,4 @@
-import { contactGrouptSchema } from "@/app/validation_shema";
+import { contactGrouptSchema } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 

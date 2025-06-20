@@ -8,7 +8,7 @@ GROUP_URL = f"{BASE_URL}/api/contact-groups"
 CONTACT_URL = f"{BASE_URL}/api/contacts"
 
 # 2. Contact group names to create
-contact_groups = ["bình thường", "khách quen", "thân thiết", "VIP"]
+contact_groups = ["Bình thường", "Khách quen", "Thân thiết", "VIP"]
 
 # 3. Create contact groups
 group_ids = []
@@ -27,7 +27,7 @@ DB_PATH = r"D:\Cursor\new_app\database\new_db3.db"
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-cursor.execute("SELECT id, name, phone, address, issuenumber, taxcode FROM customers WHERE id BETWEEN 2 AND 200")
+cursor.execute("SELECT id, name, phone, address, Contactnumber, taxcode FROM customers WHERE id BETWEEN 2 AND 200")
 rows = cursor.fetchall()
 
 # 6. Post contacts

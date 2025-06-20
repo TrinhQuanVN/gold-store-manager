@@ -1,4 +1,4 @@
-import { contactSchema } from "@/app/validation_shema";
+import { contactSchema } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";

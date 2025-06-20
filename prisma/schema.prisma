@@ -20,25 +20,27 @@ datasource db {
 }
 
 model ContactGroup {
-  id        Int       @id @default(autoincrement())
-  name      String
+  id          Int      @id @default(autoincrement())
+  name        String
   description String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  color       String?  @default("gray") //color for ContactGroupBadge
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  contacts  Contact[]
+  contacts Contact[]
 }
 
 model Contact {
-  id            Int           @id @default(autoincrement())
-  groupId       Int
-  group         ContactGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  name          String
+  id           Int          @id @default(autoincrement())
+  groupId      Int          @default(1) // Default to group with id 1
+  group        ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  name         String
   unaccentName String
-  address       String?
-  cccd          String?
-  taxcode       String?
-  phone         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  address      String?
+  cccd         String?
+  taxcode      String?
+  phone        String?
+  note         String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
