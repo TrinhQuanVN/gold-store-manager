@@ -20,11 +20,11 @@ datasource db {
 }
 
 model ContactGroup {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
-  color       String?  @default("gray") //color for ContactGroupBadge
-  createdAt   DateTime @default(now())
+  color       String?   @default("gray") //color for ContactGroupBadge
+  createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
   contacts Contact[]
@@ -42,5 +42,45 @@ model Contact {
   phone        String?
   note         String?
   createdAt    DateTime     @default(now())
-  updatedAt    DateTime?     @updatedAt
+  updatedAt    DateTime?    @updatedAt
+}
+
+model GoldKara {
+  id          Int       @id @default(autoincrement())
+  name        String
+  goldPercent Float
+  description String?
+  color       String?   @default("gray") //color for GoldKaraBadge
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  jewelry Jewelry[]
+}
+
+model JewerlyCategory {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  jewelry Jewelry[]
+}
+
+model Jewelry {
+  id          Int             @id @default(autoincrement())
+  categoryId  Int
+  category    JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  goldKaraId  Int
+  goldKara    GoldKara        @relation(fields: [goldKaraId], references: [id], onDelete: Cascade)
+  name        String
+  goldWeight  Float
+  gemWeight   Float           @default(0)
+  totalWeight Float           @default(0)
+  gemName     String?
+  description String?
+  madeIn      String          @default("Việt Nam") // Default to "Việt Nam"
+  size        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime?       @updatedAt
 }
