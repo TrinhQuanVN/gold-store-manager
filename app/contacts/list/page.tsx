@@ -40,7 +40,6 @@ const ContactsPage = async ({ searchParams }: Props) => {
         : {
             [field]: {
               contains: keyword,
-              mode: "insensitive",
             },
           }
       : {};
@@ -57,7 +56,9 @@ const ContactsPage = async ({ searchParams }: Props) => {
     },
   });
 
-  const contactCount = await prisma.contact.count({});
+  const contactCount = await prisma.contact.count({
+    where,
+  });
 
   return (
     <Flex direction="column" gap="3">

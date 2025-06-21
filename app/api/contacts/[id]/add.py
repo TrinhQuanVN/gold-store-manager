@@ -1,51 +1,72 @@
 import sqlite3
-import requests
-import random
 
-# 1. API endpoints
-BASE_URL = "http://localhost:3000"
-GROUP_URL = f"{BASE_URL}/api/contact-groups"
-CONTACT_URL = f"{BASE_URL}/api/contacts"
+import unicodedata
+import re
 
-# 2. Contact group names to create
-contact_groups = ["Bình thường", "Khách quen", "Thân thiết", "VIP"]
+def to_lowercase_non_accent_vietnamese(s):
+    s = s.lower()
+    s = re.sub(r'[àáạảãâầấậẩẫăằắặẳẵ]', 'a', s)
+    s = re.sub(r'[èéẹẻẽêềếệểễ]', 'e', s)
+    s = re.sub(r'[ìíịỉĩ]', 'i', s)
+    s = re.sub(r'[òóọỏõôồốộổỗơờớợởỡ]', 'o', s)
+    s = re.sub(r'[ùúụủũưừứựửữ]', 'u', s)
+    s = re.sub(r'[ỳýỵỷỹ]', 'y', s)
+    s = re.sub(r'đ', 'd', s)
+    s = unicodedata.normalize('NFD', s)
+    s = s.encode('ascii', 'ignore').decode('utf-8')
+    return s
 
-# 3. Create contact groups
-group_ids = []
+# Đường dẫn database
+path1 = r'D:\db_edit\db4.db'
+path2 = r'D:\Code\nextjs\gold-store-manager\prisma\dev.db'
 
-for name in contact_groups:
-    res = requests.post(GROUP_URL, json={"name": name})
-    if res.status_code == 200 or res.status_code == 201:
-        group_id = res.json().get("id")
-        group_ids.append(group_id)
-        print(f"Created group '{name}' with ID {group_id}")
-    else:
-        print(f"Failed to create group '{name}':", res.text)
+# Kết nối
+conn1 = sqlite3.connect(path1)
+conn2 = sqlite3.connect(path2)
 
-# 4. Connect to SQLite and read customer data
-DB_PATH = r"D:\Cursor\new_app\database\new_db3.db"
-conn = sqlite3.connect(DB_PATH)
-cursor = conn.cursor()
+cur1 = conn1.cursor()
+cur2 = conn2.cursor()
 
-cursor.execute("SELECT id, name, phone, address, Contactnumber, taxcode FROM customers WHERE id BETWEEN 2 AND 200")
-rows = cursor.fetchall()
+# ✅ 1. Xóa toàn bộ dữ liệu cũ trong bảng customers của path2
+cur2.execute("DELETE FROM Contact")
+conn2.commit()
 
-# 6. Post contacts
+# ✅ 2. Lấy dữ liệu từ path1 (giữ nguyên ID, bỏ id 1 và 447)
+cur1.execute("""
+SELECT id, name, phone, address, issuenumber, taxcode
+FROM customers
+WHERE id IN (
+    SELECT DISTINCT customer_id FROM transactions
+)
+AND id NOT IN (1, 447)
+""")
+
+rows = cur1.fetchall()
+inserted = 0
+
+# ✅ 3. Chèn dữ liệu vào path2, giữ nguyên ID
 for row in rows:
-    _id, name, phone, address, cccd, taxcode = row
+    id, name, phone, address, cccd, taxcode = row 
     if not name:
-        continue  # Skip if name is missing
-    group_id = random.choice(group_ids)
-    payload = {
-        "name": name,
-        "phone": phone,
-        "address": address,
-        "cccd": cccd,
-        "taxcode": taxcode,
-        "groupId": f"{group_id}"
-    }
-    res = requests.post(CONTACT_URL, json=payload)
-    if res.status_code in (200, 201):
-        print(f"Created contact: {name}")
-    else:
-        print(f"❌ Failed to create contact {name}: {res.status_code} {res.text}")
+        continue
+
+    group_id = 1
+    try:
+        unaccent_name = to_lowercase_non_accent_vietnamese(name)
+        cur2.execute("""
+            INSERT INTO Contact (id, name, unaccentName, phone, address, cccd, taxcode, groupId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (id, name, unaccent_name, phone, address, cccd, taxcode, group_id))
+        inserted += 1
+    except sqlite3.IntegrityError as e:
+        print(f"Lỗi khi chèn ID {id}: {e}")
+        continue
+
+# ✅ 4. Kết thúc
+conn2.commit()
+conn1.close()
+conn2.close()
+
+print(f"Đã chèn {inserted} khách hàng từ path1 sang path2.")
+
+

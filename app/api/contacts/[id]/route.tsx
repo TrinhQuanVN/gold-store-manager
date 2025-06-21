@@ -44,6 +44,7 @@ export async function PATCH(
       cccd: body.cccd ?? contact.cccd,
       taxcode: body.taxcode ?? contact.taxcode,
       address: body.address ?? contact.address,
+      note: body.note ?? contact.note,
     },
   });
 

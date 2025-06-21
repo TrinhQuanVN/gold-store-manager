@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
       cccd: body.cccd || null,
       taxcode: body.taxcode || null,
       address: body.address || null,
+      note: body.note || null,
     },
   });
 

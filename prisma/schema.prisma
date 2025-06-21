@@ -25,7 +25,7 @@ model ContactGroup {
   description String?
   color       String?  @default("gray") //color for ContactGroupBadge
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime? @updatedAt
 
   contacts Contact[]
 }
@@ -42,5 +42,5 @@ model Contact {
   phone        String?
   note         String?
   createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  updatedAt    DateTime?     @updatedAt
 }
