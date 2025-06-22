@@ -48,7 +48,7 @@ model Contact {
 model JewelryType {
   id          Int       @id @default(autoincrement())
   name        String
-  goldPercent Float @default(0.0) // Gold percentage for the type
+  goldPercent Float     @default(0.0) // Gold percentage for the type
   description String?
   color       String?   @default("gray") //color for GoldKaraBadge
   createdAt   DateTime  @default(now())
@@ -68,23 +68,74 @@ model JewerlyCategory {
 }
 
 model Jewelry {
-  id          Int             @id @default(autoincrement())
-  name        String
-  goldWeight  Float
-  inStock       Boolean         @default(true)
+  id         Int     @id @default(autoincrement())
+  name       String
+  goldWeight Float
+  inStock    Boolean @default(true)
 
-  categoryId  Int
-  category    JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  jewelryTypeId  Int
-  jewelryType    JewelryType        @relation(fields: [jewelryTypeId], references: [id], onDelete: Cascade)
+  categoryId    Int
+  category      JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  jewelryTypeId Int
+  jewelryType   JewelryType     @relation(fields: [jewelryTypeId], references: [id], onDelete: Cascade)
 
-  gemWeight   Float           @default(0)
-  totalWeight Float           @default(0)
+  gemWeight   Float   @default(0)
+  totalWeight Float   @default(0)
   gemName     String?
 
   description String?
-  madeIn      String?          @default("Việt Nam") // Default to "Việt Nam"
+  madeIn      String? @default("Việt Nam") // Default to "Việt Nam"
   size        String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime?       @updatedAt
+
+  baoCaoXNTId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model ReportXNTHeader {
+  id              Int    @id @default(autoincrement())
+  name            String
+  quarter         Int //quý
+  year            Int //năm
+  taxPayerNamne   String //Tên người nộp thuế
+  taxPayerCode    String //Mã số thuế người nộp thuế
+  taxPayerAddress String //Địa chỉ người nộp thuế
+
+  tonDauKyValue  Float @default(0) //Tồn đầu kỳ giá trị
+  nhapValue      Float @default(0) //Nhập trong kỳ giá trị
+  xuatValue      Float @default(0) //Xuất trong kỳ giá trị
+  tonCuoiKyValue Float @default(0) //Tồn cuối kỳ giá trị
+
+  xuatThucTeValue Float @default(0) //Xuất thực tế giá trị
+  thueValue       Float @default(0) //Thuế giá trị gia tăng
+
+  startDate DateTime //Ngày bắt đầu kỳ báo cáo
+  endDate   DateTime //Ngày kết thúc kỳ báo cáo
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  reportXNTs ReportXNT[]
+}
+
+model ReportXNT {
+  id       String          @id
+  headerId Int
+  header   ReportXNTHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
+
+  name             String
+  unit             String? @default("chỉ")
+  tonDauKyQuantity Float   @default(0)
+  tonDauKyValue    Float   @default(0)
+
+  nhapQuantity Float @default(0)
+  nhapValue    Float @default(0)
+
+  xuatQuantity Float @default(0)
+  xuatValue    Float @default(0) //Xuất trong kỳ tính bằng xuatDonGia * xuatSoLuong
+
+  xuatDonGia Float @default(0) //đơn giá xuất trong kỳ tính bàng (tonDauKyValue + nhapValue) / (tonDauKyQuantity + nhapQuantity)
+
+  tonCuoiKyQuantity Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
+  tonCuoiKyValue    Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
 }
