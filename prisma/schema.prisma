@@ -45,10 +45,10 @@ model Contact {
   updatedAt    DateTime?    @updatedAt
 }
 
-model GoldKara {
+model JewelryType {
   id          Int       @id @default(autoincrement())
   name        String
-  goldPercent Float
+  goldPercent Float @default(0.0) // Gold percentage for the type
   description String?
   color       String?   @default("gray") //color for GoldKaraBadge
   createdAt   DateTime  @default(now())
@@ -69,17 +69,21 @@ model JewerlyCategory {
 
 model Jewelry {
   id          Int             @id @default(autoincrement())
-  categoryId  Int
-  category    JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  goldKaraId  Int
-  goldKara    GoldKara        @relation(fields: [goldKaraId], references: [id], onDelete: Cascade)
   name        String
   goldWeight  Float
+  inStock       Boolean         @default(true)
+
+  categoryId  Int
+  category    JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  jewelryTypeId  Int
+  jewelryType    JewelryType        @relation(fields: [jewelryTypeId], references: [id], onDelete: Cascade)
+
   gemWeight   Float           @default(0)
   totalWeight Float           @default(0)
   gemName     String?
+
   description String?
-  madeIn      String          @default("Việt Nam") // Default to "Việt Nam"
+  madeIn      String?          @default("Việt Nam") // Default to "Việt Nam"
   size        String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime?       @updatedAt

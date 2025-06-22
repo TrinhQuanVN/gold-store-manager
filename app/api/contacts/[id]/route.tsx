@@ -26,7 +26,7 @@ export async function PATCH(
   if (
     body.groupId &&
     (await prisma.contactGroup.findUnique({
-      where: { id: parseInt(body.groupId) },
+      where: { id: body.groupId },
     })) === null
   ) {
     return NextResponse.json({ error: "Invalid group id" }, { status: 404 });
@@ -39,7 +39,7 @@ export async function PATCH(
       unaccentName: body.name
         ? toLowerCaseNonAccentVietnamese(body.name)
         : contact.unaccentName,
-      groupId: body.groupId ? parseInt(body.groupId) : contact.groupId,
+      groupId: body.groupId ? body.groupId : contact.groupId,
       phone: body.phone ?? contact.phone,
       cccd: body.cccd ?? contact.cccd,
       taxcode: body.taxcode ?? contact.taxcode,
