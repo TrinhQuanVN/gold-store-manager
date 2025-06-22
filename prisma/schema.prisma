@@ -92,26 +92,26 @@ model Jewelry {
   updatedAt DateTime? @updatedAt
 }
 
-model TaxPayer{
-  id         Int       @id @default(autoincrement())
-  name        String
-  code        String    @unique // Mã số thuế
-  address     String?
+model TaxPayer {
+  id      Int     @id @default(autoincrement())
+  name    String // Tên người nộp thuế
+  taxCode String  @unique // Mã số thuế
+  address String? // Địa chỉ người nộp thuế
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   reportXNTHeaders ReportXNTHeader[]
 }
 
 model ReportXNTHeader {
-  id              Int    @id @default(autoincrement())
-  name            String
-  quarter         Int //quý
-  year            Int //năm
-  
-  taxPayerId      Int //Mã số thuế của người nộp thuế
-  taxPayer        TaxPayer @relation(fields: [taxPayerId], references: [id], onDelete: Cascade)
+  id      Int    @id @default(autoincrement())
+  name    String
+  quarter Int //quý
+  year    Int //năm
+
+  taxPayerId Int //Mã số thuế của người nộp thuế
+  taxPayer   TaxPayer @relation(fields: [taxPayerId], references: [id], onDelete: Cascade)
 
   tonDauKyValue  Float @default(0) //Tồn đầu kỳ giá trị
   nhapValue      Float @default(0) //Nhập trong kỳ giá trị
