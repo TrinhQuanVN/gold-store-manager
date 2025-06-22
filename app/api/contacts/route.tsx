@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
       status: 400,
     });
   }
+  const data = validation.data;
   const group = await prisma.contactGroup.findUnique({
     where: { id: parseInt(body.groupId) },
   });
@@ -20,14 +21,14 @@ export async function POST(request: NextRequest) {
 
   const contact = await prisma.contact.create({
     data: {
-      name: body.name,
-      unaccentName: toLowerCaseNonAccentVietnamese(body.name),
-      groupId: parseInt(body.groupId),
-      phone: body.phone || null,
-      cccd: body.cccd || null,
-      taxcode: body.taxcode || null,
-      address: body.address || null,
-      note: body.note || null,
+      name: data.name,
+      unaccentName: toLowerCaseNonAccentVietnamese(data.name),
+      groupId: parseInt(data.groupId),
+      phone: data.phone || null,
+      cccd: data.cccd || null,
+      taxcode: data.taxcode || null,
+      address: data.address || null,
+      note: data.note || null,
     },
   });
 

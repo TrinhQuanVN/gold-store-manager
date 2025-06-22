@@ -9,11 +9,14 @@ export async function PATCH(
 ) {
   const body = await request.json();
   const validation = pathContactSchema.safeParse(body);
+
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), {
       status: 400,
     });
   }
+  const data = validation.data;
+
   const _params = await params;
   const contact = await prisma.contact.findUnique({
     where: { id: parseInt(_params.id) },
@@ -24,9 +27,9 @@ export async function PATCH(
 
   // Check if groupId is provided and valid
   if (
-    body.groupId &&
+    data.groupId &&
     (await prisma.contactGroup.findUnique({
-      where: { id: body.groupId },
+      where: { id: data.groupId },
     })) === null
   ) {
     return NextResponse.json({ error: "Invalid group id" }, { status: 404 });
@@ -35,16 +38,16 @@ export async function PATCH(
   const updatedContact = await prisma.contact.update({
     where: { id: parseInt(_params.id) },
     data: {
-      name: body.name ?? contact.name,
-      unaccentName: body.name
-        ? toLowerCaseNonAccentVietnamese(body.name)
+      name: data.name ?? contact.name,
+      unaccentName: data.name
+        ? toLowerCaseNonAccentVietnamese(data.name)
         : contact.unaccentName,
-      groupId: body.groupId ? body.groupId : contact.groupId,
-      phone: body.phone ?? contact.phone,
-      cccd: body.cccd ?? contact.cccd,
-      taxcode: body.taxcode ?? contact.taxcode,
-      address: body.address ?? contact.address,
-      note: body.note ?? contact.note,
+      groupId: data.groupId ? data.groupId : contact.groupId,
+      phone: data.phone ?? contact.phone,
+      cccd: data.cccd ?? contact.cccd,
+      taxcode: data.taxcode ?? contact.taxcode,
+      address: data.address ?? contact.address,
+      note: data.note ?? contact.note,
     },
   });
 
