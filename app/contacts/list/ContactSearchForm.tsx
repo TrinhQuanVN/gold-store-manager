@@ -1,8 +1,8 @@
 "use client";
 
-import { TextField, Flex, Button, Select } from "@radix-ui/themes";
+import { Button, Flex, Select, TextField } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
-import { useTransition, useState } from "react";
+import { useState, useTransition } from "react";
 import { ContactQuery } from "./ContactTable";
 
 interface Props {
@@ -36,7 +36,6 @@ const ContactSearchForm = ({ searchParams }: Props) => {
     if (field && value) {
       params.set("field", field); // lưu tiêu chí tìm
       params.set("value", value); // lưu giá trị tìm
-      params.set(field, value); // để giữ giá trị TextField khi reload (UI sync)
     } else {
       // nếu không nhập gì thì xóa
       params.delete("field");

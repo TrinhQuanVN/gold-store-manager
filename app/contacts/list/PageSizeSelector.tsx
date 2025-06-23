@@ -1,7 +1,7 @@
 "use client";
 
 import { Select } from "@radix-ui/themes";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { ContactQuery } from "./ContactTable";
 
@@ -12,7 +12,7 @@ const pageSizes = ["10", "20", "50", "100"];
 
 const PageSizeSelector = ({ searchParams }: Props) => {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const currentSize = searchParams.pageSize || "10";
 

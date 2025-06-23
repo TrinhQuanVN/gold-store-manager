@@ -1,14 +1,11 @@
 import Pagination from "@/app/components/Pagination";
 import { prisma } from "@/prisma/client";
-//import { Status } from '@prisma/client';
-import ContactActions from "./ContactActions";
-import ContactTable, { ContactQuery, columnNames } from "./ContactTable";
-import { Flex } from "@radix-ui/themes";
-import { Metadata } from "next";
-import { Prisma } from "@prisma/client";
-import PageSizeSelector from "./PageSizeSelector";
-import ContactSearchForm from "./ContactSearchForm";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
+import { Prisma } from "@prisma/client";
+import { Flex } from "@radix-ui/themes";
+import ContactActions from "./ContactActions";
+import ContactSearchForm from "./ContactSearchForm";
+import ContactTable, { ContactQuery, columnNames } from "./ContactTable";
 interface Props {
   searchParams: ContactQuery;
 }
@@ -66,7 +63,6 @@ const ContactsPage = async ({ searchParams }: Props) => {
       <ContactSearchForm searchParams={params} /> {/* 👈 Thêm ở đây */}
       <ContactTable searchParams={params} contacts={contacts} />
       <Flex gap="2">
-        <PageSizeSelector searchParams={params} />
         <Pagination
           pageSize={pageSize}
           currentPage={page}
