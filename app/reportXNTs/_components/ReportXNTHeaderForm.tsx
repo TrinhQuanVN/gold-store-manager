@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  rawReportXNTHeaderSchema,
-  getCurrentQuarter,
-  getCurrentYear,
-} from "@/app/validationSchemas/reportXNTHeaderSchemas";
+import { rawReportXNTHeaderSchema } from "@/app/validationSchemas/reportXNTHeaderSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Callout, Select, TextField } from "@radix-ui/themes";
 import axios from "axios";
@@ -24,7 +20,8 @@ const ReportXNTHeaderForm = ({ taxPayers }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const quarter = Math.floor(new Date().getMonth() / 3) + 1;
+  const year = new Date().getFullYear();
   const {
     register,
     handleSubmit,
@@ -33,9 +30,15 @@ const ReportXNTHeaderForm = ({ taxPayers }: Props) => {
   } = useForm<z.infer<typeof rawReportXNTHeaderSchema>>({
     resolver: zodResolver(rawReportXNTHeaderSchema),
     defaultValues: {
-      quarter: getCurrentQuarter(),
-      year: getCurrentYear(),
+      quarter: quarter.toString(),
+      year: year.toString(),
       taxPayerId: taxPayers[taxPayers.length - 1]?.id.toString() ?? "",
+      startDate: new Date(year, (quarter - 1) * 3, 1)
+        .toISOString()
+        .split("T")[0],
+      endDate: new Date(year, (quarter - 1) * 3 + 3, 1)
+        .toISOString()
+        .split("T")[0],
     },
   });
 
@@ -108,6 +111,20 @@ const ReportXNTHeaderForm = ({ taxPayers }: Props) => {
           )}
         />
         <ErrorMessage>{errors.taxPayerId?.message}</ErrorMessage>
+
+        <TextField.Root
+          type="date"
+          placeholder="Ngày bắt đầu"
+          {...register("startDate")}
+        />
+        <ErrorMessage>{errors.startDate?.message}</ErrorMessage>
+
+        <TextField.Root
+          type="date"
+          placeholder="Ngày kết thúc"
+          {...register("endDate")}
+        />
+        <ErrorMessage>{errors.startDate?.message}</ErrorMessage>
 
         <Button type="submit" disabled={isSubmitting}>
           Tạo báo cáo {isSubmitting && <Spinner />}

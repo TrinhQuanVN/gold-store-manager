@@ -1,7 +1,5 @@
 import dynamic from "next/dynamic";
 import ContactFormSkeleton from "../_components/ReportXNTHeaderFormSkeleton";
-import { notFound } from "next/navigation";
-import { prisma } from "@/prisma/client";
 
 const ReportHeaderForm = dynamic(
   () => import("../_components/ReportXNTHeaderForm"),

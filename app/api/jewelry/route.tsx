@@ -1,6 +1,5 @@
-import { jewelrySchema } from "@/app/validationSchemas";
+import { jewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
 import { prisma } from "@/prisma/client";
-import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -45,6 +44,9 @@ export async function POST(request: NextRequest) {
       description: data.description || null,
       madeIn: data.madeIn || null,
       size: data.size || null,
+      inStock: data.inStock,
+      supplierId: data.supplierId ? data.supplierId : null,
+      reportXNTId: data.reportXNTId ? data.reportXNTId : null, // Optional field
     },
   });
 

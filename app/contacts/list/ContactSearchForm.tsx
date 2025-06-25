@@ -8,22 +8,19 @@ import { ContactQuery } from "./ContactTable";
 interface Props {
   searchParams: ContactQuery;
 }
-const validFields = ["name", "cccd", "phone"] as const;
-type SearchField = (typeof validFields)[number];
 
 const ContactSearchForm = ({ searchParams }: Props) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [field, setField] = useState<SearchField>("name");
-  const [value, setValue] = useState(
-    searchParams[field as keyof ContactQuery] ?? ""
+  const [field, setField] = useState<"name" | "cccd" | "phone">(
+    (searchParams.field as "name" | "cccd" | "phone") || "name"
   );
+  const [value, setValue] = useState(searchParams.value || "");
 
   const handleSearch = (formData: FormData) => {
     const params = new URLSearchParams();
 
-    // Preserve existing params except the search fields
     Object.entries(searchParams).forEach(([key, val]) => {
       if (val && !["name", "cccd", "phone", "field", "value"].includes(key)) {
         params.set(key, val);
@@ -34,16 +31,14 @@ const ContactSearchForm = ({ searchParams }: Props) => {
     const value = formData.get("value")?.toString().trim();
 
     if (field && value) {
-      params.set("field", field); // lưu tiêu chí tìm
-      params.set("value", value); // lưu giá trị tìm
+      params.set("field", field);
+      params.set("value", value);
     } else {
-      // nếu không nhập gì thì xóa
       params.delete("field");
       params.delete("value");
       ["name", "cccd", "phone"].forEach((k) => params.delete(k));
     }
 
-    // reset về page 1
     params.set("page", "1");
 
     startTransition(() => {
@@ -57,7 +52,7 @@ const ContactSearchForm = ({ searchParams }: Props) => {
         <Select.Root
           name="field"
           defaultValue={field}
-          onValueChange={(val) => setField(val as SearchField)}
+          onValueChange={(val) => setField(val as "name" | "cccd" | "phone")}
         >
           <Select.Trigger />
           <Select.Content>
@@ -72,7 +67,7 @@ const ContactSearchForm = ({ searchParams }: Props) => {
           placeholder="Nhập từ khóa"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-        ></TextField.Root>
+        />
 
         <Button type="submit" disabled={isPending}>
           Tìm kiếm

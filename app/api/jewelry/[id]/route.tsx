@@ -1,4 +1,4 @@
-import { pathJewelrySchema } from "@/app/validationSchemas";
+import { jewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
 import { prisma } from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +7,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const body = await request.json();
-  const validation = pathJewelrySchema.safeParse(body);
+  const validation = jewelrySchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), {
       status: 400,
@@ -67,16 +67,15 @@ export async function PATCH(
       madeIn: data.madeIn ?? jewelry.madeIn,
       size: data.size ?? jewelry.size,
       inStock: data.inStock ? data.inStock : jewelry.inStock,
+
+      supplierId: data.supplierId ?? jewelry.supplierId, // ✅ mới thêm
     },
   });
 
   return NextResponse.json(updatedJewelry, { status: 200 });
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE({ params }: { params: { id: string } }) {
   const _params = await params;
   const jewelry = await prisma.jewelry.findUnique({
     where: { id: parseInt(_params.id) },

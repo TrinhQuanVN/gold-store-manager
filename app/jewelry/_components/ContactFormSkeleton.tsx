@@ -2,24 +2,29 @@ import { Box, Flex } from "@radix-ui/themes";
 import { Skeleton } from "@/app/components";
 import React from "react";
 
-const ReportXNTHeaderFormSkeleton = () => {
+const ContactFormSkeleton = () => {
   return (
     <Box className="max-w-xl space-y-4">
-      {/* Tên báo cáo */}
+      {/* Tên */}
       <Skeleton height="2.5rem" width="100%" />
 
-      {/* Chọn quý (Select) */}
+      {/* Nhóm liên hệ (Select) */}
       <Skeleton height="2.5rem" width="100%" />
 
-      {/* Năm */}
+      {/* Số điện thoại */}
       <Skeleton height="2.5rem" width="100%" />
 
-      {/* Người nộp thuế (Select) */}
+      {/* CCCD */}
       <Skeleton height="2.5rem" width="100%" />
-      {/* start date (Select) */}
+
+      {/* Mã số thuế */}
       <Skeleton height="2.5rem" width="100%" />
-      {/* end date (Select) */}
+
+      {/* Địa chỉ */}
       <Skeleton height="2.5rem" width="100%" />
+
+      {/* Ghi chú */}
+      <Skeleton height="6rem" width="100%" />
 
       {/* Nút submit */}
       <Flex justify="start">
@@ -29,4 +34,4 @@ const ReportXNTHeaderFormSkeleton = () => {
   );
 };
 
-export default ReportXNTHeaderFormSkeleton;
+export default ContactFormSkeleton;

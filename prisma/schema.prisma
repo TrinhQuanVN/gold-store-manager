@@ -61,6 +61,7 @@ model JewerlyCategory {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
+  color       String?   @default("gray") //color for JewerlyCategoryBadge
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
@@ -86,7 +87,9 @@ model Jewelry {
   madeIn      String? @default("Việt Nam") // Default to "Việt Nam"
   size        String?
 
-  baoCaoXNTId String?
+  reportXNTId String?
+
+  supplierId String? //Mã trang sức của nhà
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -112,14 +115,6 @@ model ReportXNTHeader {
 
   taxPayerId Int //Mã số thuế của người nộp thuế
   taxPayer   TaxPayer @relation(fields: [taxPayerId], references: [id], onDelete: Cascade)
-
-  tonDauKyValue  Float @default(0) //Tồn đầu kỳ giá trị
-  nhapValue      Float @default(0) //Nhập trong kỳ giá trị
-  xuatValue      Float @default(0) //Xuất trong kỳ giá trị
-  tonCuoiKyValue Float @default(0) //Tồn cuối kỳ giá trị
-
-  xuatThucTeValue Float @default(0) //Xuất thực tế giá trị
-  thueValue       Float @default(0) //Thuế giá trị gia tăng
 
   startDate DateTime //Ngày bắt đầu kỳ báo cáo
   endDate   DateTime //Ngày kết thúc kỳ báo cáo
