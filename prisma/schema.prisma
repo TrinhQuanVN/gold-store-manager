@@ -57,7 +57,7 @@ model JewelryType {
   jewelry Jewelry[]
 }
 
-model JewerlyCategory {
+model JewelryCategory {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
@@ -75,7 +75,7 @@ model Jewelry {
   inStock    Boolean @default(true)
 
   categoryId    Int
-  category      JewerlyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category      JewelryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   jewelryTypeId Int
   jewelryType   JewelryType     @relation(fields: [jewelryTypeId], references: [id], onDelete: Cascade)
 

@@ -1,39 +1,35 @@
-import React from "react";
 import { prisma } from "@/prisma/client";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import ContactFormSkeleton from "../../_components/ContactFormSkeleton";
-// import ContactForm from "../../_components/ContactForm";
+import JewelryFormSkeleton from "../../_components/JewelryFormSkeleton";
 
-const ContactForm = dynamic(() => import("../../_components/ContactForm"), {
-  //   ssr: false,
-  loading: () => <ContactFormSkeleton />,
+const JewelryForm = dynamic(() => import("../../_components/JewelryForm"), {
+  loading: () => <JewelryFormSkeleton />,
 });
 
 interface Props {
   params: { id: string };
 }
 
-const EditContactPage = async ({ params }: Props) => {
+const EditJewelryPage = async ({ params }: Props) => {
   const _params = await params;
-  const contactgroups = await prisma.contactGroup.findMany();
-  if (!contactgroups || contactgroups.length === 0) {
-    notFound();
-  }
-  const groups: { id: number; name: string }[] = contactgroups.map((group) => ({
-    id: group.id,
-    name: group.name,
-  }));
-  const contact = await prisma.contact.findUnique({
+
+  const types = await prisma.jewelryType.findMany();
+  const categories = await prisma.jewelryCategory.findMany();
+
+  const jewelry = await prisma.jewelry.findUnique({
     where: { id: parseInt(_params.id) },
     include: {
-      group: true, // Include the ContactGroup relation
+      category: true,
+      jewelryType: true,
     },
   });
 
-  if (!contact) notFound();
+  if (!jewelry) notFound();
 
-  return <ContactForm contact={contact} groups={groups} />;
+  return (
+    <JewelryForm jewelry={jewelry} types={types} categories={categories} />
+  );
 };
 
-export default EditContactPage;
+export default EditJewelryPage;

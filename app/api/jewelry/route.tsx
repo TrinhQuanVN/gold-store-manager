@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     );
   }
   //check if categoryId is a valid number
-  const category = await prisma.jewerlyCategory.findUnique({
+  const category = await prisma.jewelryCategory.findUnique({
     where: { id: data.categoryId },
   });
   if (!category) {

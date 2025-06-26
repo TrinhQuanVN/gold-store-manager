@@ -34,7 +34,7 @@ export const rawJewelrySchema = z.object({
   size: z.string().nullable().optional(),
   reportXNTId: z.string().nullable().optional(),
 
-  inStock: z.enum(["true", "false"]).optional(),
+  inStock: z.enum(["true", "false", "1", "0"]).optional(),
 
   supplierId: z.string().nullable().optional(), // ✅ mới thêm
 });
@@ -52,6 +52,6 @@ export const jewelrySchema = rawJewelrySchema.transform((data) => ({
     data.totalWeight?.trim() === "" || data.totalWeight == null
       ? 0
       : parseFloat(data.totalWeight),
-  inStock: data.inStock === "true",
+  inStock: data.inStock === "true" || data.inStock === "1", // ✅ chuyển chuỗi "true"/"false" thành boolean
   supplierId: data.supplierId?.trim() || null, // ✅ chuyển chuỗi rỗng thành null
 }));

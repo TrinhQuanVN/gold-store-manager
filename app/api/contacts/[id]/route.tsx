@@ -58,14 +58,15 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const _params = await params;
   const contact = await prisma.contact.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(_params.id) },
   });
   if (!contact) {
     return NextResponse.json({ error: "Contact not found" }, { status: 404 });
   }
   await prisma.contact.delete({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(_params.id) },
   });
   return NextResponse.json(
     { message: "Contact deleted successfully" },

@@ -2,10 +2,10 @@ import { Pencil2Icon } from "@radix-ui/react-icons";
 import { Button } from "@radix-ui/themes";
 import Link from "next/link";
 
-const EditContactButton = ({ ContactId }: { ContactId: number }) => {
+const EditJewelryButton = ({ jewelryId }: { jewelryId: number }) => {
   return (
     <Button asChild>
-      <Link href={`/contacts/edit/${ContactId}`}>
+      <Link href={`/jewelry/edit/${jewelryId}`}>
         <Pencil2Icon />
         <span className="ml-2">Sửa</span>
       </Link>
@@ -13,4 +13,4 @@ const EditContactButton = ({ ContactId }: { ContactId: number }) => {
   );
 };
 
-export default EditContactButton;
+export default EditJewelryButton;

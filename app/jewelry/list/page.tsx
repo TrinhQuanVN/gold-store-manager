@@ -50,8 +50,8 @@ const JewelryPage = async ({ searchParams }: Props) => {
   const jewelries = await prisma.jewelry.findMany({
     where,
     orderBy: columnNames.includes(params.orderBy)
-      ? [{ [params.orderBy!]: orderDirection }, { totalWeight: "desc" }]
-      : [{ totalWeight: "desc" }],
+      ? [{ [params.orderBy!]: orderDirection }, { createdAt: "desc" }]
+      : [{ createdAt: "desc" }],
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: {
@@ -60,12 +60,21 @@ const JewelryPage = async ({ searchParams }: Props) => {
     },
   });
 
-  const jewelryCount = await prisma.jewelry.count({ where });
+  const [types, categories] = await Promise.all([
+    prisma.jewelryType.findMany(),
+    prisma.jewelryCategory.findMany(),
+  ]);
+
+  const jewelryCount = await prisma.jewelry.count({ where }); //
 
   return (
     <Flex direction="column" gap="3">
       <JewelryActions />
-      <JewelrySearchForm searchParams={params} />
+      <JewelrySearchForm
+        searchParams={params}
+        categories={categories}
+        types={types}
+      />
       <JewelryTable searchParams={params} jewelries={jewelries} />
       <Flex gap="2">
         <Pagination

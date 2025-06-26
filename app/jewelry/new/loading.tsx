@@ -1,2 +1,2 @@
-import ContactFormSkeleton from "../_components/ContactFormSkeleton";
-export default ContactFormSkeleton;
+import JewelryFormSkeleton from "../_components/JewelryFormSkeleton";
+export default JewelryFormSkeleton;

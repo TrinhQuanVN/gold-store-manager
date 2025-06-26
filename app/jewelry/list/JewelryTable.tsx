@@ -1,8 +1,8 @@
-import { Jewelry, JewelryType, JewerlyCategory } from "@prisma/client";
-import { ArrowUpIcon } from "@radix-ui/react-icons";
-import { Badge, Flex, Table, Text } from "@radix-ui/themes";
+import { default as Link, default as NextLink } from "next/link";
 import JewelryBadge from "@/app/components/JewelryBadge";
-import NextLink from "next/link";
+import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
+import { ArrowUpIcon } from "@radix-ui/react-icons";
+import { Flex, Table, Text } from "@radix-ui/themes";
 
 export interface JewelryQuery {
   orderBy: keyof Jewelry;
@@ -19,7 +19,7 @@ export interface JewelryQuery {
 interface Props {
   jewelries: (Jewelry & {
     jewelryType: JewelryType;
-    category: JewerlyCategory;
+    category: JewelryCategory;
   })[];
   searchParams: JewelryQuery;
 }
@@ -68,13 +68,13 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
             <Table.Cell>
               <Flex direction="column">
                 <Text>ID: {jewelry.id}</Text>
-                <Text>Mã nhà: {jewelry.supplierId || "-"}</Text>
+                <Text>Mã: {jewelry.supplierId || "-"}</Text>
               </Flex>
             </Table.Cell>
 
             <Table.Cell>
               <Flex direction="column" gap="1">
-                <Text>{jewelry.name}</Text>
+                <Link href={`/jewelry/${jewelry.id}`}>{jewelry.name}</Link>
                 <JewelryBadge
                   inStock={jewelry.inStock}
                   category={jewelry.category}
@@ -85,9 +85,11 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
             </Table.Cell>
 
             <Table.Cell>
-              <Text>Vàng: {jewelry.goldWeight}g</Text>
-              <Text>Đá: {jewelry.gemWeight}g</Text>
-              <Text>Tổng: {jewelry.totalWeight}g</Text>
+              <Flex direction="column" gap="2">
+                <Text>Vàng: {jewelry.goldWeight} chỉ</Text>
+                <Text>Đá: {jewelry.gemWeight} chỉ</Text>
+                <Text>Tổng: {jewelry.totalWeight} chỉ</Text>
+              </Flex>
             </Table.Cell>
 
             <Table.Cell>{jewelry.reportXNTId || "-"}</Table.Cell>

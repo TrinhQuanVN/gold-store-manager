@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const body = await request.json();
   const validation = jewelrySchema.safeParse(body);
@@ -39,7 +39,7 @@ export async function PATCH(
   // Check if jewelry category is provided and valid
   if (
     data.categoryId &&
-    (await prisma.jewerlyCategory.findUnique({
+    (await prisma.jewelryCategory.findUnique({
       where: { id: data.categoryId },
     })) === null
   ) {
@@ -75,7 +75,10 @@ export async function PATCH(
   return NextResponse.json(updatedJewelry, { status: 200 });
 }
 
-export async function DELETE({ params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest, //dòng này phải có
+  { params }: { params: { id: string } }
+) {
   const _params = await params;
   const jewelry = await prisma.jewelry.findUnique({
     where: { id: parseInt(_params.id) },

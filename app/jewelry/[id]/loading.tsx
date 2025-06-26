@@ -1,8 +1,9 @@
 import { Box, Card, Flex, Grid, Skeleton, Text } from "@radix-ui/themes";
 
-const LoadingContactDetailPage = () => {
+const LoadingJewelryDetailPage = () => {
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">
+      {/* Chi tiết trang sức */}
       <Box className="md:col-span-4">
         <Card size="3" style={{ maxWidth: 600 }}>
           <Flex direction="column" gap="4">
@@ -15,17 +16,22 @@ const LoadingContactDetailPage = () => {
             {/* Thông tin chi tiết */}
             <Flex direction="column" gap="2">
               {[
-                "Căn cước",
-                "Địa chỉ",
-                "Điện thoại",
-                "Mã số thuế",
-                "Ghi chú",
+                "Mã trang sức",
+                "Vàng",
+                "Đá",
+                "Tổng trọng lượng",
+                "Loại đá",
+                "Xuất xứ",
+                "Kích thước",
+                "Mã báo cáo",
+                "Mô tả",
               ].map((label) => (
                 <Text key={label}>
                   <strong>{label}:</strong>{" "}
                   <Skeleton height="1rem" width="60%" />
                 </Text>
               ))}
+
               <Text size="1" color="gray">
                 <Skeleton height="0.75rem" width="40%" />
               </Text>
@@ -45,4 +51,4 @@ const LoadingContactDetailPage = () => {
   );
 };
 
-export default LoadingContactDetailPage;
+export default LoadingJewelryDetailPage;

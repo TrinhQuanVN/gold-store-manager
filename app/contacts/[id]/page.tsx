@@ -1,9 +1,9 @@
 import { prisma } from "@/prisma/client";
 import { Box, Flex, Grid } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
-import EditContactButton from "./EditContactButton";
 import ContactDetail from "./ContactDetail";
 import DeleteContactButton from "./DeleteContactButton";
+import EditContactButton from "./EditContactButton";
 // import { getServerSession } from "next-auth";
 // import authOptions from "@/app/auth/authOptions";
 // import AssigneeSelect from "./AssigneeSelect";

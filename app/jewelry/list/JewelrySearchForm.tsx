@@ -4,12 +4,15 @@ import { Button, Checkbox, Flex, Select, TextField } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { JewelryQuery } from "./JewelryTable";
+import { JewelryCategory, JewelryType } from "@prisma/client";
 
 interface Props {
   searchParams: JewelryQuery;
+  categories: JewelryCategory[];
+  types: JewelryType[];
 }
 
-const JewelrySearchForm = ({ searchParams }: Props) => {
+const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -65,8 +68,8 @@ const JewelrySearchForm = ({ searchParams }: Props) => {
         >
           <Select.Trigger />
           <Select.Content>
-            <Select.Item value="id">Mã trang sức</Select.Item>
-            <Select.Item value="supplierId">Mã nhà</Select.Item>
+            <Select.Item value="id">ID</Select.Item>
+            <Select.Item value="supplierId">Mã</Select.Item>
           </Select.Content>
         </Select.Root>
         <TextField.Root
@@ -85,8 +88,11 @@ const JewelrySearchForm = ({ searchParams }: Props) => {
             >
               <Select.Trigger placeholder="Chọn loại trang sức" />
               <Select.Content>
-                <Select.Item value="1">Nhẫn</Select.Item>
-                <Select.Item value="2">Dây chuyền</Select.Item>
+                {categories.map((c) => (
+                  <Select.Item key={c.id} value={c.id.toString()}>
+                    {c.name}
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
 
@@ -97,8 +103,11 @@ const JewelrySearchForm = ({ searchParams }: Props) => {
             >
               <Select.Trigger placeholder="Chọn loại vàng" />
               <Select.Content>
-                <Select.Item value="1">Vàng 24K</Select.Item>
-                <Select.Item value="2">Vàng 18K</Select.Item>
+                {types.map((t) => (
+                  <Select.Item key={t.id} value={t.id.toString()}>
+                    {t.name}
+                  </Select.Item>
+                ))}
               </Select.Content>
             </Select.Root>
           </>

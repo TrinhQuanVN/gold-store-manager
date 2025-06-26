@@ -1,23 +1,24 @@
 import dynamic from "next/dynamic";
-import ContactFormSkeleton from "../_components/ContactFormSkeleton";
-import { notFound } from "next/navigation";
+import JewelryFormSkeleton from "../_components/JewelryFormSkeleton";
 import { prisma } from "@/prisma/client";
+import { notFound } from "next/navigation";
 
-const ContactForm = dynamic(() => import("../_components/ContactForm"), {
-  //   ssr: false,
-  loading: () => <ContactFormSkeleton />,
+// Dynamic import với fallback loading Skeleton
+const JewelryForm = dynamic(() => import("../_components/JewelryForm"), {
+  loading: () => <JewelryFormSkeleton />,
 });
 
-const NewContactPage = async () => {
-  const contactgroups = await prisma.contactGroup.findMany();
-  const groups: { id: number; name: string }[] = contactgroups.map((group) => ({
-    id: group.id,
-    name: group.name,
-  }));
-  if (!contactgroups || contactgroups.length === 0) {
-    notFound();
-  }
-  return <ContactForm groups={groups} />;
+const NewJewelryPage = async () => {
+  // Lấy danh sách loại vàng và loại trang sức từ DB
+  const [types, categories] = await Promise.all([
+    prisma.jewelryType.findMany(),
+    prisma.jewelryCategory.findMany(),
+  ]);
+
+  // Nếu không có dữ liệu nào thì trả về notFound
+  if (!types.length || !categories.length) notFound();
+
+  return <JewelryForm types={types} categories={categories} />;
 };
 
-export default NewContactPage;
+export default NewJewelryPage;
