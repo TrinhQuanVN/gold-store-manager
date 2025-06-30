@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.rdg {
+  background-color: rgb(255, 255, 255);
+  color: #0d192b;
+  border-radius: 8px;
+}

@@ -1,4 +1,4 @@
-import { contactSchema } from "@/app/validationSchemas";
+import { contactSchema } from "@/app/validationSchemas/contactSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   }
   const data = validation.data;
   const group = await prisma.contactGroup.findUnique({
-    where: { id: parseInt(body.groupId) },
+    where: { id: data.groupId },
   });
   if (!group) {
     return NextResponse.json({ error: "Invalid group id" }, { status: 404 });
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     data: {
       name: data.name,
       unaccentName: toLowerCaseNonAccentVietnamese(data.name),
-      groupId: parseInt(data.groupId),
+      groupId: data.groupId,
       phone: data.phone || null,
       cccd: data.cccd || null,
       taxcode: data.taxcode || null,

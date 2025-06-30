@@ -1,4 +1,4 @@
-import { pathContactSchema } from "@/app/validationSchemas";
+import { contactSchema } from "@/app/validationSchemas/contactSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const body = await request.json();
-  const validation = pathContactSchema.safeParse(body);
+  const validation = contactSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), {

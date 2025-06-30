@@ -41,8 +41,11 @@ model Contact {
   taxcode      String?
   phone        String?
   note         String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime?    @updatedAt
+
+  transactionHeaders TransactionHeader[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 model JewelryType {
@@ -90,6 +93,8 @@ model Jewelry {
   reportXNTId String?
 
   supplierId String? //Mã trang sức của nhà
+
+  transactionDetails JewelryTransactionDetail[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -145,4 +150,104 @@ model ReportXNT {
 
   tonCuoiKyQuantity Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
   tonCuoiKyValue    Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
+}
+
+model Gold {
+  id          Int    @id @default(autoincrement())
+  name        String
+  goldPercent Float  @default(0.0) // Tỷ lệ vàng trong nguyên liệu
+
+  reportXNTId String? // Mã báo cáo XNT nếu có
+  description String?
+
+  goldTransactionDetails GoldTransactionDetail[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model JewelryTransactionDetail {
+  id        Int     @id @default(autoincrement())
+  jewelryId Int
+  jewelry   Jewelry @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
+
+  unitPrice Float
+  amount    Float // tổng tiền giao dịch của sản phẩm này
+
+  transactionHeaderId Int
+  transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model GoldTransactionDetail {
+  id     Int  @id @default(autoincrement())
+  goldId Int
+  gold   Gold @relation(fields: [goldId], references: [id], onDelete: Cascade)
+
+  unitPrice Float
+  weight    Float // Trọng lượng vàng giao dịch
+
+  discount Float @default(0) // Giảm giá nếu có
+  amount   Float
+
+  transactionHeaderId Int
+  transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model TransactionHeader {
+  id   Int     @id @default(autoincrement())
+  note String?
+  type Int // 2 xuất hoặc 1 nhập
+
+  contactId Int? // Mã liên hệ nếu có
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  totalAmount Float @default(0) // Tổng số tiền giao dịch
+
+  paymentAmounts PaymentAmount[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  jewelryTransactionDetails JewelryTransactionDetail[]
+  goldTransactionDetails    GoldTransactionDetail[]
+}
+
+model PaymentHeader {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  color       String?   @default("gray") //color for PaymentMethodBadge
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  paymentAmounts PaymentAmount[]
+}
+
+model PaymentAmount {
+  id                  Int               @id @default(autoincrement())
+  amount              Float // Số tiền thanh toán
+  transactionHeaderId Int
+  transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
+
+  paymentHeaderId Int
+  paymentHeader   PaymentHeader @relation(fields: [paymentHeaderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model GoldPrice {
+  id   Int    @id @default(autoincrement())
+  name String // Tên của giá vàng, ví dụ: "Giá vàng SJC", "Giá vàng 9999"
+  buy  Float // Giá vàng mua vào
+  sell Float // Giá vàng bán ra
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 }
