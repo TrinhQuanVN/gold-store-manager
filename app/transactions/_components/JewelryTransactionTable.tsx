@@ -11,15 +11,29 @@ import {
   RowsChangeData,
 } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { Text } from "@radix-ui/themes";
-import { Gold, GoldPrice, GoldTransactionDetail } from "@prisma/client";
+import { Flex, Text } from "@radix-ui/themes";
+import {
+  GoldPrice,
+  Jewelry,
+  JewelryCategory,
+  JewelryTransactionDetail,
+  JewelryType,
+} from "@prisma/client";
 import axios from "axios";
+import JewelryBadge from "@/app/components/JewelryBadge";
 
 // Row type
 type Row = {
   internalId: number; // Unique identifier for the row
-  goldId?: string;
-  name?: string;
+  jewelryId?: string;
+  jewelryCode?: string;
+  fullName?: {
+    jewelryName?: string;
+    typeName?: string;
+    typeColor?: string;
+    categoryName?: string;
+    categoryColor?: string;
+  };
   weight: number;
   price: number;
   discount: number;
@@ -43,8 +57,9 @@ function createInitialRows(): Row[] {
   return Array.from({ length: 5 }, (_, i) => {
     return {
       internalId: i,
-      goldId: "",
-      name: "",
+      jewelryId: "",
+      jewelryCode: "",
+      fullName: {},
       weight: 0,
       price: 0,
       discount: 0,
@@ -52,8 +67,13 @@ function createInitialRows(): Row[] {
     };
   });
 }
-type GoldTransactionDetailWithGold = GoldTransactionDetail & {
-  gold: Gold;
+type JewelryWithTypeAndCategory = Jewelry & {
+  category: JewelryCategory;
+  jewelryType: JewelryType;
+};
+
+type JewelryTransactionWithJewelry = JewelryTransactionDetail & {
+  jewelry: Jewelry;
 };
 
 function formatNumberVN(
@@ -68,10 +88,13 @@ function formatNumberVN(
 }
 
 interface Props {
-  golDetails?: GoldTransactionDetailWithGold[];
+  jewelryTransactionDetail?: JewelryTransactionWithJewelry[];
   transactionDate?: Date;
 }
-export default function GoldTable({ golDetails, transactionDate }: Props) {
+export default function JewelryTransactionTable({
+  jewelryTransactionDetail,
+  transactionDate,
+}: Props) {
   transactionDate = transactionDate || new Date();
   // Initialize grid reference and state
   const gridRef = useRef<DataGridHandle>(null);
@@ -82,7 +105,7 @@ export default function GoldTable({ golDetails, transactionDate }: Props) {
   const columns: readonly Column<Row, SummaryRow>[] = [
     SelectColumn,
     {
-      key: "goldId",
+      key: "jewelryId",
       name: "ID",
       editable: true,
 
@@ -93,8 +116,35 @@ export default function GoldTable({ golDetails, transactionDate }: Props) {
       },
     },
     {
-      key: "name",
-      name: "Tên",
+      key: "jewelryCode",
+      name: "Mã nhà",
+      editable: true,
+
+      renderEditCell: textEditor,
+      frozen: true,
+    },
+    {
+      key: "fullName",
+      name: "Tên sản phẩm",
+      renderCell({ row }) {
+        return row.fullName ? (
+          <Flex>
+            <Text className="text-red-600">{row.fullName.jewelryName}</Text>
+            <JewelryBadge
+              jewelryType={{
+                name: row.fullName.typeName!,
+                color: row.fullName.typeColor!,
+              }}
+              category={{
+                name: row.fullName.categoryName!,
+                color: row.fullName.categoryColor!,
+              }}
+            />
+          </Flex>
+        ) : (
+          <Text className="text-red-600">""</Text>
+        );
+      },
       renderSummaryCell({ row }) {
         return (
           <Text className="text-red-600">{`${row.totalCount} sản phẩm`}</Text>
@@ -162,7 +212,7 @@ export default function GoldTable({ golDetails, transactionDate }: Props) {
     const totalWeight = rows.reduce((sum, r) => sum + r.weight, 0);
     const totalDiscount = rows.reduce((sum, r) => sum + r.discount, 0);
     const totalAmount = rows.reduce((sum, r) => sum + r.amount, 0);
-    const totalCount = rows.filter((r) => r.name?.trim()).length;
+    const totalCount = rows.filter((r) => r.jewelryId?.trim()).length;
     return [
       {
         id: "summary",
@@ -202,60 +252,81 @@ export default function GoldTable({ golDetails, transactionDate }: Props) {
     const columnName = data.column.key;
     const index = data.indexes[0];
     const row = updatedRows[index];
-    // Trường hợp người dùng xóa goldId => reset dòng
-    if (columnName === "goldId") {
-      if (!row.goldId?.trim()) {
+
+    const oldRow = rows[index];
+
+    // Trường hợp xóa jewelryId hoặc jewelryCode => reset dòng
+    if (columnName === "jewelryId" || columnName === "jewelryCode") {
+      // Reset dòng CHỈ khi jewelryId rỗng
+      if (columnName === "jewelryId" && !row.jewelryId?.trim()) {
         updatedRows[index] = {
           internalId: row.internalId,
-          goldId: "",
-          name: "",
+          jewelryId: "",
+          jewelryCode: "",
+          fullName: {},
           weight: 0,
           price: 0,
           discount: 0,
           amount: 0,
         };
-
-        setRows(updatedRows);
+        setRows([...updatedRows]);
         return;
       }
-      // Lấy row cũ từ state để so sánh
-      const oldRow = rows[index];
 
-      // Nếu giá trị goldId đã đổi
-      if (row.goldId !== oldRow.goldId) {
-        try {
-          // 1. Lấy thông tin gold
-          const goldRes = await axios.get<Gold>(`/api/gold/${row.goldId}`);
-          const gold = goldRes.data;
+      try {
+        let jewelry: JewelryWithTypeAndCategory | null = null;
 
-          // 2. Lấy giá theo ngày
+        if (columnName === "jewelryId" && row.jewelryId !== oldRow.jewelryId) {
+          const res = await axios.get<JewelryWithTypeAndCategory>(
+            `/api/jewelry/${row.jewelryId}`
+          );
+          jewelry = res.data;
+        }
+
+        if (
+          columnName === "jewelryCode" &&
+          row.jewelryCode !== oldRow.jewelryCode
+        ) {
+          const res = await axios.get<JewelryWithTypeAndCategory>(
+            `/api/jewelry?code=${row.jewelryCode}`
+          );
+          jewelry = res.data;
+        }
+
+        if (jewelry) {
           const priceRes = await axios.get<GoldPrice>(`/api/goldPrices`, {
             params: { date: transactionDate?.toISOString() },
           });
 
-          const goldPrice = priceRes.data?.sell;
-
-          const price = Number(goldPrice) || 0;
+          const price =
+            ((priceRes.data?.sell * jewelry.jewelryType.goldPercent) / 100) *
+              1000 || 0;
           const weight = Number(row.weight) || 0;
           const discount = Number(row.discount) || 0;
           const amount = weight * price - discount;
 
-          // 3. Cập nhật lại dòng
           updatedRows[index] = {
             ...row,
-            name: gold.name,
-            price,
-            weight,
-            discount,
-            amount,
+            jewelryId: jewelry.id.toString(),
+            jewelryCode: jewelry.supplierId ?? "",
+            fullName: {
+              jewelryName: jewelry.name,
+              categoryName: jewelry.category.name,
+              categoryColor: jewelry.category.color!,
+              typeName: jewelry.jewelryType.name,
+              typeColor: jewelry.jewelryType.color!,
+            },
+            price: price,
+            weight: jewelry.totalWeight,
+            discount: discount,
+            amount: amount,
           };
 
           setRows([...updatedRows]);
           return;
-        } catch (error) {
-          console.error("Lỗi khi lấy thông tin gold hoặc giá:", error);
-          // Optionally: reset dòng hoặc hiển thị lỗi
         }
+      } catch (error) {
+        console.error("Lỗi khi lấy jewelry hoặc giá:", error);
       }
     }
 
@@ -270,10 +341,10 @@ export default function GoldTable({ golDetails, transactionDate }: Props) {
     // Gán lại dòng đã chuẩn hoá vào mảng
     updatedRows[index] = {
       ...row,
-      weight,
-      price,
-      discount,
-      amount,
+      weight: weight,
+      price: price,
+      discount: discount,
+      amount: amount,
     };
 
     setRows(updatedRows);

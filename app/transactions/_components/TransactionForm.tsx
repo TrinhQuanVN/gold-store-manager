@@ -20,7 +20,8 @@ import Spinner from "@/app/components/Spinner";
 import TransactionTypeSwitch from "./TransactionTypeSwitch";
 import ContactForm from "./ContactForm";
 import { prisma } from "@/prisma/client";
-import GoldTable from "./GoldTable";
+import GolaTransactionTable from "./GoldTransactionTable";
+import JewelryTransactionTable from "./JewelryTransactionTable";
 
 interface Props {
   contactWithGroups: (Contact & { group: ContactGroup })[]; // List of contacts with their groups
@@ -79,7 +80,8 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
         <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
         <ContactForm contacts={contactWithGroups} />
-        <GoldTable transactionDate={new Date("2025-06-30")} />
+        <GolaTransactionTable transactionDate={new Date("2025-06-30")} />
+        <JewelryTransactionTable transactionDate={new Date("2025-06-30")} />
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}

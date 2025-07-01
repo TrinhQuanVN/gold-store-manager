@@ -52,3 +52,26 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(jewelry, { status: 201 });
 }
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const code = searchParams.get("code"); // ex: "2025-06-20"
+  if (!code) {
+    return NextResponse.json(
+      { error: "thiếu mã của nhà hoặc mã rỗng" },
+      { status: 400 }
+    );
+  }
+
+  const jewelry = await prisma.jewelry.findFirst({
+    where: {
+      supplierId: code,
+    },
+    include: {
+      jewelryType: true,
+      category: true,
+    },
+  });
+
+  return NextResponse.json(jewelry, { status: 201 });
+}
