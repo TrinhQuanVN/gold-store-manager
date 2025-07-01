@@ -129,7 +129,7 @@ export default function JewelryTransactionTable({
       renderCell({ row }) {
         return row.fullName ? (
           <Flex>
-            <Text className="text-red-600">{row.fullName.jewelryName}</Text>
+            <Text className="">{row.fullName.jewelryName}</Text>
             <JewelryBadge
               jewelryType={{
                 name: row.fullName.typeName!,
@@ -142,7 +142,7 @@ export default function JewelryTransactionTable({
             />
           </Flex>
         ) : (
-          <Text className="text-red-600">""</Text>
+          <Text className="">""</Text>
         );
       },
       renderSummaryCell({ row }) {

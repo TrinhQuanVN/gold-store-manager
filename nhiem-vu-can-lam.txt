@@ -1,0 +1,20 @@
+0. input để tạo được transaction date vì cần làm ngược dòng thời gian
+
+1. Cần truyền vào jewelry hay gold transaction table price dựa vào date của transaction. như thế giảm api get goldPrice
+2. Cần cấu trúc lại các jewelry hay gold transaction table để có thể dùng cho edit
+3. thay đổi bg của jewelry hay gold transaction table dựa vào switch transaction typescript
+4. collapsible jewelry hay gold transaction table
+5. làm form tổng hợp ở cuối new transaction
+6. làm payment cho new transaction
+7. api create new transaction
+8. page edit transaction
+9. page list transaction
+10. page transaction [id]
+
+11. xử lý việc truyền date vào trong prisma thì sẽ ra GMT +7
+12. chuyển sang progetres database
+
+
+
+13. làm dark mode
+

@@ -8,7 +8,14 @@ import {
   JewelryTransactionDetail,
   Contact,
 } from "@prisma/client";
-import { Button, Callout, Select, TextArea, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  Callout,
+  Flex,
+  Select,
+  TextArea,
+  TextField,
+} from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,7 +24,7 @@ import { date, z } from "zod";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
-import TransactionTypeSwitch from "./TransactionTypeSwitch";
+import TransactionTypeSegment from "./TransactionTypeSegment";
 import ContactForm from "./ContactForm";
 import { prisma } from "@/prisma/client";
 import GolaTransactionTable from "./GoldTransactionTable";
@@ -68,11 +75,18 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
   return (
     <div
       className={`p-4 rounded-lg ${
-        isExport ? "bg-red-50" : "bg-green-50"
+        isExport
+          ? BackGroundTransactionFormColor.export.bg
+          : BackGroundTransactionFormColor.import.bg
       } transition-colors`}
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <TransactionTypeSwitch isExport={isExport} setIsExport={setIsExport} />
+        <Flex justify="center">
+          <TransactionTypeSegment
+            isExport={isExport}
+            setIsExport={setIsExport}
+          />
+        </Flex>
         <TextField.Root
           placeholder="Ghi chú"
           {...register("name")}
@@ -92,3 +106,14 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
 };
 
 export default TransactionForm;
+
+export const BackGroundTransactionFormColor = {
+  export: {
+    bg: "bg-red-100",
+    text: "text-red-700",
+  },
+  import: {
+    bg: "bg-green-100",
+    text: "text-green-700",
+  },
+} as const;
