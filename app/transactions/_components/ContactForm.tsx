@@ -9,23 +9,27 @@ import { ContactGroupBadge } from "@/app/components";
 import CustomCollapsible from "@/app/components/CustomCollapsible";
 
 interface Props {
-  contacts: (Contact & { group: ContactGroup })[];
-  onSelect?: (contact: Contact) => void;
+  value?: (Contact & { group: ContactGroup }) | null;
+  onChange?: (contact: Contact & { group: ContactGroup }) => void;
 }
 
-const ContactForm = ({ contacts }: Props) => {
+const ContactForm = ({ value, onChange }: Props) => {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
-    (Contact & { group: ContactGroup }) | null
-  >(null);
+  const selected = value;
 
   return (
-    <CustomCollapsible title="Lựa chọn khách hàng">
+    <CustomCollapsible
+      title={
+        selected
+          ? `Lựa chọn khách hàng: ${selected.name}`
+          : "Lựa chọn khách hàng"
+      }
+    >
       <Flex direction="column" gap="4">
         <ContactSelect
           value={selected}
           onChange={(contact) => {
-            setSelected(contact);
+            onChange?.(contact); // Gọi lên parent
           }}
         />
 
@@ -33,13 +37,11 @@ const ContactForm = ({ contacts }: Props) => {
           <DataList.Root>
             <DataList.Item>
               <DataList.Label>Tên khách hàng</DataList.Label>
-              <DataList.Value>{selected.name}</DataList.Value>
-            </DataList.Item>
-
-            <DataList.Item>
-              <DataList.Label>Nhóm</DataList.Label>
               <DataList.Value>
-                <ContactGroupBadge ContactGroup={selected.group} />
+                <Flex gap="2">
+                  <Text>{selected.name}</Text>
+                  <ContactGroupBadge ContactGroup={selected.group} />
+                </Flex>
               </DataList.Value>
             </DataList.Item>
 

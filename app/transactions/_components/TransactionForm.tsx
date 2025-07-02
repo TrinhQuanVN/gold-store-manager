@@ -38,6 +38,9 @@ interface Props {
 }
 
 const TransactionForm = ({ contactWithGroups }: Props) => {
+  const [selectedContact, setSelectedContact] = useState<
+    (Contact & { group: ContactGroup }) | null
+  >(null);
   const router = useRouter();
   const [isExport, setIsExport] = useState(false);
   const [contactId, setContactId] = useState(-1);
@@ -94,7 +97,10 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
         ></TextField.Root>
         <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
-        <ContactForm contacts={contactWithGroups} />
+        <ContactForm
+          value={selectedContact}
+          onChange={(contact) => setSelectedContact(contact)}
+        />
         <GolaTransactionTable transactionDate={new Date("2025-06-30")} />
         <JewelryTransactionTable transactionDate={new Date("2025-06-30")} />
 
