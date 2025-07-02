@@ -40,6 +40,7 @@ interface Props {
 const TransactionForm = ({ contactWithGroups }: Props) => {
   const router = useRouter();
   const [isExport, setIsExport] = useState(false);
+  const [contactId, setContactId] = useState(-1);
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
 

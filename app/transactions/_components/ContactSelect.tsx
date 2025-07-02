@@ -1,50 +1,55 @@
 "use client";
 
 import { Contact, ContactGroup } from "@prisma/client";
-import { useState } from "react";
-import Select from "react-select";
-import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
+import { JSX } from "react";
+import { AsyncPaginate } from "react-select-async-paginate";
+import { GroupBase } from "react-select";
+
+import {
+  loadOptions as loadContactOptions,
+  OptionType,
+  contactWithGroups,
+} from "./loadContactOptions";
+
 import ContactLabel from "./ContactLabel";
 
 interface Props {
-  contacts: (Contact & { group: ContactGroup })[];
-  onChange: (contact: Contact & { group: ContactGroup }) => void;
-  value?: (Contact & { group: ContactGroup }) | null;
+  onChange: (contact: contactWithGroups) => void;
+  value?: contactWithGroups | null;
 }
 
-const ContactSelect = ({ contacts, onChange, value }: Props) => {
-  const options = contacts.map((c) => ({
-    value: c.id,
-    label: <ContactLabel contact={c} />,
-    data: c,
-    searchValues: [
-      c.name,
-      c.phone ?? "",
-      c.cccd ?? "",
-      toLowerCaseNonAccentVietnamese(c.name),
-    ],
-  }));
-
-  const filterOption = (option: any, rawInput: string) => {
-    const normalized = toLowerCaseNonAccentVietnamese(rawInput.toLowerCase());
-    return option.data.searchValues.some((val: string) =>
-      toLowerCaseNonAccentVietnamese(val.toLowerCase()).includes(normalized)
-    );
-  };
-
-  const selected = value
-    ? options.find((opt) => opt.data.id === value.id)
+const ContactSelect = ({ onChange, value }: Props) => {
+  // Chuyển giá trị được chọn từ contact -> OptionType
+  const selectedOption: OptionType | null = value
+    ? {
+        value: value.id,
+        label: `${value.name} - ${value.phone ?? ""} - ${value.cccd ?? ""} - ${
+          value.address ?? ""
+        }`,
+        data: value,
+        searchValues: [],
+      }
     : null;
 
   return (
-    <Select
+    <AsyncPaginate<OptionType, GroupBase<OptionType>, unknown>
       placeholder="Tìm theo tên, số CCCD hoặc số điện thoại"
-      options={options}
-      filterOption={filterOption}
-      value={selected}
-      onChange={(option) => {
-        onChange(option!.data);
-      }}
+      value={selectedOption}
+      loadOptions={loadContactOptions}
+      onChange={(opt) => opt && onChange(opt.data)}
+      debounceTimeout={300}
+      // components={{
+      //   Option: (props) => (
+      //     <div style={{ padding: "4px 8px" }}>
+      //       <ContactLabel contact={props.data.data} />
+      //     </div>
+      //   ),
+      //   SingleValue: (props) => (
+      //     <div style={{ padding: "4px 8px" }}>
+      //       <ContactLabel contact={props.data.data} />
+      //     </div>
+      //   ),
+      // }}
     />
   );
 };

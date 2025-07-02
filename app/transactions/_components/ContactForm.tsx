@@ -23,7 +23,6 @@ const ContactForm = ({ contacts }: Props) => {
     <CustomCollapsible title="Lựa chọn khách hàng">
       <Flex direction="column" gap="4">
         <ContactSelect
-          contacts={contacts}
           value={selected}
           onChange={(contact) => {
             setSelected(contact);
