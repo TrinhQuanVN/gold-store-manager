@@ -145,6 +145,19 @@ export default function GolaTransactionTable({
     ];
   }, [rows]);
 
+  const dynamicTitle = useMemo(() => {
+    const summary = summaryRows[0];
+    if (!summary || Math.abs(summary.totalWeight) < 1e-6) return "Nhẫn tròn";
+
+    return `Nhẫn tròn: Tổng ${summary.totalCount} sản phẩm = ${formatNumberVN(
+      summary.totalWeight,
+      0,
+      2
+    )} chỉ / ${new Intl.NumberFormat("vi-VN").format(
+      summary.totalAmount
+    )} nghìn đồng`;
+  }, [summaryRows]);
+
   const sortedRows = useMemo(() => {
     if (sortColumns.length === 0) return rows;
 
@@ -186,8 +199,9 @@ export default function GolaTransactionTable({
           amount: 0,
         };
 
-        setRows(updatedRows);
-        onChange(rows);
+        const newRows = [...updatedRows];
+        setRows(newRows);
+        onChange(newRows);
 
         return;
       }
@@ -215,8 +229,9 @@ export default function GolaTransactionTable({
             amount,
           };
 
-          setRows([...updatedRows]);
-          onChange(rows);
+          const newRows = [...updatedRows];
+          setRows(newRows);
+          onChange(newRows);
 
           return;
         } catch (error) {
@@ -243,13 +258,14 @@ export default function GolaTransactionTable({
       amount,
     };
 
-    setRows(updatedRows);
-    onChange(rows);
+    const newRows = [...updatedRows];
+    setRows(newRows);
+    onChange(newRows);
   }
   // Gọi onChange mỗi khi rows thay đổi
 
   return (
-    <CustomCollapsible title="Nhẫn tròn">
+    <CustomCollapsible title={dynamicTitle}>
       <DataGrid
         ref={gridRef}
         aria-label="Gold Table"

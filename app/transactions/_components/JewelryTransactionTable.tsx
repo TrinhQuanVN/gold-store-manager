@@ -10,7 +10,7 @@ import {
 } from "@prisma/client";
 import { Flex, Text } from "@radix-ui/themes";
 import axios from "axios";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DataGrid,
   RowsChangeData,
@@ -21,42 +21,26 @@ import {
   type SortColumn,
 } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
+import {
+  rawJewelryTransactionSchema,
+  SummaryRowSchema,
+} from "@/app/validationSchemas";
+import z from "zod";
 
 // Row type
-type Row = {
-  internalId: number; // Unique identifier for the row
-  jewelryId?: string;
-  jewelryCode?: string;
-  fullName?: {
-    jewelryName?: string;
-    typeName?: string;
-    typeColor?: string;
-    categoryName?: string;
-    categoryColor?: string;
-  };
-  weight: number;
-  price: number;
-  discount: number;
-  amount: number;
-};
+type Row = z.infer<typeof rawJewelryTransactionSchema>;
 
 // Summary row
-type SummaryRow = {
-  id: string;
-  totalCount: number;
-  totalWeight: number;
-  totalDiscount: number;
-  totalAmount: number;
-};
+type SummaryRow = z.infer<typeof SummaryRowSchema>;
 
 function rowKeyGetter(row: Row) {
-  return row.internalId;
+  return row.detailId;
 }
 
 function createInitialRows(): Row[] {
   return Array.from({ length: 5 }, (_, i) => {
     return {
-      internalId: i,
+      detailId: i,
       jewelryId: "",
       jewelryCode: "",
       fullName: {},
@@ -72,23 +56,26 @@ type JewelryWithTypeAndCategory = Jewelry & {
   jewelryType: JewelryType;
 };
 
-type JewelryTransactionWithJewelry = JewelryTransactionDetail & {
-  jewelry: Jewelry;
-};
-
 interface Props {
-  jewelryTransactionDetail?: JewelryTransactionWithJewelry[];
+  value: Row[];
   lastestGoldPrice: number;
+  onChange: (details: Row[]) => void;
 }
 export default function JewelryTransactionTable({
-  jewelryTransactionDetail,
+  value,
   lastestGoldPrice,
+  onChange,
 }: Props) {
   // Initialize grid reference and state
   const gridRef = useRef<DataGridHandle>(null);
   const [rows, setRows] = useState<Row[]>(createInitialRows);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!value) return;
+    setRows(value);
+  }, [value]);
 
   const columns: readonly Column<Row, SummaryRow>[] = [
     SelectColumn,
@@ -212,6 +199,19 @@ export default function JewelryTransactionTable({
     ];
   }, [rows]);
 
+  const dynamicTitle = useMemo(() => {
+    const summary = summaryRows[0];
+    if (!summary || Math.abs(summary.totalWeight) < 1e-6) return "Trang sức";
+
+    return `Trang sức: Tổng ${summary.totalCount} sản phẩm = ${formatNumberVN(
+      summary.totalWeight,
+      0,
+      4
+    )} chỉ / ${new Intl.NumberFormat("vi-VN").format(
+      summary.totalAmount
+    )} nghìn đồng`;
+  }, [summaryRows]);
+
   const sortedRows = useMemo(() => {
     if (sortColumns.length === 0) return rows;
 
@@ -248,7 +248,7 @@ export default function JewelryTransactionTable({
       !row[columnName]?.trim()
     ) {
       updatedRows[index] = {
-        internalId: row.internalId,
+        detailId: row.detailId,
         jewelryId: "",
         jewelryCode: "",
         fullName: {},
@@ -257,7 +257,9 @@ export default function JewelryTransactionTable({
         discount: 0,
         amount: 0,
       };
-      setRows([...updatedRows]);
+      const newRows = [...updatedRows];
+      setRows(newRows);
+      onChange(newRows);
       return;
     }
 
@@ -304,7 +306,9 @@ export default function JewelryTransactionTable({
           discount,
           amount,
         };
-        setRows([...updatedRows]);
+        const newRows = [...updatedRows];
+        setRows(newRows);
+        onChange(newRows);
         return;
       }
     } catch (err) {
@@ -325,11 +329,13 @@ export default function JewelryTransactionTable({
       amount,
     };
 
-    setRows([...updatedRows]);
+    const newRows = [...updatedRows];
+    setRows(newRows);
+    onChange(newRows);
   }
 
   return (
-    <CustomCollapsible title="Trang sức">
+    <CustomCollapsible title={dynamicTitle}>
       <DataGrid
         ref={gridRef}
         aria-label="Gold Table"

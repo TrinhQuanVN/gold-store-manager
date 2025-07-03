@@ -2,6 +2,7 @@ export {
   rawGoldTransactionSchema,
   rawTransactionSchema,
   SummaryRowSchema,
+  rawJewelryTransactionSchema,
 } from "./transactionSchemas";
 // export { default as CustomCollapsible } from "./CustomCollapsible";
 // export { default as ErrorMessage } from "./ErrorMessage";

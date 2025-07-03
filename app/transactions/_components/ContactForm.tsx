@@ -1,12 +1,11 @@
 "use client";
 
-import { Contact, ContactGroup } from "@prisma/client";
-import { useState } from "react";
-import * as Collapsible from "@radix-ui/react-collapsible";
-import ContactSelect from "./ContactSelect";
-import { Button, DataList, Flex, Text } from "@radix-ui/themes";
 import { ContactGroupBadge } from "@/app/components";
 import CustomCollapsible from "@/app/components/CustomCollapsible";
+import { Contact, ContactGroup } from "@prisma/client";
+import { DataList, Flex, Text } from "@radix-ui/themes";
+import { useState } from "react";
+import ContactSelect from "./ContactSelect";
 
 interface Props {
   value?: (Contact & { group: ContactGroup }) | null;
@@ -14,7 +13,7 @@ interface Props {
 }
 
 const ContactForm = ({ value, onChange }: Props) => {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const selected = value;
 
   return (

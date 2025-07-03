@@ -31,24 +31,22 @@ import ContactForm from "./ContactForm";
 import { prisma } from "@/prisma/client";
 import GolaTransactionTable from "./GoldTransactionTable";
 import JewelryTransactionTable from "./JewelryTransactionTable";
-import { createEmptyGoldRows } from "./initialEmptyRow";
+import { createEmptyGoldRows, createEmptyJewelryRows } from "./initialEmptyRow";
 import {
   rawGoldTransactionSchema,
   rawTransactionSchema,
 } from "@/app/validationSchemas";
+import { useRouter } from "next/navigation";
 
 interface Props {
-  // contactWithGroups: (Contact & { group: ContactGroup })[]; // List of contacts with their groups
-  // header: TransactionHeader;
-  // jewelryTransactionDetail: JewelryTransactionDetail[];
-  // groups: ContactGroup[]; // List of available groups
+  transactionHeaderWithRelation?: string;
 }
 
-const TransactionForm = ({}: Props) => {
+const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
   const [selectedContact, setSelectedContact] = useState<
     (Contact & { group: ContactGroup }) | null
   >(null);
-  // const router = useRouter();
+  const router = useRouter();
   const [isExport, setIsExport] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
@@ -57,8 +55,8 @@ const TransactionForm = ({}: Props) => {
     useState<z.infer<typeof rawGoldTransactionSchema>[]>(createEmptyGoldRows);
 
   const [jewelryTransactionDetails, setJewelryTransactionDetails] = useState<
-    JewelryTransactionDetail[]
-  >([]);
+    z.infer<typeof rawGoldTransactionSchema>[]
+  >(createEmptyJewelryRows);
 
   const {
     register,
@@ -70,29 +68,24 @@ const TransactionForm = ({}: Props) => {
     defaultValues: {},
   });
 
-  const onSubmit = handleSubmit(
-    async (data) => {
-      console.log("isExport:", isExport);
-      console.log("selectedContact:", selectedContact);
-      console.log("goldTransactionDetails:", goldTransactionDetails);
-      console.log(data.note);
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setSubmitting(true);
+      if (!selectedContact) {
+      }
+      if (transactionHeaderWithRelation) {
+        // await axios.patch("/api/contacts/" + contact.id, data);
+      } else {
+        // await axios.post("/api/contacts", data);
+      }
+      router.push("/contacts/list");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      setSubmitting(false);
+      setError("Lỗi không xác định đã xảy ra.");
     }
-    //   try {
-    //     setSubmitting(true);
-    //     if () {
-    //       await axios.patch("/api/contacts/" + contact.id, data);
-    //     } else {
-    //       await axios.post("/api/contacts", data);
-    //     }
-    //     router.push("/contacts/list");
-    //     router.refresh();
-    //   } catch (err) {
-    //     console.error(err);
-    //     setSubmitting(false);
-    //     setError("Lỗi không xác định đã xảy ra.");
-    //   }
-    // }
-  );
+  });
   useEffect(() => {
     const fetchGoldPrice = async () => {
       try {
@@ -138,7 +131,11 @@ const TransactionForm = ({}: Props) => {
           onChange={setGoldTransactionDetails}
           lastestGoldPrice={lastestGoldPrice}
         />
-        <JewelryTransactionTable lastestGoldPrice={lastestGoldPrice} />
+        <JewelryTransactionTable
+          lastestGoldPrice={lastestGoldPrice}
+          value={jewelryTransactionDetails}
+          onChange={setJewelryTransactionDetails}
+        />
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
