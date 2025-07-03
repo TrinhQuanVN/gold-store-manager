@@ -1,10 +1,9 @@
-0. input để tạo được transaction date vì cần làm ngược dòng thời gian
 
-1. Cần truyền vào jewelry hay gold transaction table price dựa vào date của transaction. như thế giảm api get goldPrice
 2. Cần cấu trúc lại các jewelry hay gold transaction table để có thể dùng cho edit
-3. thay đổi bg của jewelry hay gold transaction table dựa vào switch transaction typescript
-4. collapsible jewelry hay gold transaction table
-5. làm form tổng hợp ở cuối new transaction
+3. thay đổi bg của jewelry hay gold transaction table dựa vào switch transaction type
+
+- khi thay đổi transaction segment -> gold price thay đổi truyền vào các form child: jewelry, gold
+
 6. làm payment cho new transaction
 7. api create new transaction
 8. page edit transaction
@@ -17,4 +16,20 @@
 
 
 13. làm dark mode
+
+
+
+- cần xử lý việc get api gặp lỗi trong contact, jewelry và gold transaction
+- cập nhật title của collapsible gold và jewelry khi có data
+
+-----------------------!DONE
+14. truyền contact từ transaction form sang contact form
+0. input để tạo được transaction date vì cần làm ngược dòng thời gian -> không cần chỉ cần phải edit lại date của transaction là được
+15. hiện tại đang cần create new của những ngày cũ -> nếu truyền vào date mới sẽ   phức tạp. hãy tạo mới bình thường sau đó update lại date sau.
+16. trong transaction form chỉ get được api/jewelry/InStock
+4. collapsible jewelry hay gold transaction table
+1. Cần truyền vào jewelry hay gold transaction table price dựa vào date của transaction. như thế giảm api get goldPrice
+
+
+
 

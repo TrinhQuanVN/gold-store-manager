@@ -7,6 +7,8 @@ import {
   ContactGroup,
   JewelryTransactionDetail,
   Contact,
+  GoldPrice,
+  GoldTransactionDetail,
 } from "@prisma/client";
 import {
   Button,
@@ -17,10 +19,10 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+// import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { date, z } from "zod";
+import { z } from "zod";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
@@ -29,36 +31,52 @@ import ContactForm from "./ContactForm";
 import { prisma } from "@/prisma/client";
 import GolaTransactionTable from "./GoldTransactionTable";
 import JewelryTransactionTable from "./JewelryTransactionTable";
+import { createEmptyGoldRows } from "./initialEmptyRow";
+import {
+  rawGoldTransactionSchema,
+  rawTransactionSchema,
+} from "@/app/validationSchemas";
 
 interface Props {
-  contactWithGroups: (Contact & { group: ContactGroup })[]; // List of contacts with their groups
+  // contactWithGroups: (Contact & { group: ContactGroup })[]; // List of contacts with their groups
   // header: TransactionHeader;
   // jewelryTransactionDetail: JewelryTransactionDetail[];
   // groups: ContactGroup[]; // List of available groups
 }
 
-const TransactionForm = ({ contactWithGroups }: Props) => {
+const TransactionForm = ({}: Props) => {
   const [selectedContact, setSelectedContact] = useState<
     (Contact & { group: ContactGroup }) | null
   >(null);
-  const router = useRouter();
+  // const router = useRouter();
   const [isExport, setIsExport] = useState(false);
-  const [contactId, setContactId] = useState(-1);
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
+  const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
+  const [goldTransactionDetails, setGoldTransactionDetails] =
+    useState<z.infer<typeof rawGoldTransactionSchema>[]>(createEmptyGoldRows);
+
+  const [jewelryTransactionDetails, setJewelryTransactionDetails] = useState<
+    JewelryTransactionDetail[]
+  >([]);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<z.infer<typeof rawContactSchema>>({
-    resolver: zodResolver(rawContactSchema),
+  } = useForm<z.infer<typeof rawTransactionSchema>>({
+    resolver: zodResolver(rawTransactionSchema),
     defaultValues: {},
   });
 
   const onSubmit = handleSubmit(
-    async (data) => {}
+    async (data) => {
+      console.log("isExport:", isExport);
+      console.log("selectedContact:", selectedContact);
+      console.log("goldTransactionDetails:", goldTransactionDetails);
+      console.log(data.note);
+    }
     //   try {
     //     setSubmitting(true);
     //     if () {
@@ -75,6 +93,20 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
     //   }
     // }
   );
+  useEffect(() => {
+    const fetchGoldPrice = async () => {
+      try {
+        const response = await axios.get<GoldPrice>("/api/goldPrices/lastest", {
+          params: { name: "24K" },
+        });
+        setLastestGoldPrice(response.data.sell);
+        console.log("lastest gold price: " + response.data.sell);
+      } catch (err) {
+        console.error("Lỗi lấy giá vàng:", err);
+      }
+    };
+    fetchGoldPrice();
+  }, []);
 
   return (
     <div
@@ -93,16 +125,20 @@ const TransactionForm = ({ contactWithGroups }: Props) => {
         </Flex>
         <TextField.Root
           placeholder="Ghi chú"
-          {...register("name")}
+          {...register("note")}
         ></TextField.Root>
-        <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
         <ContactForm
           value={selectedContact}
           onChange={(contact) => setSelectedContact(contact)}
         />
-        <GolaTransactionTable transactionDate={new Date("2025-06-30")} />
-        <JewelryTransactionTable transactionDate={new Date("2025-06-30")} />
+
+        <GolaTransactionTable
+          value={goldTransactionDetails}
+          onChange={setGoldTransactionDetails}
+          lastestGoldPrice={lastestGoldPrice}
+        />
+        <JewelryTransactionTable lastestGoldPrice={lastestGoldPrice} />
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}

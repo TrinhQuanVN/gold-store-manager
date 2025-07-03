@@ -1,86 +1,54 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { CustomCollapsible } from "@/app/components";
+import { formatNumberVN } from "@/utils";
+import { Gold, GoldTransactionDetail } from "@prisma/client";
+import { Text } from "@radix-ui/themes";
+import axios from "axios";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DataGrid,
+  RowsChangeData,
   SelectColumn,
   textEditor,
   type Column,
   type DataGridHandle,
   type SortColumn,
-  RowsChangeData,
 } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { Text } from "@radix-ui/themes";
-import { Gold, GoldPrice, GoldTransactionDetail } from "@prisma/client";
-import axios from "axios";
+import z from "zod";
+import {
+  rawGoldTransactionSchema,
+  SummaryRowSchema,
+} from "@/app/validationSchemas";
 
-// Row type
-type Row = {
-  internalId: number; // Unique identifier for the row
-  goldId?: string;
-  name?: string;
-  weight: number;
-  price: number;
-  discount: number;
-  amount: number;
-};
-
-// Summary row
-type SummaryRow = {
-  id: string;
-  totalCount: number;
-  totalWeight: number;
-  totalDiscount: number;
-  totalAmount: number;
-};
+type Row = z.infer<typeof rawGoldTransactionSchema>; // Row type
+type SummaryRow = z.infer<typeof SummaryRowSchema>; // Summary row
 
 function rowKeyGetter(row: Row) {
-  return row.internalId;
-}
-
-function createInitialRows(): Row[] {
-  return Array.from({ length: 5 }, (_, i) => {
-    return {
-      internalId: i,
-      goldId: "",
-      name: "",
-      weight: 0,
-      price: 0,
-      discount: 0,
-      amount: 0,
-    };
-  });
-}
-type GoldTransactionDetailWithGold = GoldTransactionDetail & {
-  gold: Gold;
-};
-
-function formatNumberVN(
-  value: number,
-  minimumFractionDigits: number = 0,
-  maximumFractionDigits: number = 0
-) {
-  return new Intl.NumberFormat("vi-VN", {
-    minimumFractionDigits: minimumFractionDigits,
-    maximumFractionDigits: maximumFractionDigits,
-  }).format(value);
+  return row.detailId;
 }
 
 interface Props {
-  golDetails?: GoldTransactionDetailWithGold[];
-  transactionDate?: Date;
+  value: Row[];
+  lastestGoldPrice: number;
+  onChange: (details: Row[]) => void;
 }
 export default function GolaTransactionTable({
-  golDetails,
-  transactionDate,
+  value,
+  lastestGoldPrice,
+  onChange,
 }: Props) {
-  transactionDate = transactionDate || new Date();
   // Initialize grid reference and state
   const gridRef = useRef<DataGridHandle>(null);
-  const [rows, setRows] = useState<Row[]>(createInitialRows);
+  const [rows, setRows] = useState<Row[]>([]);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!value) return;
+    setRows(value);
+  }, [value]);
 
   const columns: readonly Column<Row, SummaryRow>[] = [
     SelectColumn,
@@ -209,7 +177,7 @@ export default function GolaTransactionTable({
     if (columnName === "goldId") {
       if (!row.goldId?.trim()) {
         updatedRows[index] = {
-          internalId: row.internalId,
+          detailId: row.detailId,
           goldId: "",
           name: "",
           weight: 0,
@@ -219,6 +187,8 @@ export default function GolaTransactionTable({
         };
 
         setRows(updatedRows);
+        onChange(rows);
+
         return;
       }
       // Lấy row cũ từ state để so sánh
@@ -231,29 +201,23 @@ export default function GolaTransactionTable({
           const goldRes = await axios.get<Gold>(`/api/gold/${row.goldId}`);
           const gold = goldRes.data;
 
-          // 2. Lấy giá theo ngày
-          const priceRes = await axios.get<GoldPrice>(`/api/goldPrices`, {
-            params: { date: transactionDate?.toISOString() },
-          });
-
-          const goldPrice = priceRes.data?.sell;
-
-          const price = Number(goldPrice) || 0;
           const weight = Number(row.weight) || 0;
           const discount = Number(row.discount) || 0;
-          const amount = weight * price - discount;
+          const amount = weight * lastestGoldPrice - discount;
 
           // 3. Cập nhật lại dòng
           updatedRows[index] = {
             ...row,
             name: gold.name,
-            price,
+            price: lastestGoldPrice,
             weight,
             discount,
             amount,
           };
 
           setRows([...updatedRows]);
+          onChange(rows);
+
           return;
         } catch (error) {
           console.error("Lỗi khi lấy thông tin gold hoặc giá:", error);
@@ -280,25 +244,30 @@ export default function GolaTransactionTable({
     };
 
     setRows(updatedRows);
+    onChange(rows);
   }
+  // Gọi onChange mỗi khi rows thay đổi
+
   return (
-    <DataGrid
-      ref={gridRef}
-      aria-label="Gold Table"
-      columns={columns}
-      rows={sortedRows}
-      rowKeyGetter={rowKeyGetter}
-      onRowsChange={handleRowsChange}
-      selectedRows={selectedRows}
-      onSelectedRowsChange={setSelectedRows}
-      sortColumns={sortColumns}
-      onSortColumnsChange={setSortColumns}
-      topSummaryRows={summaryRows}
-      defaultColumnOptions={{
-        resizable: true,
-        sortable: true,
-      }}
-      className="w-full h-full rdg rdg-light"
-    />
+    <CustomCollapsible title="Nhẫn tròn">
+      <DataGrid
+        ref={gridRef}
+        aria-label="Gold Table"
+        columns={columns}
+        rows={sortedRows}
+        rowKeyGetter={rowKeyGetter}
+        onRowsChange={handleRowsChange}
+        selectedRows={selectedRows}
+        onSelectedRowsChange={setSelectedRows}
+        sortColumns={sortColumns}
+        onSortColumnsChange={setSortColumns}
+        topSummaryRows={summaryRows}
+        defaultColumnOptions={{
+          resizable: true,
+          sortable: true,
+        }}
+        className="w-full h-full rdg rdg-light"
+      />
+    </CustomCollapsible>
   );
 }

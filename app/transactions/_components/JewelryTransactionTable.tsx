@@ -1,26 +1,26 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { CustomCollapsible, JewelryBadge } from "@/app/components";
+import { formatNumberVN } from "@/utils";
 import {
-  DataGrid,
-  SelectColumn,
-  textEditor,
-  type Column,
-  type DataGridHandle,
-  type SortColumn,
-  RowsChangeData,
-} from "react-data-grid";
-import "react-data-grid/lib/styles.css";
-import { Flex, Text } from "@radix-ui/themes";
-import {
-  GoldPrice,
   Jewelry,
   JewelryCategory,
   JewelryTransactionDetail,
   JewelryType,
 } from "@prisma/client";
+import { Flex, Text } from "@radix-ui/themes";
 import axios from "axios";
-import JewelryBadge from "@/app/components/JewelryBadge";
+import { useMemo, useRef, useState } from "react";
+import {
+  DataGrid,
+  RowsChangeData,
+  SelectColumn,
+  textEditor,
+  type Column,
+  type DataGridHandle,
+  type SortColumn,
+} from "react-data-grid";
+import "react-data-grid/lib/styles.css";
 
 // Row type
 type Row = {
@@ -76,26 +76,14 @@ type JewelryTransactionWithJewelry = JewelryTransactionDetail & {
   jewelry: Jewelry;
 };
 
-function formatNumberVN(
-  value: number,
-  minimumFractionDigits: number = 0,
-  maximumFractionDigits: number = 0
-) {
-  return new Intl.NumberFormat("vi-VN", {
-    minimumFractionDigits: minimumFractionDigits,
-    maximumFractionDigits: maximumFractionDigits,
-  }).format(value);
-}
-
 interface Props {
   jewelryTransactionDetail?: JewelryTransactionWithJewelry[];
-  transactionDate?: Date;
+  lastestGoldPrice: number;
 }
 export default function JewelryTransactionTable({
   jewelryTransactionDetail,
-  transactionDate,
+  lastestGoldPrice,
 }: Props) {
-  transactionDate = transactionDate || new Date();
   // Initialize grid reference and state
   const gridRef = useRef<DataGridHandle>(null);
   const [rows, setRows] = useState<Row[]>(createInitialRows);
@@ -252,121 +240,114 @@ export default function JewelryTransactionTable({
     const columnName = data.column.key;
     const index = data.indexes[0];
     const row = updatedRows[index];
-
     const oldRow = rows[index];
 
-    // Trường hợp xóa jewelryId hoặc jewelryCode => reset dòng
-    if (columnName === "jewelryId" || columnName === "jewelryCode") {
-      // Reset dòng CHỈ khi jewelryId rỗng
-      if (columnName === "jewelryId" && !row.jewelryId?.trim()) {
+    // Trường hợp jewelryId bị xóa → reset dòng
+    if (
+      (columnName === "jewelryId" || columnName === "jewelryCode") &&
+      !row[columnName]?.trim()
+    ) {
+      updatedRows[index] = {
+        internalId: row.internalId,
+        jewelryId: "",
+        jewelryCode: "",
+        fullName: {},
+        weight: 0,
+        price: 0,
+        discount: 0,
+        amount: 0,
+      };
+      setRows([...updatedRows]);
+      return;
+    }
+
+    let jewelry: JewelryWithTypeAndCategory | null = null;
+
+    try {
+      if (columnName === "jewelryId" && row.jewelryId !== oldRow.jewelryId) {
+        const res = await axios.get<JewelryWithTypeAndCategory>(
+          `/api/jewelry/InStock/${row.jewelryId}`
+        );
+        jewelry = res.data;
+      }
+
+      if (
+        columnName === "jewelryCode" &&
+        row.jewelryCode !== oldRow.jewelryCode
+      ) {
+        const res = await axios.get<JewelryWithTypeAndCategory>(
+          `/api/jewelry?code=${row.jewelryCode}`
+        );
+        jewelry = res.data;
+      }
+
+      if (jewelry) {
+        const price =
+          ((lastestGoldPrice * jewelry.jewelryType.goldPercent) / 100) * 1000;
+        const weight = Number(row.weight) || jewelry.totalWeight || 0;
+        const discount = Number(row.discount) || 0;
+        const amount = weight * price - discount;
+
         updatedRows[index] = {
-          internalId: row.internalId,
-          jewelryId: "",
-          jewelryCode: "",
-          fullName: {},
-          weight: 0,
-          price: 0,
-          discount: 0,
-          amount: 0,
+          ...row,
+          jewelryId: jewelry.id.toString(),
+          jewelryCode: jewelry.supplierId ?? "",
+          fullName: {
+            jewelryName: jewelry.name,
+            categoryName: jewelry.category.name,
+            categoryColor: jewelry.category.color!,
+            typeName: jewelry.jewelryType.name,
+            typeColor: jewelry.jewelryType.color!,
+          },
+          price,
+          weight,
+          discount,
+          amount,
         };
         setRows([...updatedRows]);
         return;
       }
-
-      try {
-        let jewelry: JewelryWithTypeAndCategory | null = null;
-
-        if (columnName === "jewelryId" && row.jewelryId !== oldRow.jewelryId) {
-          const res = await axios.get<JewelryWithTypeAndCategory>(
-            `/api/jewelry/${row.jewelryId}`
-          );
-          jewelry = res.data;
-        }
-
-        if (
-          columnName === "jewelryCode" &&
-          row.jewelryCode !== oldRow.jewelryCode
-        ) {
-          const res = await axios.get<JewelryWithTypeAndCategory>(
-            `/api/jewelry?code=${row.jewelryCode}`
-          );
-          jewelry = res.data;
-        }
-
-        if (jewelry) {
-          const priceRes = await axios.get<GoldPrice>(`/api/goldPrices`, {
-            params: { date: transactionDate?.toISOString() },
-          });
-
-          const price =
-            ((priceRes.data?.sell * jewelry.jewelryType.goldPercent) / 100) *
-              1000 || 0;
-          const weight = Number(row.weight) || 0;
-          const discount = Number(row.discount) || 0;
-          const amount = weight * price - discount;
-
-          updatedRows[index] = {
-            ...row,
-            jewelryId: jewelry.id.toString(),
-            jewelryCode: jewelry.supplierId ?? "",
-            fullName: {
-              jewelryName: jewelry.name,
-              categoryName: jewelry.category.name,
-              categoryColor: jewelry.category.color!,
-              typeName: jewelry.jewelryType.name,
-              typeColor: jewelry.jewelryType.color!,
-            },
-            price: price,
-            weight: jewelry.totalWeight,
-            discount: discount,
-            amount: amount,
-          };
-
-          setRows([...updatedRows]);
-          return;
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy jewelry hoặc giá:", error);
-      }
+    } catch (err) {
+      console.error("Lỗi khi lấy dữ liệu trang sức:", err);
     }
 
-    // Ép kiểu tất cả các field cần thiết sang number
+    // Nếu chỉ thay đổi weight/price/discount → tính lại amount
     const weight = Number(row.weight) || 0;
     const price = Number(row.price) || 0;
     const discount = Number(row.discount) || 0;
-
-    // Tính lại amount
     const amount = weight * price - discount;
 
-    // Gán lại dòng đã chuẩn hoá vào mảng
     updatedRows[index] = {
       ...row,
-      weight: weight,
-      price: price,
-      discount: discount,
-      amount: amount,
+      weight,
+      price,
+      discount,
+      amount,
     };
 
-    setRows(updatedRows);
+    setRows([...updatedRows]);
   }
+
   return (
-    <DataGrid
-      ref={gridRef}
-      aria-label="Gold Table"
-      columns={columns}
-      rows={sortedRows}
-      rowKeyGetter={rowKeyGetter}
-      onRowsChange={handleRowsChange}
-      selectedRows={selectedRows}
-      onSelectedRowsChange={setSelectedRows}
-      sortColumns={sortColumns}
-      onSortColumnsChange={setSortColumns}
-      topSummaryRows={summaryRows}
-      defaultColumnOptions={{
-        resizable: true,
-        sortable: true,
-      }}
-      className="w-full h-full rdg rdg-light"
-    />
+    <CustomCollapsible title="Trang sức">
+      <DataGrid
+        ref={gridRef}
+        aria-label="Gold Table"
+        columns={columns}
+        rows={sortedRows}
+        rowKeyGetter={rowKeyGetter}
+        onRowsChange={handleRowsChange}
+        selectedRows={selectedRows}
+        onSelectedRowsChange={setSelectedRows}
+        sortColumns={sortColumns}
+        onSortColumnsChange={setSortColumns}
+        topSummaryRows={summaryRows}
+        defaultColumnOptions={{
+          resizable: true,
+          sortable: true,
+        }}
+        className="w-full h-full rdg rdg-light"
+      />
+    </CustomCollapsible>
   );
 }
