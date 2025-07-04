@@ -27,7 +27,6 @@ const EditContactPage = async ({ params }: Props) => {
       group: true, // Include the ContactGroup relation
     },
   });
-
   if (!contact) notFound();
 
   return <ContactForm contact={contact} groups={contactgroups} />;

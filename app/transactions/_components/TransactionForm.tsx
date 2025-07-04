@@ -9,6 +9,12 @@ import {
   Contact,
   GoldPrice,
   GoldTransactionDetail,
+  Gold,
+  Jewelry,
+  JewelryCategory,
+  JewelryType,
+  PaymentHeader,
+  PaymentDetail,
 } from "@prisma/client";
 import {
   Button,
@@ -33,58 +39,69 @@ import GolaTransactionTable from "./GoldTransactionTable";
 import JewelryTransactionTable from "./JewelryTransactionTable";
 import { createEmptyGoldRows, createEmptyJewelryRows } from "./initialEmptyRow";
 import {
-  rawGoldTransactionSchema,
   rawTransactionSchema,
+  RawTransactionDataForm,
 } from "@/app/validationSchemas";
 import { useRouter } from "next/navigation";
 
 interface Props {
-  transactionHeaderWithRelation?: string;
+  transactionHeaderWithRelation?: TransactionHeader & {
+    contact: Contact & {
+      group: ContactGroup;
+      goldDetails: GoldTransactionDetail & { gold: Gold }[];
+      jewelryDetails: JewelryTransactionDetail & {
+        jewelry: Jewelry & { category: JewelryCategory; type: JewelryType }[];
+      };
+      paymentDetails: PaymentDetail & { header: PaymentHeader };
+    };
+  };
 }
 
 const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
-  const [selectedContact, setSelectedContact] = useState<
-    (Contact & { group: ContactGroup }) | null
-  >(null);
+  // const [selectedContact, setSelectedContact] = useState<
+  //   (Contact & { group: ContactGroup }) | null
+  // >(null);
   const router = useRouter();
   const [isExport, setIsExport] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
   const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
-  const [goldTransactionDetails, setGoldTransactionDetails] =
-    useState<z.infer<typeof rawGoldTransactionSchema>[]>(createEmptyGoldRows);
+  // const [goldTransactionDetails, setGoldTransactionDetails] =
+  //   useState<z.infer<typeof rawGoldTransactionSchema>[]>(createEmptyGoldRows);
 
-  const [jewelryTransactionDetails, setJewelryTransactionDetails] = useState<
-    z.infer<typeof rawGoldTransactionSchema>[]
-  >(createEmptyJewelryRows);
+  // const [jewelryTransactionDetails, setJewelryTransactionDetails] = useState<
+  //   z.infer<typeof rawGoldTransactionSchema>[]
+  // >(createEmptyJewelryRows);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<z.infer<typeof rawTransactionSchema>>({
+  } = useForm<RawTransactionDataForm>({
     resolver: zodResolver(rawTransactionSchema),
     defaultValues: {},
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    try {
-      setSubmitting(true);
-      if (!selectedContact) {
-      }
-      if (transactionHeaderWithRelation) {
-        // await axios.patch("/api/contacts/" + contact.id, data);
-      } else {
-        // await axios.post("/api/contacts", data);
-      }
-      router.push("/contacts/list");
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-      setSubmitting(false);
-      setError("Lỗi không xác định đã xảy ra.");
-    }
+    console.log("...");
+    console.log(data);
+    // try {
+    //   setSubmitting(true);
+    //   if (!selectedContact) {
+    //   }
+    //   if (transactionHeaderWithRelation) {
+    //     // await axios.patch("/api/contacts/" + contact.id, data);
+    //   } else {
+    //     // await axios.post("/api/contacts", data);
+    //   }
+    //   router.push("/contacts/list");
+    //   router.refresh();
+    // } catch (err) {
+    //   console.error(err);
+    //   setSubmitting(false);
+    //   setError("Lỗi không xác định đã xảy ra.");
+    // }
   });
   useEffect(() => {
     const fetchGoldPrice = async () => {
@@ -120,22 +137,14 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           placeholder="Ghi chú"
           {...register("note")}
         ></TextField.Root>
+        <ErrorMessage>{errors.note?.message}</ErrorMessage>
 
         <ContactForm
-          value={selectedContact}
-          onChange={(contact) => setSelectedContact(contact)}
+          name="contactId"
+          control={control}
+          contact={transactionHeaderWithRelation?.contact}
         />
-
-        <GolaTransactionTable
-          value={goldTransactionDetails}
-          onChange={setGoldTransactionDetails}
-          lastestGoldPrice={lastestGoldPrice}
-        />
-        <JewelryTransactionTable
-          lastestGoldPrice={lastestGoldPrice}
-          value={jewelryTransactionDetails}
-          onChange={setJewelryTransactionDetails}
-        />
+        <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
@@ -144,6 +153,17 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     </div>
   );
 };
+
+// <GolaTransactionTable
+//   value={goldTransactionDetails}
+//   onChange={setGoldTransactionDetails}
+//   lastestGoldPrice={lastestGoldPrice}
+// />
+// <JewelryTransactionTable
+//   lastestGoldPrice={lastestGoldPrice}
+//   value={jewelryTransactionDetails}
+//   onChange={setJewelryTransactionDetails}
+// />
 
 export default TransactionForm;
 

@@ -171,8 +171,8 @@ model JewelryTransactionDetail {
   jewelryId Int
   jewelry   Jewelry @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
 
-  unitPrice Float
-  amount    Float // tổng tiền giao dịch của sản phẩm này
+  price  Float
+  amount Float // tổng tiền giao dịch của sản phẩm này
 
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
@@ -186,8 +186,8 @@ model GoldTransactionDetail {
   goldId Int
   gold   Gold @relation(fields: [goldId], references: [id], onDelete: Cascade)
 
-  unitPrice Float
-  weight    Float // Trọng lượng vàng giao dịch
+  price  Float
+  weight Float // Trọng lượng vàng giao dịch
 
   discount Float @default(0) // Giảm giá nếu có
   amount   Float
@@ -209,7 +209,7 @@ model TransactionHeader {
 
   totalAmount Float @default(0) // Tổng số tiền giao dịch
 
-  paymentAmounts PaymentAmount[]
+  paymentAmounts PaymentDetail[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -226,10 +226,10 @@ model PaymentHeader {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  paymentAmounts PaymentAmount[]
+  paymentAmounts PaymentDetail[]
 }
 
-model PaymentAmount {
+model PaymentDetail {
   id                  Int               @id @default(autoincrement())
   amount              Float // Số tiền thanh toán
   transactionHeaderId Int

@@ -1,44 +1,46 @@
 import { z } from "zod";
 
-export const rawGoldTransactionSchema = z.object({
-  detailId: z.number(),
-  goldId: z.string().optional(),
-  name: z.string().optional(),
-  weight: z.number().optional().default(0),
-  price: z.number().optional().default(0),
-  discount: z.number().optional().default(0),
-  amount: z.number().optional().default(0),
+// Enum cho loại thanh toán
+export const paymentTypeEnum = z.enum(["cash", "bank"]);
+
+// Khoản thanh toán
+export const rawPaymentAmountSchema = z.object({
+  type: paymentTypeEnum,
+  amount: z.string().min(1, "Số tiền không được để trống"),
 });
 
-export const SummaryRowSchema = z.object({
-  id: z.string().default("summary"),
-  totalCount: z.number().default(0),
-  totalWeight: z.number().default(0),
-  totalDiscount: z.number().default(0),
-  totalAmount: z.number().default(0),
+// Chi tiết giao dịch vàng
+export const rawGoldTransactionDetailSchema = z.object({
+  id: z.string().min(1, "ID không được để trống"),
+  price: z.string().min(1, "Giá không được để trống"),
+  weight: z.string().min(1, "Trọng lượng không được để trống"),
+  discount: z.string().min(1, "Giảm giá không được để trống"),
+  amount: z.string().min(1, "Thành tiền không được để trống"),
 });
 
+// Chi tiết giao dịch trang sức
+export const rawJewelryTransactionDetailSchema = z.object({
+  id: z.string().min(1, "ID không được để trống"),
+  price: z.string().min(1, "Giá không được để trống"),
+  weight: z.string().min(1, "Trọng lượng không được để trống"),
+  discount: z.string().min(1, "Giảm giá không được để trống"),
+  amount: z.string().min(1, "Thành tiền không được để trống"),
+});
+
+// Schema giao dịch tổng
 export const rawTransactionSchema = z.object({
+  contactId: z.string().min(1, "Vui lòng chọn khách hàng"),
   note: z.string().optional(),
-  //   goldDetails: z.array(rawGoldTransactionSchema),
-  // contactId: z.string().min(1),
+  date: z.string().optional(), // thường lấy new Date().toISOString() ở client
+  //     paymentAmounts: z
+  //       .array(rawPaymentAmountSchema)
+  //       .min(1, "Phải có ít nhất một phương thức thanh toán"),
+  //     goldDetails: z.array(rawGoldTransactionDetailSchema),
+  //     jewelryDetails: z.array(rawJewelryTransactionDetailSchema),
+  //   })
+  //   .refine((data) => data.goldDetails.length + data.jewelryDetails.length >= 1, {
+  //     message: "Cần ít nhất một chi tiết giao dịch (vàng hoặc trang sức)",
+  //     path: ["goldDetails"], // bạn có thể đặt ở `["jewelryDetails"]` tùy UI
 });
 
-export const rawJewelryTransactionSchema = z.object({
-  detailId: z.number(), // Unique identifier for the row
-  jewelryId: z.string().optional(),
-  jewelryCode: z.string().optional(),
-  fullName: z
-    .object({
-      jewelryName: z.string().optional(),
-      typeName: z.string().optional(),
-      typeColor: z.string().optional(),
-      categoryName: z.string().optional(),
-      categoryColor: z.string().optional(),
-    })
-    .optional(),
-  weight: z.number().default(0),
-  price: z.number().default(0),
-  discount: z.number().default(0),
-  amount: z.number().default(0),
-});
+export type RawTransactionDataForm = z.infer<typeof rawTransactionSchema>;

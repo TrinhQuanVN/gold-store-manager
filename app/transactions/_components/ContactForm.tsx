@@ -4,17 +4,35 @@ import { ContactGroupBadge } from "@/app/components";
 import CustomCollapsible from "@/app/components/CustomCollapsible";
 import { Contact, ContactGroup } from "@prisma/client";
 import { DataList, Flex, Text } from "@radix-ui/themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ContactSelect from "./ContactSelect";
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  useController,
+} from "react-hook-form";
+import ErrorMessage from "@/app/components/ErrorMessage";
 
 interface Props {
-  value?: (Contact & { group: ContactGroup }) | null;
-  onChange?: (contact: Contact & { group: ContactGroup }) => void;
+  name: string;
+  control: Control<any>; // hoặc Control<RawTransactionDataForm>
+  contact?: Contact & { group: ContactGroup }; // optional, truyền khi edit
 }
 
-const ContactForm = ({ value, onChange }: Props) => {
-  // const [open, setOpen] = useState(false);
-  const selected = value;
+const ContactForm = ({ name, control, contact }: Props) => {
+  const {
+    field: { value: contactId, onChange },
+    fieldState: { error },
+  } = useController({ name, control, defaultValue: contact?.id ?? "" });
+
+  const [selected, setSelected] = useState<typeof contact | null>(
+    contact ?? null
+  );
+
+  useEffect(() => {
+    if (contact) setSelected(contact);
+  }, [contact]);
 
   return (
     <CustomCollapsible
@@ -25,11 +43,19 @@ const ContactForm = ({ value, onChange }: Props) => {
       }
     >
       <Flex direction="column" gap="4">
-        <ContactSelect
-          value={selected}
-          onChange={(contact) => {
-            onChange?.(contact); // Gọi lên parent
-          }}
+        <Controller
+          name={name}
+          control={control}
+          defaultValue={contact?.id ?? ""}
+          render={({ field }) => (
+            <ContactSelect
+              value={selected}
+              onChange={(contact) => {
+                setSelected(contact);
+                field.onChange(contact.id.toString()); // ✅ dùng contact.id để cập nhật react-hook-form
+              }}
+            />
+          )}
         />
 
         {selected && (
