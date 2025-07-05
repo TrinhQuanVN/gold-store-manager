@@ -11,7 +11,8 @@ export const rawPaymentAmountSchema = z.object({
 
 // Chi tiết giao dịch vàng
 export const rawGoldTransactionDetailSchema = z.object({
-  id: z.string().min(1, "ID không được để trống"),
+  id: z.string().optional(),
+  goldId: z.string().min(1, "Giá không được để trống"),
   price: z.string().min(1, "Giá không được để trống"),
   weight: z.string().min(1, "Trọng lượng không được để trống"),
   discount: z.string().min(1, "Giảm giá không được để trống"),
@@ -32,10 +33,10 @@ export const rawTransactionSchema = z.object({
   contactId: z.string().min(1, "Vui lòng chọn khách hàng"),
   note: z.string().optional(),
   date: z.string().optional(), // thường lấy new Date().toISOString() ở client
-  //     paymentAmounts: z
-  //       .array(rawPaymentAmountSchema)
-  //       .min(1, "Phải có ít nhất một phương thức thanh toán"),
-  //     goldDetails: z.array(rawGoldTransactionDetailSchema),
+  //   paymentAmounts: z
+  //     .array(rawPaymentAmountSchema)
+  //     .min(1, "Phải có ít nhất một phương thức thanh toán"),
+  goldDetails: z.array(rawGoldTransactionDetailSchema),
   //     jewelryDetails: z.array(rawJewelryTransactionDetailSchema),
   //   })
   //   .refine((data) => data.goldDetails.length + data.jewelryDetails.length >= 1, {

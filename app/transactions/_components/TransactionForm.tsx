@@ -35,7 +35,6 @@ import Spinner from "@/app/components/Spinner";
 import TransactionTypeSegment from "./TransactionTypeSegment";
 import ContactForm from "./ContactForm";
 import { prisma } from "@/prisma/client";
-import GolaTransactionTable from "./GoldTransactionTable";
 import JewelryTransactionTable from "./JewelryTransactionTable";
 import { createEmptyGoldRows, createEmptyJewelryRows } from "./initialEmptyRow";
 import {
@@ -43,17 +42,16 @@ import {
   RawTransactionDataForm,
 } from "@/app/validationSchemas";
 import { useRouter } from "next/navigation";
+import GoldTransactionForm from "./GoldTransactionForm";
 
 interface Props {
   transactionHeaderWithRelation?: TransactionHeader & {
-    contact: Contact & {
-      group: ContactGroup;
-      goldDetails: GoldTransactionDetail & { gold: Gold }[];
-      jewelryDetails: JewelryTransactionDetail & {
-        jewelry: Jewelry & { category: JewelryCategory; type: JewelryType }[];
-      };
-      paymentDetails: PaymentDetail & { header: PaymentHeader };
-    };
+    contact: Contact & { group: ContactGroup };
+    goldDetails?: (GoldTransactionDetail & { gold: Gold })[];
+    jewelryDetails?: (JewelryTransactionDetail & {
+      jewelry: Jewelry & { category: JewelryCategory; type: JewelryType };
+    })[];
+    paymentDetails: (PaymentDetail & { header: PaymentHeader })[];
   };
 }
 
@@ -84,24 +82,25 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log("...");
-    console.log(data);
-    // try {
-    //   setSubmitting(true);
-    //   if (!selectedContact) {
-    //   }
-    //   if (transactionHeaderWithRelation) {
-    //     // await axios.patch("/api/contacts/" + contact.id, data);
-    //   } else {
-    //     // await axios.post("/api/contacts", data);
-    //   }
-    //   router.push("/contacts/list");
-    //   router.refresh();
-    // } catch (err) {
-    //   console.error(err);
-    //   setSubmitting(false);
-    //   setError("Lỗi không xác định đã xảy ra.");
-    // }
+    try {
+      console.log("...");
+      console.log(data);
+      console.log(errors.goldDetails?.[0]?.price);
+      //   setSubmitting(true);
+      //   if (!selectedContact) {
+      //   }
+      //   if (transactionHeaderWithRelation) {
+      //     // await axios.patch("/api/contacts/" + contact.id, data);
+      //   } else {
+      //     // await axios.post("/api/contacts", data);
+      //   }
+      //   router.push("/contacts/list");
+      //   router.refresh();
+    } catch (err) {
+      console.error(err);
+      setSubmitting(false);
+      setError("Lỗi không xác định đã xảy ra.");
+    }
   });
   useEffect(() => {
     const fetchGoldPrice = async () => {
@@ -127,6 +126,11 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       } transition-colors`}
     >
       <form onSubmit={onSubmit} className="space-y-4">
+        {error && (
+          <Callout.Root color="red" className="mb-4">
+            <Callout.Text>{error}</Callout.Text>
+          </Callout.Root>
+        )}
         <Flex justify="center">
           <TransactionTypeSegment
             isExport={isExport}
@@ -145,6 +149,13 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           contact={transactionHeaderWithRelation?.contact}
         />
         <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
+
+        <GoldTransactionForm
+          control={control}
+          register={register}
+          errors={errors}
+          goldDetails={transactionHeaderWithRelation?.goldDetails ?? []}
+        />
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
