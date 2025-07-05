@@ -75,6 +75,9 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
+    watch,
     formState: { errors },
   } = useForm<RawTransactionDataForm>({
     resolver: zodResolver(rawTransactionSchema),
@@ -85,7 +88,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     try {
       console.log("...");
       console.log(data);
-      console.log(errors.goldDetails?.[0]?.price);
+      console.log();
       //   setSubmitting(true);
       //   if (!selectedContact) {
       //   }
@@ -154,7 +157,11 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           control={control}
           register={register}
           errors={errors}
+          setValue={setValue}
+          getValues={getValues}
+          watch={watch}
           goldDetails={transactionHeaderWithRelation?.goldDetails ?? []}
+          lastestGoldPrice={lastestGoldPrice}
         />
 
         <Button type="submit" disabled={isSubmitting}>

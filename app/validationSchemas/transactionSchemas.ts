@@ -12,10 +12,10 @@ export const rawPaymentAmountSchema = z.object({
 // Chi tiết giao dịch vàng
 export const rawGoldTransactionDetailSchema = z.object({
   id: z.string().optional(),
-  goldId: z.string().min(1, "Giá không được để trống"),
+  goldId: z.string().min(1, "id không được để trống"),
   price: z.string().min(1, "Giá không được để trống"),
   weight: z.string().min(1, "Trọng lượng không được để trống"),
-  discount: z.string().min(1, "Giảm giá không được để trống"),
+  discount: z.string().optional(),
   amount: z.string().min(1, "Thành tiền không được để trống"),
 });
 
@@ -24,7 +24,7 @@ export const rawJewelryTransactionDetailSchema = z.object({
   id: z.string().min(1, "ID không được để trống"),
   price: z.string().min(1, "Giá không được để trống"),
   weight: z.string().min(1, "Trọng lượng không được để trống"),
-  discount: z.string().min(1, "Giảm giá không được để trống"),
+  discount: z.string().optional(),
   amount: z.string().min(1, "Thành tiền không được để trống"),
 });
 
