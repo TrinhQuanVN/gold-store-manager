@@ -121,7 +121,7 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json(jewelryWithTypeAndCategory);
+    return NextResponse.json(jewelryWithTypeAndCategory, { status: 200 });
   } catch (err) {
     console.error("Lỗi khi lấy thông tin trang sức:", err);
     return NextResponse.json(

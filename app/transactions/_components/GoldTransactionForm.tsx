@@ -103,8 +103,15 @@ const GoldTransactionForm = ({
 
   return (
     <CustomCollapsible title={title}>
-      <Flex direction="column" gap="4">
-        <Grid columns="7" gap="3" align="center">
+      <Flex direction="column" gap="2">
+        <Grid
+          columns="7"
+          gap="3"
+          align="center"
+          style={{
+            gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+          }}
+        >
           <Text size="2" weight="bold" align="center">
             ID
           </Text>
@@ -137,7 +144,6 @@ const GoldTransactionForm = ({
             errors={errors}
             onRemove={() => remove(index)}
             lastGoldPrice={lastestGoldPrice ?? 0}
-            goldDetailsWatch={goldDetailsWatch}
           />
         ))}
         <GoldDetailSummaryRow

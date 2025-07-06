@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 import { CustomCollapsible, ErrorMessage } from "@/app/components";
 import { FormField } from "./FormField";
 import axios from "axios";
-import GoldDetailRow from "./GoldDetailRow";
+import JewelryDetailRow from "./JewelryDetailRow";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 
 interface Props {
@@ -61,18 +61,6 @@ const JewelryTransactionForm = ({
           amount: detail.amount.toString(),
         })
       );
-    } else if (fields.length === 0) {
-      // Append 3 empty rows if creating new
-      for (let i = 0; i < 3; i++) {
-        append({
-          id: "",
-          jewelryId: "",
-          weight: "",
-          price: "",
-          discount: "",
-          amount: "",
-        });
-      }
     }
   }, []);
 
@@ -110,8 +98,15 @@ const JewelryTransactionForm = ({
 
   return (
     <CustomCollapsible title={title}>
-      <Flex direction="column" gap="4">
-        <Grid columns="7" gap="3" align="center">
+      <Flex direction="column" gap="2">
+        <Grid
+          columns="7"
+          gap="3"
+          align="center"
+          style={{
+            gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+          }}
+        >
           <Text size="2" weight="bold" align="center">
             ID
           </Text>
@@ -135,7 +130,7 @@ const JewelryTransactionForm = ({
           </Text>
         </Grid>
         {fields.map((field, index) => (
-          <GoldDetailRow
+          <JewelryDetailRow
             key={field.id}
             index={index}
             register={register}
@@ -144,7 +139,6 @@ const JewelryTransactionForm = ({
             errors={errors}
             onRemove={() => remove(index)}
             lastGoldPrice={lastestGoldPrice ?? 0}
-            jewelryDetailsWatch={jewelryDetailsWatch}
           />
         ))}
         <GoldDetailSummaryRow
@@ -156,14 +150,13 @@ const JewelryTransactionForm = ({
 
         <Flex justify="end">
           <Button
-            onClick={() =>{}
-
+            onClick={() =>
+              append({
+                jewelryId: "",
                 weight: "",
                 price: "",
                 discount: "",
                 amount: "",
-                jewelryId: "",
-
               })
             }
           >

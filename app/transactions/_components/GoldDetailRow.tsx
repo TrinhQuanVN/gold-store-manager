@@ -21,7 +21,6 @@ interface Props {
   control: any;
   onRemove: () => void;
   lastGoldPrice: number;
-  goldDetailsWatch: TransactionInputDataForm["goldDetails"];
 }
 
 const GoldDetailRow = ({
@@ -32,7 +31,6 @@ const GoldDetailRow = ({
   control,
   onRemove,
   lastGoldPrice,
-  goldDetailsWatch,
 }: Props) => {
   const [name, setName] = useState("");
 
@@ -78,7 +76,14 @@ const GoldDetailRow = ({
   }, [weight, price, discount, setValue, index]);
 
   return (
-    <Grid columns="7" gap="3" align="start">
+    <Grid
+      columns="7"
+      gap="3"
+      align="start"
+      style={{
+        gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+      }}
+    >
       <FormField
         placeholder="id"
         registerProps={register(`goldDetails.${index}.goldId`)}

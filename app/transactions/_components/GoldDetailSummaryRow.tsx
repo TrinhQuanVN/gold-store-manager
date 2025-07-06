@@ -20,7 +20,14 @@ const GoldDetailSummaryRow = ({
   totalAmount,
 }: Props) => {
   return (
-    <Grid columns="7" gap="3" align="center">
+    <Grid
+      columns="7"
+      gap="3"
+      align="center"
+      style={{
+        gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+      }}
+    >
       <Text size="2" weight="bold" color="red">
         Tổng
       </Text>

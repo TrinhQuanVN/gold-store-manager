@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import ContactForm from "./ContactForm";
 import GoldTransactionForm from "./GoldTransactionForm";
 import TransactionTypeSegment from "./TransactionTypeSegment";
+import JewelryTransactionForm from "./JewelryTransactionForm";
 
 interface Props {
   transactionHeaderWithRelation?: TransactionHeader & {
@@ -69,6 +70,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     watch,
     formState: { errors },
   } = useForm<TransactionInputDataForm, any, TransactionOutputDataForm>({
+    mode: "onChange",
     resolver: zodResolver(rawTransactionSchema),
     defaultValues: {},
   });
@@ -149,6 +151,16 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           goldDetails={transactionHeaderWithRelation?.goldDetails ?? []}
           lastestGoldPrice={lastestGoldPrice}
         />
+
+        <JewelryTransactionForm
+          control={control}
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          jewelryDetails={transactionHeaderWithRelation?.jewelryDetails ?? []}
+          lastestGoldPrice={lastestGoldPrice}
+        />
+        <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
 
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
