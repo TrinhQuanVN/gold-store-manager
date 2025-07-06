@@ -157,7 +157,7 @@ const JewelryTransactionForm = ({
         <Flex justify="end">
           <Button
             onClick={() =>{}
- 
+
                 weight: "",
                 price: "",
                 discount: "",
