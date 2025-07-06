@@ -6,15 +6,16 @@ import {
   FieldErrors,
 } from "react-hook-form";
 import { Grid, Button } from "@radix-ui/themes";
-import { RawTransactionDataForm } from "@/app/validationSchemas";
+import { TransactionInputDataForm } from "@/app/validationSchemas";
 import { FormField } from "./FormField";
 import axios from "axios";
+import { NumericFormattedField } from "./NumericFormattedField";
 
 interface Props {
   index: number;
-  register: UseFormRegister<RawTransactionDataForm>;
-  setValue: UseFormSetValue<RawTransactionDataForm>;
-  errors: FieldErrors<RawTransactionDataForm>;
+  register: UseFormRegister<TransactionInputDataForm>;
+  setValue: UseFormSetValue<TransactionInputDataForm>;
+  errors: FieldErrors<TransactionInputDataForm>;
   control: any;
   onRemove: () => void;
   lastGoldPrice: number;
@@ -59,6 +60,7 @@ const GoldDetailRow = ({
     const w = parseFloat(weight || "0");
     const p = parseFloat(price || "0");
     const d = parseFloat(discount || "0");
+
     const amount = w * p - d;
     if (!isNaN(amount)) {
       setValue(`goldDetails.${index}.amount`, amount.toString());
@@ -74,30 +76,36 @@ const GoldDetailRow = ({
       />
       <FormField placeholder="Tên vàng" value={name} readOnly />
 
-      <FormField
+      <NumericFormattedField
+        name={`goldDetails.${index}.weight`}
         placeholder="Trọng lượng"
-        registerProps={register(`goldDetails.${index}.weight`)}
+        control={control}
         error={errors?.goldDetails?.[index]?.weight?.message}
+        maximumFractionDigits={4}
       />
-      <FormField
+
+      <NumericFormattedField
+        name={`goldDetails.${index}.price`}
         placeholder="Giá"
-        registerProps={register(`goldDetails.${index}.price`)}
+        control={control}
         error={errors?.goldDetails?.[index]?.price?.message}
+        maximumFractionDigits={0}
       />
-      <FormField
+
+      <NumericFormattedField
+        name={`goldDetails.${index}.discount`}
         placeholder="Giảm giá"
-        registerProps={register(`goldDetails.${index}.discount`)}
+        control={control}
         error={errors?.goldDetails?.[index]?.discount?.message}
+        maximumFractionDigits={0}
       />
-      <FormField
+
+      <NumericFormattedField
+        name={`goldDetails.${index}.amount`}
         placeholder="Thành tiền"
-        readOnly
-        value={(() => {
-          const w = parseFloat(weight || "0");
-          const p = parseFloat(price || "0");
-          const d = parseFloat(discount || "0");
-          return (w * p - d || 0).toFixed(0);
-        })()}
+        control={control}
+        disabled
+        maximumFractionDigits={0}
       />
       <Button variant="ghost" onClick={onRemove}>
         X

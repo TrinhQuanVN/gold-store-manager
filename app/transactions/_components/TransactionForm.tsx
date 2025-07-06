@@ -1,48 +1,37 @@
 "use client";
 
-import { rawContactSchema } from "@/app/validationSchemas/contactSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  TransactionHeader,
-  ContactGroup,
-  JewelryTransactionDetail,
   Contact,
+  ContactGroup,
+  Gold,
   GoldPrice,
   GoldTransactionDetail,
-  Gold,
   Jewelry,
   JewelryCategory,
+  JewelryTransactionDetail,
   JewelryType,
-  PaymentHeader,
   PaymentDetail,
+  PaymentHeader,
+  TransactionHeader,
 } from "@prisma/client";
-import {
-  Button,
-  Callout,
-  Flex,
-  Select,
-  TextArea,
-  TextField,
-} from "@radix-ui/themes";
+import { Button, Callout, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 // import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
-import TransactionTypeSegment from "./TransactionTypeSegment";
-import ContactForm from "./ContactForm";
-import { prisma } from "@/prisma/client";
-import JewelryTransactionTable from "./JewelryTransactionTable";
-import { createEmptyGoldRows, createEmptyJewelryRows } from "./initialEmptyRow";
 import {
   rawTransactionSchema,
-  RawTransactionDataForm,
+  TransactionInputDataForm,
+  TransactionOutputDataForm,
 } from "@/app/validationSchemas";
 import { useRouter } from "next/navigation";
+import ContactForm from "./ContactForm";
 import GoldTransactionForm from "./GoldTransactionForm";
+import TransactionTypeSegment from "./TransactionTypeSegment";
 
 interface Props {
   transactionHeaderWithRelation?: TransactionHeader & {
@@ -79,7 +68,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     getValues,
     watch,
     formState: { errors },
-  } = useForm<RawTransactionDataForm>({
+  } = useForm<TransactionInputDataForm, any, TransactionOutputDataForm>({
     resolver: zodResolver(rawTransactionSchema),
     defaultValues: {},
   });
@@ -88,7 +77,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     try {
       console.log("...");
       console.log(data);
-      console.log();
       //   setSubmitting(true);
       //   if (!selectedContact) {
       //   }
@@ -158,8 +146,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           register={register}
           errors={errors}
           setValue={setValue}
-          getValues={getValues}
-          watch={watch}
           goldDetails={transactionHeaderWithRelation?.goldDetails ?? []}
           lastestGoldPrice={lastestGoldPrice}
         />

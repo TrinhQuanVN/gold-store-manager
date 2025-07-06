@@ -6,25 +6,27 @@ import {
   UseFormRegister,
   UseFormSetValue,
   UseFormWatch,
+  useWatch,
 } from "react-hook-form";
 import { Button, Flex, TextField, Text, Grid } from "@radix-ui/themes";
-import { RawTransactionDataForm } from "@/app/validationSchemas";
+import {
+  TransactionInputDataForm,
+  TransactionOutputDataForm,
+} from "@/app/validationSchemas";
 import { TransactionHeader, GoldTransactionDetail, Gold } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { CustomCollapsible, ErrorMessage } from "@/app/components";
 import { FormField } from "./FormField";
-import GoldDetailWatcher from "./GoldDetailWatcher";
 import axios from "axios";
 import GoldDetailRow from "./GoldDetailRow";
+import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 
 interface Props {
-  control: Control<RawTransactionDataForm>;
-  setValue: UseFormSetValue<RawTransactionDataForm>;
-  getValues: UseFormGetValues<RawTransactionDataForm>;
-  register: UseFormRegister<RawTransactionDataForm>;
-  errors: FieldErrors<RawTransactionDataForm>;
+  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
+  setValue: UseFormSetValue<TransactionInputDataForm>;
+  register: UseFormRegister<TransactionInputDataForm>;
+  errors: FieldErrors<TransactionInputDataForm>;
   goldDetails: (GoldTransactionDetail & { gold: Gold })[];
-  watch: UseFormWatch<RawTransactionDataForm>;
   lastestGoldPrice?: number;
 }
 
@@ -33,8 +35,6 @@ const GoldTransactionForm = ({
   register,
   errors,
   setValue,
-  getValues,
-  watch,
   goldDetails,
   lastestGoldPrice,
 }: Props) => {
@@ -42,12 +42,6 @@ const GoldTransactionForm = ({
     control,
     name: "goldDetails",
   });
-
-  const [goldNames, setGoldNames] = useState<Record<number, string>>({});
-
-  const updateGoldName = (index: number, name: string) => {
-    setGoldNames((prev) => ({ ...prev, [index]: name }));
-  };
 
   useEffect(() => {
     if (goldDetails.length > 0) {
@@ -76,8 +70,39 @@ const GoldTransactionForm = ({
     }
   }, []);
 
+  const goldDetailsWatch = useWatch({
+    control,
+    name: "goldDetails",
+  });
+
+  const totalCount =
+    goldDetailsWatch?.filter((row) => row.goldId && row.goldId.trim() !== "")
+      .length ?? 0;
+
+  const totalWeight = goldDetailsWatch?.reduce((sum, row) => {
+    const w = parseFloat(row.weight || "0");
+    return sum + (isNaN(w) ? 0 : w);
+  }, 0);
+
+  const totalDiscount = goldDetailsWatch?.reduce((sum, row) => {
+    const d = parseFloat(row.discount || "0");
+    return sum + (isNaN(d) ? 0 : d);
+  }, 0);
+
+  const totalAmount = goldDetailsWatch?.reduce((sum, row) => {
+    const a = parseFloat(row.amount || "0");
+    return sum + (isNaN(a) ? 0 : a);
+  }, 0);
+
+  const title =
+    totalCount > 0
+      ? `${totalWeight.toLocaleString(
+          "vn-VN"
+        )} chỉ nhẫn tròn = ${totalAmount.toLocaleString("vn-VN")}`
+      : "Nhẫn tròn";
+
   return (
-    <CustomCollapsible title="Nhẫn tròn">
+    <CustomCollapsible title={title}>
       <Flex direction="column" gap="4">
         <Grid columns="7" gap="3" align="center">
           <Text size="2" weight="bold" align="center">
@@ -114,41 +139,12 @@ const GoldTransactionForm = ({
             lastGoldPrice={lastestGoldPrice ?? 0}
           />
         ))}
-        {/* {fields.map((field, index) => (
-          <Grid key={field.id} columns="7" gap="3" align="start">
-            <FormField
-              placeholder="id"
-              registerProps={register(`goldDetails.${index}.goldId`)}
-              error={errors?.goldDetails?.[index]?.goldId?.message}
-            />
-            <FormField
-              placeholder="Tên vàng"
-              readOnly
-              // registerProps={register(`goldDetails.${index}.name`)}
-            />
-            <FormField
-              placeholder="Trọng lượng"
-              registerProps={register(`goldDetails.${index}.weight`)}
-              error={errors?.goldDetails?.[index]?.weight?.message}
-            />
-            <FormField
-              placeholder="Giá"
-              registerProps={register(`goldDetails.${index}.price`)}
-              error={errors?.goldDetails?.[index]?.price?.message}
-            />
-            <FormField
-              placeholder="Giảm giá"
-              registerProps={register(`goldDetails.${index}.discount`)}
-            />
-            <FormField
-              placeholder="Thành tiền"
-              registerProps={register(`goldDetails.${index}.amount`)}
-            />
-            <Button variant="ghost" onClick={() => remove(index)}>
-              X
-            </Button>
-          </Grid>
-        ))} */}
+        <GoldDetailSummaryRow
+          totalCount={totalCount}
+          totalWeight={totalWeight}
+          totalDiscount={totalDiscount}
+          totalAmount={totalAmount}
+        />
 
         <Button
           onClick={() =>

@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+import { transformCurrencyStringToNumber } from "@/utils/";
 // Enum cho loại thanh toán
 export const paymentTypeEnum = z.enum(["cash", "bank"]);
 
@@ -12,20 +12,41 @@ export const rawPaymentAmountSchema = z.object({
 // Chi tiết giao dịch vàng
 export const rawGoldTransactionDetailSchema = z.object({
   id: z.string().optional(),
-  goldId: z.string().min(1, "id không được để trống"),
-  price: z.string().min(1, "Giá không được để trống"),
-  weight: z.string().min(1, "Trọng lượng không được để trống"),
-  discount: z.string().optional(),
-  amount: z.string().min(1, "Thành tiền không được để trống"),
+  goldId: z
+    .string()
+    .min(1, "id không được để trống")
+    .transform(transformCurrencyStringToNumber),
+  price: z
+    .string()
+    .min(1, "Giá không được để trống")
+    .transform(transformCurrencyStringToNumber),
+  weight: z
+    .string()
+    .min(1, "Trọng lượng không được để trống")
+    .transform(transformCurrencyStringToNumber),
+  discount: z.string().transform(transformCurrencyStringToNumber),
+  amount: z
+    .string()
+    .min(1, "Thành tiền không được để trống")
+    .transform(transformCurrencyStringToNumber),
 });
 
 // Chi tiết giao dịch trang sức
 export const rawJewelryTransactionDetailSchema = z.object({
   id: z.string().min(1, "ID không được để trống"),
-  price: z.string().min(1, "Giá không được để trống"),
-  weight: z.string().min(1, "Trọng lượng không được để trống"),
-  discount: z.string().optional(),
-  amount: z.string().min(1, "Thành tiền không được để trống"),
+  price: z
+    .string()
+    .min(1, "Giá không được để trống")
+    .transform(transformCurrencyStringToNumber),
+  weight: z
+    .string()
+    .min(1, "Trọng lượng không được để trống")
+    .transform(transformCurrencyStringToNumber),
+  discount: z.string().transform(transformCurrencyStringToNumber),
+  amount: z
+    .string()
+    .min(1, "Thành tiền không được để trống")
+    .transform(transformCurrencyStringToNumber),
 });
 
 // Schema giao dịch tổng
@@ -44,4 +65,5 @@ export const rawTransactionSchema = z.object({
   //     path: ["goldDetails"], // bạn có thể đặt ở `["jewelryDetails"]` tùy UI
 });
 
-export type RawTransactionDataForm = z.infer<typeof rawTransactionSchema>;
+export type TransactionInputDataForm = z.input<typeof rawTransactionSchema>;
+export type TransactionOutputDataForm = z.output<typeof rawTransactionSchema>;
