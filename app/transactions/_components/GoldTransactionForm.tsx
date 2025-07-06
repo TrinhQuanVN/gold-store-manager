@@ -137,6 +137,7 @@ const GoldTransactionForm = ({
             errors={errors}
             onRemove={() => remove(index)}
             lastGoldPrice={lastestGoldPrice ?? 0}
+            goldDetailsWatch={goldDetailsWatch}
           />
         ))}
         <GoldDetailSummaryRow
@@ -146,19 +147,21 @@ const GoldTransactionForm = ({
           totalAmount={totalAmount}
         />
 
-        <Button
-          onClick={() =>
-            append({
-              goldId: "",
-              weight: "",
-              price: "",
-              discount: "",
-              amount: "",
-            })
-          }
-        >
-          Thêm dòng
-        </Button>
+        <Flex justify="end">
+          <Button
+            onClick={() =>
+              append({
+                goldId: "",
+                weight: "",
+                price: "",
+                discount: "",
+                amount: "",
+              })
+            }
+          >
+            Thêm dòng
+          </Button>
+        </Flex>
       </Flex>
     </CustomCollapsible>
   );
