@@ -34,6 +34,10 @@ export const rawGoldTransactionDetailSchema = z.object({
 // Chi tiết giao dịch trang sức
 export const rawJewelryTransactionDetailSchema = z.object({
   id: z.string().min(1, "ID không được để trống"),
+  jewelryId: z
+    .string()
+    .min(1, "id không được để trống")
+    .transform(transformCurrencyStringToNumber),
   price: z
     .string()
     .min(1, "Giá không được để trống")
@@ -58,8 +62,8 @@ export const rawTransactionSchema = z.object({
   //     .array(rawPaymentAmountSchema)
   //     .min(1, "Phải có ít nhất một phương thức thanh toán"),
   goldDetails: z.array(rawGoldTransactionDetailSchema),
-  //     jewelryDetails: z.array(rawJewelryTransactionDetailSchema),
-  //   })
+  jewelryDetails: z.array(rawJewelryTransactionDetailSchema),
+  // })
   //   .refine((data) => data.goldDetails.length + data.jewelryDetails.length >= 1, {
   //     message: "Cần ít nhất một chi tiết giao dịch (vàng hoặc trang sức)",
   //     path: ["goldDetails"], // bạn có thể đặt ở `["jewelryDetails"]` tùy UI

@@ -171,8 +171,9 @@ model JewelryTransactionDetail {
   jewelryId Int
   jewelry   Jewelry @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
 
-  price  Float
-  amount Float // tổng tiền giao dịch của sản phẩm này
+  price    Float
+  discount Float @default(0) // Giảm giá nếu có
+  amount   Float // tổng tiền giao dịch của sản phẩm này
 
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
