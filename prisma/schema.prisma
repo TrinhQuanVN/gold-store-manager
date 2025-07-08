@@ -201,11 +201,13 @@ model GoldTransactionDetail {
 }
 
 model TransactionHeader {
-  id   Int     @id @default(autoincrement())
-  note String?
-  type Int // 2 xuất hoặc 1 nhập
+  id       Int     @id @default(autoincrement())
+  note     String?
+  isExport Boolean // 2 xuất hoặc 1 nhập
 
-  contactId Int? // Mã liên hệ nếu có
+  paymentMethode PaymentMethode
+
+  contactId Int
   contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   totalAmount Float @default(0) // Tổng số tiền giao dịch
@@ -219,25 +221,13 @@ model TransactionHeader {
   goldTransactionDetails    GoldTransactionDetail[]
 }
 
-model PaymentHeader {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  color       String?   @default("gray") //color for PaymentMethodBadge
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-
-  paymentAmounts PaymentDetail[]
-}
-
 model PaymentDetail {
   id                  Int               @id @default(autoincrement())
   amount              Float // Số tiền thanh toán
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
 
-  paymentHeaderId Int
-  paymentHeader   PaymentHeader @relation(fields: [paymentHeaderId], references: [id], onDelete: Cascade)
+  type PaymentType
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -251,4 +241,15 @@ model GoldPrice {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+}
+
+enum PaymentType {
+  BANK
+  CASH
+}
+
+enum PaymentMethode {
+  BANK
+  CASH
+  CASH_AND_BANK
 }

@@ -15,11 +15,20 @@ export function parseNumberVN(value: string): number {
 export function transformCurrencyStringToNumber(input: string): number {
   if (!input) return 0;
 
-  const cleaned = input
-    .replace(/\./g, "") // Xoá dấu phân cách hàng nghìn (.)
-    .replace(",", "."); // Đổi dấu thập phân từ , → .
+  // Loại bỏ khoảng trắng và ký tự không số/trừ/phẩy/chấm
+  const cleaned = input.replace(/[^\d.,-]/g, "").trim();
 
-  const parsed = parseFloat(cleaned);
+  // Nếu có cả "," và ".", giả định định dạng kiểu `vi-VN`: "10.000,25"
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    const normalized = cleaned.replace(/\./g, "").replace(",", ".");
+    return parseFloat(normalized);
+  }
 
-  return isNaN(parsed) ? 0 : parsed;
+  // Nếu chỉ có "," => cũng là dấu thập phân
+  if (cleaned.includes(",") && !cleaned.includes(".")) {
+    return parseFloat(cleaned.replace(",", "."));
+  }
+
+  // Trường hợp mặc định: chỉ số không có dấu thập phân hoặc đã đúng định dạng
+  return parseFloat(cleaned);
 }

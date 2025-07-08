@@ -20,6 +20,7 @@ import { FormField } from "./FormField";
 import axios from "axios";
 import GoldDetailRow from "./GoldDetailRow";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
+import { RiAddCircleLine } from "react-icons/ri";
 
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
@@ -42,33 +43,6 @@ const GoldTransactionForm = ({
     control,
     name: "goldDetails",
   });
-
-  useEffect(() => {
-    if (goldDetails.length > 0) {
-      // Prefill from edit data
-      goldDetails.forEach((detail) =>
-        append({
-          id: detail.id.toString(),
-          goldId: detail.goldId.toString(),
-          price: detail.price.toString(),
-          weight: detail.weight.toString(),
-          discount: detail.discount.toString(),
-          amount: detail.amount.toString(),
-        })
-      );
-    } else if (fields.length === 0) {
-      // Append 3 empty rows if creating new
-      for (let i = 0; i < 3; i++) {
-        append({
-          goldId: "",
-          price: "",
-          weight: "",
-          discount: "",
-          amount: "",
-        });
-      }
-    }
-  }, []);
 
   const goldDetailsWatch = useWatch({
     control,
@@ -102,7 +76,7 @@ const GoldTransactionForm = ({
       : "Nhẫn tròn";
 
   return (
-    <CustomCollapsible title={title}>
+    <CustomCollapsible title={title} defaultOpen={true}>
       <Flex direction="column" gap="2">
         <Grid
           columns="7"
@@ -135,16 +109,21 @@ const GoldTransactionForm = ({
           </Text>
         </Grid>
         {fields.map((field, index) => (
-          <GoldDetailRow
-            key={field.id}
-            index={index}
-            register={register}
-            setValue={setValue}
-            control={control}
-            errors={errors}
-            onRemove={() => remove(index)}
-            lastGoldPrice={lastestGoldPrice ?? 0}
-          />
+          <Flex direction="column" key={field.id}>
+            <GoldDetailRow
+              key={field.id}
+              index={index}
+              register={register}
+              setValue={setValue}
+              control={control}
+              errors={errors}
+              onRemove={() => remove(index)}
+              lastGoldPrice={lastestGoldPrice ?? 0}
+            />
+            <ErrorMessage>
+              {errors?.goldDetails?.[index]?.goldId?.message}
+            </ErrorMessage>
+          </Flex>
         ))}
         <GoldDetailSummaryRow
           totalCount={totalCount}
@@ -155,17 +134,19 @@ const GoldTransactionForm = ({
 
         <Flex justify="end">
           <Button
+            size="2"
             onClick={() =>
               append({
-                goldId: "",
-                weight: "",
-                price: "",
+                goldId: "1",
+                weight: "1",
+                price: `${lastestGoldPrice}`,
                 discount: "",
-                amount: "",
+                amount: `${lastestGoldPrice}`,
               })
             }
           >
-            Thêm dòng
+            <RiAddCircleLine size="25" />
+            <Text>Thêm</Text>
           </Button>
         </Flex>
       </Flex>

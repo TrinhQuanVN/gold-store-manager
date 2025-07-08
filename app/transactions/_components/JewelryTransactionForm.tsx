@@ -1,30 +1,22 @@
-import {
-  Control,
-  FieldErrors,
-  useFieldArray,
-  UseFormGetValues,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-  useWatch,
-} from "react-hook-form";
-import { Button, Flex, TextField, Text, Grid } from "@radix-ui/themes";
+import { CustomCollapsible, ErrorMessage } from "@/app/components";
 import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
+import { Jewelry, JewelryTransactionDetail } from "@prisma/client";
+import { Button, Flex, Grid, Text } from "@radix-ui/themes";
+import { useEffect } from "react";
 import {
-  TransactionHeader,
-  JewelryTransactionDetail,
-  Gold,
-  Jewelry,
-} from "@prisma/client";
-import { useEffect, useState } from "react";
-import { CustomCollapsible, ErrorMessage } from "@/app/components";
-import { FormField } from "./FormField";
-import axios from "axios";
-import JewelryDetailRow from "./JewelryDetailRow";
+  Control,
+  FieldErrors,
+  useFieldArray,
+  UseFormRegister,
+  UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
+import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
+import JewelryDetailRow from "./JewelryDetailRow";
 
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
@@ -64,36 +56,35 @@ const JewelryTransactionForm = ({
     }
   }, []);
 
-  const jewelryDetailsWatch = useWatch({
-    control,
-    name: "jewelryDetails",
-  });
+  const jewelryDetailsWatch =
+    useWatch({
+      control,
+      name: "jewelryDetails",
+    }) ?? [];
 
-  const totalCount =
-    jewelryDetailsWatch?.filter(
-      (row) => row.jewelryId && row.jewelryId.trim() !== ""
-    ).length ?? 0;
+  const { totalCount, totalWeight, totalDiscount, totalAmount } =
+    jewelryDetailsWatch.reduce(
+      (acc, row) => {
+        const hasJewelry = row.jewelryId?.trim();
+        const weight = parseFloat(row.weight || "0");
+        const discount = parseFloat(row.discount || "0");
+        const amount = parseFloat(row.amount || "0");
 
-  const totalWeight = jewelryDetailsWatch?.reduce((sum, row) => {
-    const w = parseFloat(row.weight || "0");
-    return sum + (isNaN(w) ? 0 : w);
-  }, 0);
+        if (hasJewelry) acc.totalCount += 1;
+        if (!isNaN(weight)) acc.totalWeight += weight;
+        if (!isNaN(discount)) acc.totalDiscount += discount;
+        if (!isNaN(amount)) acc.totalAmount += amount;
 
-  const totalDiscount = jewelryDetailsWatch?.reduce((sum, row) => {
-    const d = parseFloat(row.discount || "0");
-    return sum + (isNaN(d) ? 0 : d);
-  }, 0);
-
-  const totalAmount = jewelryDetailsWatch?.reduce((sum, row) => {
-    const a = parseFloat(row.amount || "0");
-    return sum + (isNaN(a) ? 0 : a);
-  }, 0);
+        return acc;
+      },
+      { totalCount: 0, totalWeight: 0, totalDiscount: 0, totalAmount: 0 }
+    );
 
   const title =
     totalCount > 0
       ? `${totalCount} sản phẩm : ${totalWeight.toLocaleString(
-          "vn-VN"
-        )} chỉ = ${totalAmount.toLocaleString("vn-VN")}`
+          "vi-VN"
+        )} chỉ = ${totalAmount.toLocaleString("vi-VN")}`
       : "Trang sức";
 
   return (
@@ -130,16 +121,28 @@ const JewelryTransactionForm = ({
           </Text>
         </Grid>
         {fields.map((field, index) => (
-          <JewelryDetailRow
-            key={field.id}
-            index={index}
-            register={register}
-            setValue={setValue}
-            control={control}
-            errors={errors}
-            onRemove={() => remove(index)}
-            lastGoldPrice={lastestGoldPrice ?? 0}
-          />
+          <Flex direction="column" key={field.id}>
+            <JewelryDetailRow
+              key={field.id}
+              index={index}
+              register={register}
+              setValue={setValue}
+              control={control}
+              errors={errors}
+              onRemove={() => remove(index)}
+              lastGoldPrice={lastestGoldPrice ?? 0}
+            />
+            <ErrorMessage>
+              {[
+                errors?.jewelryDetails?.[index]?.jewelryId?.message,
+                errors?.jewelryDetails?.[index]?.price?.message,
+                errors?.jewelryDetails?.[index]?.weight?.message,
+                errors?.jewelryDetails?.[index]?.amount?.message,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </ErrorMessage>
+          </Flex>
         ))}
         <GoldDetailSummaryRow
           totalCount={totalCount}
@@ -150,6 +153,7 @@ const JewelryTransactionForm = ({
 
         <Flex justify="end">
           <Button
+            size="2"
             onClick={() =>
               append({
                 jewelryId: "",
@@ -160,7 +164,8 @@ const JewelryTransactionForm = ({
               })
             }
           >
-            Thêm dòng
+            <RiAddCircleLine size="25" />
+            <Text>Thêm</Text>
           </Button>
         </Flex>
       </Flex>

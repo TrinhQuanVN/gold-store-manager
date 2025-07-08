@@ -1,18 +1,26 @@
 "use client";
 
 import { ContactGroupBadge } from "@/app/components";
-import CustomCollapsible from "@/app/components/CustomCollapsible";
+// import CustomCollapsible from "@/app/components/CustomCollapsible";
 import { Contact, ContactGroup } from "@prisma/client";
 import { DataList, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
-import ContactSelect from "./ContactSelect";
-import {
-  Control,
-  Controller,
-  FieldErrors,
-  useController,
-} from "react-hook-form";
-import ErrorMessage from "@/app/components/ErrorMessage";
+import { Control, Controller, useController } from "react-hook-form";
+// import ContactSelect from "./ContactSelect";
+import dynamic from "next/dynamic";
+
+const CustomCollapsible = dynamic(
+  () => import("@/app/components/CustomCollapsible"),
+  {
+    ssr: false,
+    // loading: () => <ContactFormSkeleton />,
+  }
+);
+
+const ContactSelect = dynamic(() => import("./ContactSelect"), {
+  ssr: false,
+  // loading: () => <ContactFormSkeleton />,
+});
 
 interface Props {
   name: string;
@@ -36,6 +44,7 @@ const ContactForm = ({ name, control, contact }: Props) => {
 
   return (
     <CustomCollapsible
+      defaultOpen={true}
       title={
         selected
           ? `Lựa chọn khách hàng: ${selected.name}`
@@ -61,7 +70,9 @@ const ContactForm = ({ name, control, contact }: Props) => {
         {selected && (
           <DataList.Root>
             <DataList.Item>
-              <DataList.Label>Tên khách hàng</DataList.Label>
+              <DataList.Label className="font-bold">
+                Tên khách hàng:
+              </DataList.Label>
               <DataList.Value>
                 <Flex gap="2">
                   <Text>{selected.name}</Text>
@@ -72,35 +83,39 @@ const ContactForm = ({ name, control, contact }: Props) => {
 
             {selected.phone && (
               <DataList.Item>
-                <DataList.Label>SĐT</DataList.Label>
+                <DataList.Label className="font-bold">
+                  Số điện thoại:
+                </DataList.Label>
                 <DataList.Value>{selected.phone}</DataList.Value>
               </DataList.Item>
             )}
 
             {selected.cccd && (
               <DataList.Item>
-                <DataList.Label>CCCD</DataList.Label>
+                <DataList.Label className="font-bold">Căn cước:</DataList.Label>
                 <DataList.Value>{selected.cccd}</DataList.Value>
               </DataList.Item>
             )}
 
             {selected.address && (
               <DataList.Item>
-                <DataList.Label>Địa chỉ</DataList.Label>
+                <DataList.Label className="font-bold">Địa chỉ:</DataList.Label>
                 <DataList.Value>{selected.address}</DataList.Value>
               </DataList.Item>
             )}
 
             {selected.taxcode && (
               <DataList.Item>
-                <DataList.Label>Mã số thuế</DataList.Label>
+                <DataList.Label className="font-bold">
+                  Mã số thuế
+                </DataList.Label>
                 <DataList.Value>{selected.taxcode}</DataList.Value>
               </DataList.Item>
             )}
 
             {selected.note && (
               <DataList.Item>
-                <DataList.Label>Ghi chú</DataList.Label>
+                <DataList.Label className="font-bold">Ghi chú:</DataList.Label>
                 <DataList.Value>{selected.note}</DataList.Value>
               </DataList.Item>
             )}

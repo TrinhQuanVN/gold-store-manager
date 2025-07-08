@@ -1,10 +1,10 @@
 import { Grid, Text } from "@radix-ui/themes";
 
 interface Props {
-  totalCount: number;
-  totalWeight: number;
-  totalDiscount: number;
-  totalAmount: number;
+  totalCount?: number;
+  totalWeight?: number;
+  totalDiscount?: number;
+  totalAmount?: number;
 }
 
 const formatVN = (val: number, digits = 0) =>
@@ -28,24 +28,24 @@ const GoldDetailSummaryRow = ({
         gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
       }}
     >
-      <Text size="2" weight="bold" color="red">
+      <Text size="2" weight="bold" color="indigo">
         Tổng
       </Text>
-      <Text size="2" color="red">
+      <Text size="2" color="indigo">
         {totalCount} sản phẩm
       </Text>
-      <Text size="2" align="right" color="red">
-        {formatVN(totalWeight, 4)}
+      <Text size="2" align="right" color="indigo">
+        {formatVN(totalWeight ?? 0, 4)}
       </Text>
-      <Text size="2" align="right" color="red">
+      <Text size="2" align="right" color="indigo">
         {/* Giá: thường không có tổng */}
         {/* Có thể để trống hoặc dấu `-` */}–
       </Text>
-      <Text size="2" align="right" color="red">
-        {formatVN(totalDiscount, 0)}
+      <Text size="2" align="right" color="indigo">
+        {formatVN(totalDiscount ?? 0, 0)}
       </Text>
-      <Text size="2" align="right" color="red">
-        {formatVN(totalAmount, 0)}
+      <Text size="2" align="right" color="indigo">
+        {formatVN(totalAmount ?? 0, 0)}
       </Text>
       <div /> {/* Cột nút X trống */}
     </Grid>

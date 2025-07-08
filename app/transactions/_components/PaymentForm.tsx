@@ -1,6 +1,122 @@
 "use client";
 
-import { Controller, UseFormRegister, Control } from "react-hook-form";
-import { z } from "zod";
-import { rawTransactionSchema } from "@/app/validationSchemas"; // chỉnh lại path cho phù hợp
-import { TextField, Flex, Text } from "@radix-ui/themes";
+import { CustomCollapsible } from "@/app/components";
+import {
+  TransactionInputDataForm,
+  TransactionOutputDataForm,
+} from "@/app/validationSchemas";
+import { transformCurrencyStringToNumber } from "@/utils";
+import { PaymentDetail } from "@prisma/client";
+import { Flex, Grid } from "@radix-ui/themes";
+import { Label } from "@radix-ui/themes/components/context-menu";
+import { useEffect } from "react";
+import {
+  Control,
+  Controller,
+  UseFormSetValue,
+  UseFormWatch,
+  useWatch,
+} from "react-hook-form";
+import { NumericFormat } from "react-number-format";
+
+interface Props {
+  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
+  watch: UseFormWatch<TransactionInputDataForm>;
+  setValue: UseFormSetValue<TransactionInputDataForm>;
+  paymentDetails?: PaymentDetail[]; // for edit
+}
+
+const PaymentForm = ({ control, watch, setValue, paymentDetails }: Props) => {
+  const amounts = useWatch({ control: control, name: "paymentAmounts" });
+
+  useEffect(() => {
+    const bank = amounts.find((a) => a.type === "BANK");
+    const cash = amounts.find((a) => a.type === "CASH");
+
+    const bankAmount = transformCurrencyStringToNumber(bank?.amount || "0");
+    const cashAmount = transformCurrencyStringToNumber(cash?.amount || "0");
+
+    if (bankAmount > 0 && cashAmount > 0) {
+      setValue("header.paymentMethode", "CASH_AND_BANK");
+    } else if (bankAmount > 0) {
+      setValue("header.paymentMethode", "BANK");
+    } else if (cashAmount > 0) {
+      setValue("header.paymentMethode", "CASH");
+    } else {
+      setValue("header.paymentMethode", "BANK"); // mặc định nếu cả 2 đều = 0
+    }
+  }, [amounts, setValue]);
+
+  const handleChangeAmount = (type: "BANK" | "CASH", value: string) => {
+    const index = amounts.findIndex((item) => item.type === type);
+    if (index >= 0) {
+      const updated = [...amounts];
+      updated[index].amount = value;
+      setValue("paymentAmounts", updated);
+    } else {
+      setValue("paymentAmounts", [...amounts, { type, amount: value }]);
+    }
+  };
+
+  const title = "Thanh toán";
+
+  return (
+    <CustomCollapsible title={title} defaultOpen={true}>
+      <Flex direction="column" gap="3">
+        <Controller
+          name="paymentAmounts"
+          control={control}
+          render={() => (
+            <Grid columns="auto 1fr" gap="3" align="center">
+              <Label className="font-bold">Chuyển khoản:</Label>
+              <NumericFormat
+                placeholder="Chuyển khoản"
+                value={amounts.find((a) => a.type === "BANK")?.amount || ""}
+                thousandSeparator="."
+                decimalSeparator=","
+                allowNegative={false}
+                onValueChange={(values) => {
+                  handleChangeAmount("BANK", values.value);
+                }}
+                customInput={InputWrapper}
+              />
+
+              <Label className="font-bold">Tiền mặt:</Label>
+              <NumericFormat
+                placeholder="Tiền mặt"
+                value={amounts.find((a) => a.type === "CASH")?.amount || ""}
+                thousandSeparator="."
+                decimalSeparator=","
+                allowNegative={false}
+                onValueChange={(values) => {
+                  handleChangeAmount("CASH", values.value);
+                }}
+                customInput={InputWrapper}
+              />
+            </Grid>
+          )}
+        />
+      </Flex>
+    </CustomCollapsible>
+  );
+};
+
+export default PaymentForm;
+
+// Wrapper để format với Radix
+const InputWrapper = ({
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) => {
+  return (
+    <input
+      {...props}
+      style={{
+        padding: "8px 12px",
+        fontSize: "14px",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        width: "100%",
+      }}
+    />
+  );
+};

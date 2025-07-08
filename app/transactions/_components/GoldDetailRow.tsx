@@ -1,17 +1,17 @@
+import { TransactionInputDataForm } from "@/app/validationSchemas";
+import { Gold } from "@prisma/client";
+import { Button, Flex, Grid, Text, TextField } from "@radix-ui/themes";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import {
-  useWatch,
-  UseFormSetValue,
-  UseFormRegister,
+  Controller,
   FieldErrors,
-  UseFormWatch,
+  UseFormRegister,
+  UseFormSetValue,
+  useWatch,
 } from "react-hook-form";
-import { Grid, Button, Flex, Text } from "@radix-ui/themes";
-import { TransactionInputDataForm } from "@/app/validationSchemas";
-import { FormField } from "./FormField";
-import axios from "axios";
-import { NumericFormattedField } from "./NumericFormattedField";
 import { TiDelete } from "react-icons/ti";
+import { NumericFormattedField } from "./NumericFormattedField";
 
 interface Props {
   index: number;
@@ -32,32 +32,26 @@ const GoldDetailRow = ({
   onRemove,
   lastGoldPrice,
 }: Props) => {
-  const [name, setName] = useState("");
+  const [gold, setGold] = useState<Gold | null>(null);
 
   const goldId = useWatch({ control, name: `goldDetails.${index}.goldId` });
   const weight = useWatch({ control, name: `goldDetails.${index}.weight` });
   const price = useWatch({ control, name: `goldDetails.${index}.price` });
   const discount = useWatch({ control, name: `goldDetails.${index}.discount` });
 
-  // const currentRow = (goldDetailsWatch ?? [])[index] ?? {};
-  // const goldId = currentRow.goldId || "";
-  // const weight = currentRow.weight || "0";
-  // const price = currentRow.price || "0";
-  // const discount = currentRow.discount || "0";
-
   useEffect(() => {
     const fetchGold = async () => {
       if (!goldId) {
-        setName("");
+        setGold(null);
         return;
       }
 
       try {
-        const res = await axios.get(`/api/gold/${goldId}`);
-        setName(res.data?.name ?? "Không tìm thấy");
+        const res = await axios.get<Gold>(`/api/gold/${goldId}`);
+        setGold(res.data ?? null);
         setValue(`goldDetails.${index}.price`, lastGoldPrice.toString());
       } catch {
-        setName("Lỗi tải tên");
+        setGold(null);
       }
     };
 
@@ -75,6 +69,22 @@ const GoldDetailRow = ({
     }
   }, [weight, price, discount, setValue, index]);
 
+  const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const id = e.target.value;
+    if (!id) {
+      setGold(null);
+      return;
+    }
+
+    try {
+      const res = await axios.get<Gold>(`/api/gold/${id}`);
+      const jew = res.data;
+      setGold(jew); // ✅ set state — còn effect xử lý riêng bên dưới
+    } catch {
+      setGold(null);
+    }
+  };
+
   return (
     <Grid
       columns="7"
@@ -84,38 +94,52 @@ const GoldDetailRow = ({
         gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
       }}
     >
-      <FormField
-        placeholder="id"
-        registerProps={register(`goldDetails.${index}.goldId`)}
-        error={errors?.goldDetails?.[index]?.goldId?.message}
+      <Controller
+        control={control}
+        name={`goldDetails.${index}.goldId`}
+        render={({ field }) => (
+          <TextField.Root
+            {...field}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={handleBlur}
+            placeholder="id"
+          />
+        )}
       />
-      <FormField placeholder="Tên vàng" value={name} readOnly />
+
+      {gold ? (
+        <TextField.Root value={gold.name} readOnly />
+      ) : (
+        <TextField.Root
+          className="text-red-600"
+          value="Lỗi hoặc không tồn tại"
+          readOnly
+        />
+      )}
+
       <NumericFormattedField
         name={`goldDetails.${index}.weight`}
         placeholder="Trọng lượng"
         control={control}
-        error={errors?.goldDetails?.[index]?.weight?.message}
         maximumFractionDigits={4}
       />
       <NumericFormattedField
         name={`goldDetails.${index}.price`}
         placeholder="Giá"
         control={control}
-        error={errors?.goldDetails?.[index]?.price?.message}
         maximumFractionDigits={0}
       />
       <NumericFormattedField
         name={`goldDetails.${index}.discount`}
         placeholder="Giảm giá"
         control={control}
-        error={errors?.goldDetails?.[index]?.discount?.message}
         maximumFractionDigits={0}
       />
       <NumericFormattedField
         name={`goldDetails.${index}.amount`}
         placeholder="Thành tiền"
         control={control}
-        error={errors?.goldDetails?.[index]?.amount?.message}
         maximumFractionDigits={0}
         disabled
       />

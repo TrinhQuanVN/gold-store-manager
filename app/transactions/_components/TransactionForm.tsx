@@ -12,14 +12,13 @@ import {
   JewelryTransactionDetail,
   JewelryType,
   PaymentDetail,
-  PaymentHeader,
   TransactionHeader,
 } from "@prisma/client";
 import { Button, Callout, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 // import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
@@ -31,8 +30,13 @@ import {
 import { useRouter } from "next/navigation";
 import ContactForm from "./ContactForm";
 import GoldTransactionForm from "./GoldTransactionForm";
-import TransactionTypeSegment from "./TransactionTypeSegment";
 import JewelryTransactionForm from "./JewelryTransactionForm";
+import IsExportSegment from "./IsExportSegment";
+import PaymentForm from "./PaymentForm";
+import { transformCurrencyStringToNumber } from "@/utils";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { vi } from "date-fns/locale";
 
 interface Props {
   transactionHeaderWithRelation?: TransactionHeader & {
@@ -41,55 +45,71 @@ interface Props {
     jewelryDetails?: (JewelryTransactionDetail & {
       jewelry: Jewelry & { category: JewelryCategory; type: JewelryType };
     })[];
-    paymentDetails: (PaymentDetail & { header: PaymentHeader })[];
+    paymentDetails: PaymentDetail[];
   };
 }
 
 const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
-  // const [selectedContact, setSelectedContact] = useState<
-  //   (Contact & { group: ContactGroup }) | null
-  // >(null);
   const router = useRouter();
-  const [isExport, setIsExport] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
   const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
-  // const [goldTransactionDetails, setGoldTransactionDetails] =
-  //   useState<z.infer<typeof rawGoldTransactionSchema>[]>(createEmptyGoldRows);
-
-  // const [jewelryTransactionDetails, setJewelryTransactionDetails] = useState<
-  //   z.infer<typeof rawGoldTransactionSchema>[]
-  // >(createEmptyJewelryRows);
-
   const {
     register,
     handleSubmit,
     control,
     setValue,
-    getValues,
     watch,
     formState: { errors },
   } = useForm<TransactionInputDataForm, any, TransactionOutputDataForm>({
-    mode: "onChange",
+    mode: "onSubmit",
     resolver: zodResolver(rawTransactionSchema),
-    defaultValues: {},
+    defaultValues: {
+      header: {
+        date: transactionHeaderWithRelation?.createdAt ?? new Date(),
+        isExport: transactionHeaderWithRelation?.isExport ?? true,
+        totalAmount:
+          transactionHeaderWithRelation?.totalAmount.toLocaleString("vn-VN"),
+      },
+      paymentAmounts: transactionHeaderWithRelation?.paymentDetails.map(
+        (p) => ({
+          type: p.type,
+          amount: p.amount.toLocaleString("vn-VN"),
+        })
+      ) ?? [
+        { type: "BANK", amount: "0" },
+        { type: "CASH", amount: "0" },
+      ],
+    },
   });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       console.log("...");
       console.log(data);
-      //   setSubmitting(true);
-      //   if (!selectedContact) {
-      //   }
-      //   if (transactionHeaderWithRelation) {
-      //     // await axios.patch("/api/contacts/" + contact.id, data);
-      //   } else {
-      //     // await axios.post("/api/contacts", data);
-      //   }
-      //   router.push("/contacts/list");
-      //   router.refresh();
+      setSubmitting(true);
+
+      if (transactionHeaderWithRelation) {
+        await axios.patch(
+          "/api/transactions/" + transactionHeaderWithRelation.id,
+          data
+        );
+      } else {
+        await axios.post("/api/transactions", data);
+      }
+      router.push("/contacts/list");
+      router.refresh();
     } catch (err) {
+      if (axios.isAxiosError(error)) {
+        const details = error.response?.data?.details;
+        if (Array.isArray(details)) {
+          details.forEach((err) => {
+            console.error(`⛔ ${err.path}: ${err.message}`);
+          });
+        } else {
+          console.error("❌", error.response?.data?.error || "Unknown error");
+        }
+      }
       console.error(err);
       setSubmitting(false);
       setError("Lỗi không xác định đã xảy ra.");
@@ -110,9 +130,59 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     fetchGoldPrice();
   }, []);
 
+  const isExport = watch("header.isExport");
+  const goldDetails = useWatch({
+    control,
+    name: "goldDetails",
+  });
+  const jewelryDetails = useWatch({
+    control,
+    name: "jewelryDetails",
+  });
+
+  useEffect(() => {
+    const sumAmount = (arr?: { amount?: string }[]) =>
+      Array.isArray(arr)
+        ? arr.reduce(
+            (total, item) =>
+              total + transformCurrencyStringToNumber(item.amount ?? "0"),
+            0
+          )
+        : 0;
+
+    const total = sumAmount(goldDetails) + sumAmount(jewelryDetails);
+    setValue("header.totalAmount", total.toString());
+  }, [goldDetails, jewelryDetails, setValue]);
+
+  // const renderErrors = (errObj: any, prefix = ""): string[] => {
+  //   return Object.entries(errObj).flatMap(([key, value]) => {
+  //     const fullKey = prefix ? `${prefix}.${key}` : key;
+
+  //     if (!value) return [];
+
+  //     if (Array.isArray(value)) {
+  //       return value.flatMap((item, index) =>
+  //         typeof item === "object"
+  //           ? renderErrors(item, `${fullKey}[${index}]`)
+  //           : [`${fullKey}[${index}]: ${item}`]
+  //       );
+  //     }
+
+  //     if (typeof value === "object" && "message" in value) {
+  //       return [`${fullKey}: ${value.message}`];
+  //     }
+
+  //     if (typeof value === "object") {
+  //       return renderErrors(value, fullKey);
+  //     }
+
+  //     return [];
+  //   });
+  // };
+
   return (
     <div
-      className={`p-4 rounded-lg ${
+      className={` p-4  ${
         isExport
           ? BackGroundTransactionFormColor.export.bg
           : BackGroundTransactionFormColor.import.bg
@@ -124,24 +194,54 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
             <Callout.Text>{error}</Callout.Text>
           </Callout.Root>
         )}
+
+        {/* {Object.keys(errors).length > 0 && (
+          <Callout.Root color="red" className="mb-4">
+            {renderErrors(errors).map((err, i) => (
+              <Callout.Text key={i}>{err}</Callout.Text>
+            ))}
+          </Callout.Root>
+        )} */}
+
         <Flex justify="center">
-          <TransactionTypeSegment
-            isExport={isExport}
-            setIsExport={setIsExport}
+          <IsExportSegment control={control} />
+        </Flex>
+
+        <Flex justify="center" align="center" style={{ height: "100%" }}>
+          <Controller
+            control={control}
+            name="header.date"
+            render={({ field }) => (
+              <DatePicker
+                locale={vi}
+                dateFormat="dd/MM/yyyy HH:mm:ss"
+                selected={field.value ? new Date(field.value) : null}
+                onChange={(date) => {
+                  if (date) field.onChange(date);
+                }}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={30}
+                timeCaption="Giờ"
+                placeholderText="Chọn ngày giờ"
+                className="w-full border px-3 py-2 rounded"
+              />
+            )}
           />
         </Flex>
+
         <TextField.Root
           placeholder="Ghi chú"
-          {...register("note")}
+          {...register("header.note")}
         ></TextField.Root>
-        <ErrorMessage>{errors.note?.message}</ErrorMessage>
+        <ErrorMessage>{errors.header?.note?.message}</ErrorMessage>
 
         <ContactForm
-          name="contactId"
+          name="header.contactId"
           control={control}
           contact={transactionHeaderWithRelation?.contact}
         />
-        <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
+        <ErrorMessage>{errors.header?.contactId?.message}</ErrorMessage>
 
         <GoldTransactionForm
           control={control}
@@ -162,6 +262,26 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
         />
         <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
 
+        <hr className="my-4 border-indigo-600" />
+
+        <Flex justify="end" className="my-4 border-gray-300">
+          <strong>
+            Tổng tiền:{" "}
+            {Number(watch("header.totalAmount")) > 0
+              ? Number(watch("header.totalAmount")).toLocaleString("vi-VN")
+              : "0"}
+          </strong>
+        </Flex>
+
+        <PaymentForm
+          control={control}
+          watch={watch}
+          setValue={setValue}
+          paymentDetails={transactionHeaderWithRelation?.paymentDetails}
+        />
+
+        <ErrorMessage>{errors.paymentAmounts?.message}</ErrorMessage>
+
         <Button type="submit" disabled={isSubmitting}>
           {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
         </Button>
@@ -169,17 +289,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     </div>
   );
 };
-
-// <GolaTransactionTable
-//   value={goldTransactionDetails}
-//   onChange={setGoldTransactionDetails}
-//   lastestGoldPrice={lastestGoldPrice}
-// />
-// <JewelryTransactionTable
-//   lastestGoldPrice={lastestGoldPrice}
-//   value={jewelryTransactionDetails}
-//   onChange={setJewelryTransactionDetails}
-// />
 
 export default TransactionForm;
 
