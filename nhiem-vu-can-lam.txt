@@ -13,6 +13,7 @@
 11. xử lý việc truyền date vào trong prisma thì sẽ ra GMT +7
 12. chuyển sang progetres database
 
+- tại sao khi get gold name trong gold transaction thì nó lại call api 4 lần
 
 
 13. làm dark mode
@@ -29,7 +30,7 @@
 16. trong transaction form chỉ get được api/jewelry/InStock
 4. collapsible jewelry hay gold transaction table
 1. Cần truyền vào jewelry hay gold transaction table price dựa vào date của transaction. như thế giảm api get goldPrice
-
+6. làm payment cho new transaction
 
 
 

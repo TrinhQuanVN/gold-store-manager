@@ -134,6 +134,7 @@ const GoldTransactionForm = ({
 
         <Flex justify="end">
           <Button
+            type="button"
             size="2"
             onClick={() =>
               append({

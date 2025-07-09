@@ -66,6 +66,8 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     resolver: zodResolver(rawTransactionSchema),
     defaultValues: {
       header: {
+        contactId: transactionHeaderWithRelation?.contactId.toString(),
+        note: transactionHeaderWithRelation?.note ?? undefined,
         date: transactionHeaderWithRelation?.createdAt ?? new Date(),
         isExport: transactionHeaderWithRelation?.isExport ?? true,
         totalAmount:
@@ -97,19 +99,9 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       } else {
         await axios.post("/api/transactions", data);
       }
-      router.push("/contacts/list");
+      router.push("/transactions/list");
       router.refresh();
     } catch (err) {
-      if (axios.isAxiosError(error)) {
-        const details = error.response?.data?.details;
-        if (Array.isArray(details)) {
-          details.forEach((err) => {
-            console.error(`⛔ ${err.path}: ${err.message}`);
-          });
-        } else {
-          console.error("❌", error.response?.data?.error || "Unknown error");
-        }
-      }
       console.error(err);
       setSubmitting(false);
       setError("Lỗi không xác định đã xảy ra.");
@@ -154,32 +146,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     setValue("header.totalAmount", total.toString());
   }, [goldDetails, jewelryDetails, setValue]);
 
-  // const renderErrors = (errObj: any, prefix = ""): string[] => {
-  //   return Object.entries(errObj).flatMap(([key, value]) => {
-  //     const fullKey = prefix ? `${prefix}.${key}` : key;
-
-  //     if (!value) return [];
-
-  //     if (Array.isArray(value)) {
-  //       return value.flatMap((item, index) =>
-  //         typeof item === "object"
-  //           ? renderErrors(item, `${fullKey}[${index}]`)
-  //           : [`${fullKey}[${index}]: ${item}`]
-  //       );
-  //     }
-
-  //     if (typeof value === "object" && "message" in value) {
-  //       return [`${fullKey}: ${value.message}`];
-  //     }
-
-  //     if (typeof value === "object") {
-  //       return renderErrors(value, fullKey);
-  //     }
-
-  //     return [];
-  //   });
-  // };
-
   return (
     <div
       className={` p-4  ${
@@ -194,14 +160,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
             <Callout.Text>{error}</Callout.Text>
           </Callout.Root>
         )}
-
-        {/* {Object.keys(errors).length > 0 && (
-          <Callout.Root color="red" className="mb-4">
-            {renderErrors(errors).map((err, i) => (
-              <Callout.Text key={i}>{err}</Callout.Text>
-            ))}
-          </Callout.Root>
-        )} */}
 
         <Flex justify="center">
           <IsExportSegment control={control} />

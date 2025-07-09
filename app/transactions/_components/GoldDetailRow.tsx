@@ -45,7 +45,7 @@ const GoldDetailRow = ({
         setGold(null);
         return;
       }
-
+      if (gold?.id?.toString() === goldId) return;
       try {
         const res = await axios.get<Gold>(`/api/gold/${goldId}`);
         setGold(res.data ?? null);
@@ -143,7 +143,7 @@ const GoldDetailRow = ({
         maximumFractionDigits={0}
         disabled
       />
-      <Button variant="soft" onClick={onRemove}>
+      <Button variant="soft" onClick={onRemove} type="button">
         <Flex align="center" gap="2">
           <TiDelete size={20} color="red" />
           <Text>Xoá</Text>
