@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Control, Controller, useController } from "react-hook-form";
 // import ContactSelect from "./ContactSelect";
 import dynamic from "next/dynamic";
+import { ContactWithGroup } from "@/types";
 
 const CustomCollapsible = dynamic(
   () => import("@/app/components/CustomCollapsible"),
@@ -25,7 +26,7 @@ const ContactSelect = dynamic(() => import("./ContactSelect"), {
 interface Props {
   name: string;
   control: Control<any>; // hoặc Control<RawTransactionDataForm>
-  contact?: Contact & { group: ContactGroup }; // optional, truyền khi edit
+  contact?: ContactWithGroup | null; // optional, truyền khi edit
 }
 
 const ContactForm = ({ name, control, contact }: Props) => {

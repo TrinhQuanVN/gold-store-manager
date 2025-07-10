@@ -15,6 +15,9 @@
 
 - tại sao khi get gold name trong gold transaction thì nó lại call api 4 lần
 
+- update inStock của jewelery mỗi khi call transaction api có thể dùng trigger trong db progetres
+- hoặc là bỏ inStock đi chỉ truy vấn inStock query thôi
+
 
 13. làm dark mode
 

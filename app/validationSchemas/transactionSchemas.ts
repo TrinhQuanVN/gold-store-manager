@@ -17,8 +17,8 @@ export const rawPaymentAmountSchema = z
 // Chi tiết giao dịch vàng
 export const rawGoldTransactionDetailSchema = z
   .object({
-    id: z.string().optional(),
     goldId: z.string().min(1, "Id trống"),
+    goldName: z.string().optional(),
     price: z.string().min(1, "Giá trống"),
     weight: z.string().min(1, "Trọng lượng trống"),
     discount: z.string().optional(),
@@ -26,7 +26,6 @@ export const rawGoldTransactionDetailSchema = z
   })
   .transform((data) => ({
     ...data,
-    id: parseInt(data.id ?? "-1"),
     goldId: parseInt(data.goldId ?? ""),
     price: transformCurrencyStringToNumber(data.price ?? ""),
     weight: transformCurrencyStringToNumber(data.weight ?? ""),
@@ -37,8 +36,8 @@ export const rawGoldTransactionDetailSchema = z
 // Chi tiết giao dịch trang sức
 export const rawJewelryTransactionDetailSchema = z
   .object({
-    id: z.string().optional(),
     jewelryId: z.string().min(1, "Id trống"),
+    jewelryName: z.string().optional(),
     price: z.string().min(1, "Giá trống"),
     weight: z.string().min(1, "Trọng lượng trống"),
     discount: z.string().optional(),
@@ -46,7 +45,6 @@ export const rawJewelryTransactionDetailSchema = z
   })
   .transform((data) => ({
     ...data,
-    id: parseInt(data.id ?? "-1"),
     jewelryId: parseInt(data.jewelryId ?? ""),
     price: transformCurrencyStringToNumber(data.price ?? ""),
     weight: transformCurrencyStringToNumber(data.weight ?? ""),

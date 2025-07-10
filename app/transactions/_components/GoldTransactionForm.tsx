@@ -1,26 +1,33 @@
-import {
-  Control,
-  FieldErrors,
-  useFieldArray,
-  UseFormGetValues,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-  useWatch,
-} from "react-hook-form";
-import { Button, Flex, TextField, Text, Grid } from "@radix-ui/themes";
+"use client";
+
+import { ErrorMessage } from "@/app/components";
 import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
-import { TransactionHeader, GoldTransactionDetail, Gold } from "@prisma/client";
-import { useEffect, useState } from "react";
-import { CustomCollapsible, ErrorMessage } from "@/app/components";
-import { FormField } from "./FormField";
-import axios from "axios";
+import { Gold, GoldTransactionDetail } from "@prisma/client";
+import { Button, Flex, Grid, Text } from "@radix-ui/themes";
+import dynamic from "next/dynamic";
+import {
+  Control,
+  FieldErrors,
+  useFieldArray,
+  UseFormRegister,
+  UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
+import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailRow from "./GoldDetailRow";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
-import { RiAddCircleLine } from "react-icons/ri";
+import { useEffect, useState } from "react";
+
+const CustomCollapsible = dynamic(
+  () => import("@/app/components/CustomCollapsible"),
+  {
+    ssr: false,
+    // loading: () => <ContactFormSkeleton />,
+  }
+);
 
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
@@ -68,12 +75,18 @@ const GoldTransactionForm = ({
     return sum + (isNaN(a) ? 0 : a);
   }, 0);
 
-  const title =
-    totalCount > 0
-      ? `${totalWeight.toLocaleString(
-          "vn-VN"
-        )} chỉ nhẫn tròn = ${totalAmount.toLocaleString("vn-VN")}`
-      : "Nhẫn tròn";
+  const [title, setTitle] = useState("Nhẫn tròn");
+
+  useEffect(() => {
+    if (totalCount > 0) {
+      const formatted = `${totalWeight.toLocaleString(
+        "vn-VN"
+      )} chỉ nhẫn tròn = ${totalAmount.toLocaleString("vn-VN")}`;
+      setTitle(formatted);
+    } else {
+      setTitle("Nhẫn tròn");
+    }
+  }, [totalCount, totalWeight, totalAmount]);
 
   return (
     <CustomCollapsible title={title} defaultOpen={true}>
@@ -138,11 +151,11 @@ const GoldTransactionForm = ({
             size="2"
             onClick={() =>
               append({
-                goldId: "1",
-                weight: "1",
-                price: `${lastestGoldPrice}`,
+                goldId: "",
+                weight: "",
+                price: "",
                 discount: "",
-                amount: `${lastestGoldPrice}`,
+                amount: "",
               })
             }
           >

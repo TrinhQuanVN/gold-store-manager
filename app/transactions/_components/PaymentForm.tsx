@@ -1,6 +1,5 @@
 "use client";
 
-import { CustomCollapsible } from "@/app/components";
 import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
@@ -9,6 +8,7 @@ import { transformCurrencyStringToNumber } from "@/utils";
 import { PaymentDetail } from "@prisma/client";
 import { Flex, Grid } from "@radix-ui/themes";
 import { Label } from "@radix-ui/themes/components/context-menu";
+import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import {
   Control,
@@ -18,6 +18,14 @@ import {
   useWatch,
 } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
+
+const CustomCollapsible = dynamic(
+  () => import("@/app/components/CustomCollapsible"),
+  {
+    ssr: false,
+    // loading: () => <ContactFormSkeleton />,
+  }
+);
 
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;

@@ -32,31 +32,8 @@ const GoldDetailRow = ({
   onRemove,
   lastGoldPrice,
 }: Props) => {
-  const [gold, setGold] = useState<Gold | null>(null);
-
-  const goldId = useWatch({ control, name: `goldDetails.${index}.goldId` });
-  const weight = useWatch({ control, name: `goldDetails.${index}.weight` });
-  const price = useWatch({ control, name: `goldDetails.${index}.price` });
-  const discount = useWatch({ control, name: `goldDetails.${index}.discount` });
-
-  useEffect(() => {
-    const fetchGold = async () => {
-      if (!goldId) {
-        setGold(null);
-        return;
-      }
-      if (gold?.id?.toString() === goldId) return;
-      try {
-        const res = await axios.get<Gold>(`/api/gold/${goldId}`);
-        setGold(res.data ?? null);
-        setValue(`goldDetails.${index}.price`, lastGoldPrice.toString());
-      } catch {
-        setGold(null);
-      }
-    };
-
-    fetchGold();
-  }, [goldId]);
+  const detail = useWatch({ control, name: `goldDetails.${index}` });
+  const { goldName, weight, price, discount } = detail ?? {};
 
   useEffect(() => {
     const w = parseFloat(weight || "0");
@@ -72,16 +49,22 @@ const GoldDetailRow = ({
   const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const id = e.target.value;
     if (!id) {
-      setGold(null);
+      //trường hợp này sẽ xoá các dòng khác nếu xoá id
+      setValue(`goldDetails.${index}.goldName`, "");
+      setValue(`goldDetails.${index}.price`, "");
+      setValue(`goldDetails.${index}.weight`, "");
+      setValue(`goldDetails.${index}.discount`, "");
+      setValue(`goldDetails.${index}.amount`, "");
       return;
     }
 
     try {
       const res = await axios.get<Gold>(`/api/gold/${id}`);
-      const jew = res.data;
-      setGold(jew); // ✅ set state — còn effect xử lý riêng bên dưới
+      const gold = res.data;
+      setValue(`goldDetails.${index}.goldName`, gold.name);
+      setValue(`goldDetails.${index}.price`, lastGoldPrice.toString());
     } catch {
-      setGold(null);
+      setValue(`goldDetails.${index}.goldName`, "lỗi hoặc không tìm được");
     }
   };
 
@@ -101,6 +84,7 @@ const GoldDetailRow = ({
           <TextField.Root
             {...field}
             value={field.value}
+            // disabled={!firstInit}
             onChange={field.onChange}
             onBlur={handleBlur}
             placeholder="id"
@@ -108,15 +92,11 @@ const GoldDetailRow = ({
         )}
       />
 
-      {gold ? (
-        <TextField.Root value={gold.name} readOnly />
-      ) : (
-        <TextField.Root
-          className="text-red-600"
-          value="Lỗi hoặc không tồn tại"
-          readOnly
-        />
-      )}
+      <TextField.Root
+        value={goldName || "Lỗi hoặc không tồn tại"}
+        readOnly
+        className={!goldName ? "text-red-600" : ""}
+      />
 
       <NumericFormattedField
         name={`goldDetails.${index}.weight`}

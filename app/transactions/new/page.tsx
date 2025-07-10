@@ -22,7 +22,7 @@ const NewTransactionPage = async () => {
       group: true, // Include the ContactGroup relation
     },
   });
-  return <TransactionForm contactWithGroups={contactwithgroups} />;
+  return <TransactionForm />;
 };
 
 export default NewTransactionPage;

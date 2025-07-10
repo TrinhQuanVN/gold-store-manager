@@ -1,25 +1,18 @@
+import { TransactionInputDataForm } from "@/app/validationSchemas";
+import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
+import { Button, Flex, Grid, Text, TextField } from "@radix-ui/themes";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import {
-  useWatch,
-  UseFormSetValue,
-  UseFormRegister,
-  FieldErrors,
-  UseFormWatch,
   Controller,
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  useWatch,
 } from "react-hook-form";
-import { Grid, Button, Flex, Text, TextField } from "@radix-ui/themes";
-import { TransactionInputDataForm } from "@/app/validationSchemas";
-import { FormField } from "./FormField";
-import axios from "axios";
-import { NumericFormattedField } from "./NumericFormattedField";
 import { TiDelete } from "react-icons/ti";
-import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
-import { ErrorMessage, JewelryBadge } from "@/app/components";
-
-type JewelryWithRelation = Jewelry & {
-  category: JewelryCategory;
-  jewelryType: JewelryType;
-};
+import { NumericFormattedField } from "./NumericFormattedField";
+import { JewelryWithRelation } from "@/types";
 
 interface Props {
   index: number;
@@ -40,28 +33,36 @@ const JewelryDetailRow = ({
   onRemove,
   lastGoldPrice,
 }: Props) => {
-  const [jewelry, setJewelry] = useState<JewelryWithRelation | null>(null);
-
-  const weight = useWatch({ control, name: `jewelryDetails.${index}.weight` });
-  const price = useWatch({ control, name: `jewelryDetails.${index}.price` });
-  const discount = useWatch({
-    control,
-    name: `jewelryDetails.${index}.discount`,
-  });
+  const detail = useWatch({ control, name: `jewelryDetails.${index}` });
+  const { jewelryName, weight, price, discount } = detail ?? {};
 
   const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const id = e.target.value;
     if (!id) {
-      setJewelry(null);
+      //trường hợp này sẽ xoá các dòng khác nếu xoá id
+      setValue(`jewelryDetails.${index}.jewelryName`, "");
+      setValue(`jewelryDetails.${index}.price`, "");
+      setValue(`jewelryDetails.${index}.weight`, "");
+      setValue(`jewelryDetails.${index}.discount`, "");
+      setValue(`jewelryDetails.${index}.amount`, "");
       return;
     }
 
     try {
       const res = await axios.get<JewelryWithRelation>(`/api/jewelry/${id}`);
       const jew = res.data;
-      setJewelry(jew); // ✅ set state — còn effect xử lý riêng bên dưới
+      setValue(
+        `jewelryDetails.${index}.jewelryName`,
+        `${jew.name} - ${jew.jewelryType.name} - ${jew.category.name}`
+      );
+      setValue(`jewelryDetails.${index}.weight`, jew.totalWeight.toString());
+
+      setValue(`jewelryDetails.${index}.price`, lastGoldPrice.toString());
     } catch {
-      setJewelry(null);
+      setValue(
+        `jewelryDetails.${index}.jewelryName`,
+        "lỗi hoặc không tìm được"
+      );
     }
   };
 
@@ -99,18 +100,11 @@ const JewelryDetailRow = ({
         )}
       />
 
-      {jewelry ? (
-        <TextField.Root
-          value={`${jewelry.name} - ${jewelry.jewelryType.name} - ${jewelry.category.name}`}
-          readOnly
-        />
-      ) : (
-        <TextField.Root
-          className="text-red-600"
-          value="Lỗi hoặc không tồn tại"
-          disabled
-        />
-      )}
+      <TextField.Root
+        value={jewelryName || "Lỗi hoặc không tồn tại"}
+        readOnly
+        className={!jewelryName ? "text-red-600" : ""}
+      />
 
       <NumericFormattedField
         name={`jewelryDetails.${index}.weight`}

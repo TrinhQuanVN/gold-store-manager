@@ -1,11 +1,13 @@
-import { CustomCollapsible, ErrorMessage } from "@/app/components";
+"use client";
+
+import { ErrorMessage } from "@/app/components";
 import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
 import { Jewelry, JewelryTransactionDetail } from "@prisma/client";
 import { Button, Flex, Grid, Text } from "@radix-ui/themes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Control,
   FieldErrors,
@@ -17,6 +19,15 @@ import {
 import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 import JewelryDetailRow from "./JewelryDetailRow";
+import dynamic from "next/dynamic";
+
+const CustomCollapsible = dynamic(
+  () => import("@/app/components/CustomCollapsible"),
+  {
+    ssr: false,
+    // loading: () => <ContactFormSkeleton />,
+  }
+);
 
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
@@ -45,7 +56,6 @@ const JewelryTransactionForm = ({
       // Prefill from edit data
       jewelryDetails.forEach((detail) =>
         append({
-          id: detail.id.toString(),
           jewelryId: detail.jewelryId.toString(),
           weight: detail.jewelry.goldWeight.toString(),
           price: detail.price.toString(),
@@ -80,12 +90,18 @@ const JewelryTransactionForm = ({
       { totalCount: 0, totalWeight: 0, totalDiscount: 0, totalAmount: 0 }
     );
 
-  const title =
-    totalCount > 0
-      ? `${totalCount} sản phẩm : ${totalWeight.toLocaleString(
-          "vi-VN"
-        )} chỉ = ${totalAmount.toLocaleString("vi-VN")}`
-      : "Trang sức";
+  const [title, setTitle] = useState("Trang sức");
+
+  useEffect(() => {
+    if (totalCount > 0) {
+      const formatted = `Trang sức tổng: ${totalWeight.toLocaleString(
+        "vi-VN"
+      )} chỉ = ${totalAmount.toLocaleString("vi-VN")}`;
+      setTitle(formatted);
+    } else {
+      setTitle("Trang sức");
+    }
+  }, [totalCount, totalWeight, totalAmount]);
 
   return (
     <CustomCollapsible title={title}>

@@ -37,16 +37,10 @@ import { transformCurrencyStringToNumber } from "@/utils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { vi } from "date-fns/locale";
+import { TransactionHeaderWithRelation } from "@/types";
 
 interface Props {
-  transactionHeaderWithRelation?: TransactionHeader & {
-    contact: Contact & { group: ContactGroup };
-    goldDetails?: (GoldTransactionDetail & { gold: Gold })[];
-    jewelryDetails?: (JewelryTransactionDetail & {
-      jewelry: Jewelry & { category: JewelryCategory; type: JewelryType };
-    })[];
-    paymentDetails: PaymentDetail[];
-  };
+  transactionHeaderWithRelation?: TransactionHeaderWithRelation;
 }
 
 const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
@@ -66,28 +60,46 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     resolver: zodResolver(rawTransactionSchema),
     defaultValues: {
       header: {
-        contactId: transactionHeaderWithRelation?.contactId.toString(),
-        note: transactionHeaderWithRelation?.note ?? undefined,
+        contactId: transactionHeaderWithRelation?.contactId?.toString() ?? "",
+        note: transactionHeaderWithRelation?.note ?? "",
         date: transactionHeaderWithRelation?.createdAt ?? new Date(),
         isExport: transactionHeaderWithRelation?.isExport ?? true,
         totalAmount:
-          transactionHeaderWithRelation?.totalAmount.toLocaleString("vn-VN"),
+          transactionHeaderWithRelation?.totalAmount?.toString() ?? "0",
+        paymentMethode: transactionHeaderWithRelation?.paymentMethode ?? "BANK",
       },
-      paymentAmounts: transactionHeaderWithRelation?.paymentDetails.map(
+      paymentAmounts: transactionHeaderWithRelation?.paymentAmounts.map(
         (p) => ({
           type: p.type,
-          amount: p.amount.toLocaleString("vn-VN"),
+          amount: p.amount.toString(),
         })
       ) ?? [
         { type: "BANK", amount: "0" },
         { type: "CASH", amount: "0" },
       ],
+      goldDetails:
+        transactionHeaderWithRelation?.goldTransactionDetails.map((g) => ({
+          goldId: g.goldId.toString(),
+          goldName: g.gold.name,
+          price: g.price.toString(),
+          weight: g.weight.toString(),
+          discount: g.discount?.toString() ?? "0",
+          amount: g.amount.toString(),
+        })) ?? [],
+      jewelryDetails:
+        transactionHeaderWithRelation?.jewelryTransactionDetails.map((j) => ({
+          jewelryId: j.jewelryId.toString(),
+          jewelryName: `${j.jewelry.name} - ${j.jewelry.jewelryType.name} - ${j.jewelry.category.name}`,
+          price: j.price.toString(),
+          weight: j.jewelry.totalWeight.toString(),
+          discount: j.discount?.toString() ?? "0",
+          amount: j.amount.toString(),
+        })) ?? [],
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log("...");
       console.log(data);
       setSubmitting(true);
 
@@ -206,7 +218,9 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           register={register}
           errors={errors}
           setValue={setValue}
-          goldDetails={transactionHeaderWithRelation?.goldDetails ?? []}
+          goldDetails={
+            transactionHeaderWithRelation?.goldTransactionDetails ?? []
+          }
           lastestGoldPrice={lastestGoldPrice}
         />
 
@@ -215,7 +229,9 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           register={register}
           errors={errors}
           setValue={setValue}
-          jewelryDetails={transactionHeaderWithRelation?.jewelryDetails ?? []}
+          jewelryDetails={
+            transactionHeaderWithRelation?.jewelryTransactionDetails ?? []
+          }
           lastestGoldPrice={lastestGoldPrice}
         />
         <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
@@ -235,13 +251,14 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           control={control}
           watch={watch}
           setValue={setValue}
-          paymentDetails={transactionHeaderWithRelation?.paymentDetails}
+          paymentDetails={transactionHeaderWithRelation?.paymentAmounts}
         />
 
         <ErrorMessage>{errors.paymentAmounts?.message}</ErrorMessage>
 
         <Button type="submit" disabled={isSubmitting}>
-          {0 ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
+          {transactionHeaderWithRelation ? "Cập nhật" : "Tạo mới"}{" "}
+          {isSubmitting && <Spinner />}
         </Button>
       </form>
     </div>

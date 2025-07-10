@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  console.log(transactionHeader);
-
   //tạo gold transaction detail
   if (data.goldDetails && data.goldDetails.length > 0) {
     data.goldDetails.forEach(async (detail) => {
@@ -51,8 +49,8 @@ export async function POST(request: NextRequest) {
           discount: detail.discount,
         },
       });
-      console.log("g: ", g);
     });
+
     //tạo jewelry transaction detail
     if (data.jewelryDetails && data.jewelryDetails.length > 0) {
       data.jewelryDetails.forEach(async (detail) => {
@@ -75,7 +73,6 @@ export async function POST(request: NextRequest) {
             discount: detail.discount,
           },
         });
-        console.log("j: ", j);
       });
     }
 
@@ -90,7 +87,6 @@ export async function POST(request: NextRequest) {
               transactionHeaderId: transactionHeader.id,
             },
           });
-          console.log("p", p);
         }
       });
     }

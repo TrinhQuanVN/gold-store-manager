@@ -2,35 +2,52 @@ import React from "react";
 import { prisma } from "@/prisma/client";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import ContactFormSkeleton from "../../_components/ContactFormSkeleton";
+import TransactionFormSkeleton from "../../_components/TransactionFormSkeleton";
 // import ContactForm from "../../_components/ContactForm";
 
-const ContactForm = dynamic(() => import("../../_components/ContactForm"), {
-  //   ssr: false,
-  loading: () => <ContactFormSkeleton />,
-});
+const TransactionForm = dynamic(
+  () => import("../../_components/TransactionForm"),
+  {
+    // ssr: false,
+    loading: () => <TransactionFormSkeleton />,
+  }
+);
 
 interface Props {
   params: { id: string };
 }
 
-const EditContactPage = async ({ params }: Props) => {
+const EditTransactionPage = async ({ params }: Props) => {
   const _params = await params;
-  const contactgroups = await prisma.contactGroup.findMany();
-  if (!contactgroups || contactgroups.length === 0) {
-    notFound();
-  }
-
-  const contact = await prisma.contact.findUnique({
+  const transaction = await prisma.transactionHeader.findUnique({
     where: { id: parseInt(_params.id) },
     include: {
-      group: true, // Include the ContactGroup relation
+      contact: {
+        include: {
+          group: true,
+        },
+      },
+      goldTransactionDetails: {
+        include: {
+          gold: true,
+        },
+      },
+      jewelryTransactionDetails: {
+        include: {
+          jewelry: {
+            include: {
+              category: true,
+              jewelryType: true,
+            },
+          },
+        },
+      },
+      paymentAmounts: true,
     },
   });
+  if (!transaction) notFound();
 
-  if (!contact) notFound();
-
-  return <ContactForm contact={contact} groups={contactgroups} />;
+  return <TransactionForm transactionHeaderWithRelation={transaction} />;
 };
 
-export default EditContactPage;
+export default EditTransactionPage;
