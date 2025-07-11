@@ -12,16 +12,6 @@ const TransactionForm = dynamic(
 );
 
 const NewTransactionPage = async () => {
-  const contactgroups = await prisma.contactGroup.findMany();
-
-  if (!contactgroups || contactgroups.length === 0) {
-    notFound();
-  }
-  const contactwithgroups = await prisma.contact.findMany({
-    include: {
-      group: true, // Include the ContactGroup relation
-    },
-  });
   return <TransactionForm />;
 };
 

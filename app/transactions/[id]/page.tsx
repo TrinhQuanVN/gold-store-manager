@@ -1,13 +1,10 @@
 import { prisma } from "@/prisma/client";
-import { Box, Flex, Grid } from "@radix-ui/themes";
+import DeleteTransactionButton from "./DeleteTransactionButton";
+import EditTransactionButton from "./EditTransactionButton";
+import { transactionWithRelation } from "@/types";
+import { Grid, Box, Flex } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
-import ContactDetail from "./ContactDetail";
-import DeleteContactButton from "./DeleteContactButton";
-import EditContactButton from "./EditContactButton";
-// import { getServerSession } from "next-auth";
-// import authOptions from "@/app/auth/authOptions";
-// import AssigneeSelect from "./AssigneeSelect";
-// import { cache } from "react";
+import TransactionDetail from "./TransactionDetail";
 
 interface Props {
   params: { id: string };
@@ -17,28 +14,26 @@ interface Props {
 //   prisma.Contact.findUnique({ where: { id: ContactId } })
 // );
 
-const ContactDetailPage = async ({ params }: Props) => {
+const TransactionDetailPage = async ({ params }: Props) => {
   //   const session = await getServerSession(authOptions);
   //   const Contact = await fetchUser(parseInt(params.id));
   const _params = await params;
 
-  const contact = await prisma.contact.findUnique({
+  const transaction = await prisma.transactionHeader.findUnique({
     where: { id: parseInt(_params.id) },
-    include: {
-      group: true, // Include the ContactGroup relation
-    },
+    ...transactionWithRelation,
   });
-  if (!contact) notFound();
+  if (!transaction) notFound();
 
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">
       <Box className="md:col-span-4">
-        <ContactDetail contact={contact} />
+        <TransactionDetail transaction={transaction} />
       </Box>
       <Box>
         <Flex direction="column" gap="4">
-          <EditContactButton ContactId={contact.id} />
-          <DeleteContactButton ContactId={contact.id} />
+          <EditTransactionButton transactionId={transaction.id} />
+          <DeleteTransactionButton transactionId={transaction.id} />
         </Flex>
       </Box>
     </Grid>
@@ -54,4 +49,4 @@ const ContactDetailPage = async ({ params }: Props) => {
 //   };
 // }
 
-export default ContactDetailPage;
+export default TransactionDetailPage;

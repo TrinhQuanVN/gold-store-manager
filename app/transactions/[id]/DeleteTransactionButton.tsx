@@ -6,7 +6,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
+const DeleteTransactionButton = ({
+  transactionId,
+}: {
+  transactionId: number;
+}) => {
   const router = useRouter();
   const [error, setError] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
@@ -14,8 +18,8 @@ const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
   const deleteContact = async () => {
     try {
       setDeleting(true);
-      await axios.delete("/api/contacts/" + ContactId);
-      router.push("/contacts/list");
+      await axios.delete("/api/transactions/" + transactionId);
+      router.push("/transactions/list");
       router.refresh();
     } catch (error) {
       setDeleting(false);
@@ -28,14 +32,14 @@ const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
       <AlertDialog.Root>
         <AlertDialog.Trigger>
           <Button color="red" disabled={isDeleting}>
-            Xoá khách hàng
+            Xoá giao dịch
             {isDeleting && <Spinner />}
           </Button>
         </AlertDialog.Trigger>
         <AlertDialog.Content>
-          <AlertDialog.Title>Xác nhận xoá khách hàng</AlertDialog.Title>
+          <AlertDialog.Title>Xác nhận xoá giao dịch</AlertDialog.Title>
           <AlertDialog.Description>
-            Bạn có chắc chắn muốn xoá khách hàng này không? Hành động này không
+            Bạn có chắc chắn muốn xoá giao dịch này không? Hành động này không
             thể hoàn tác.
           </AlertDialog.Description>
           <Flex mt="4" gap="3" justify="end">
@@ -46,7 +50,7 @@ const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
             </AlertDialog.Cancel>
             <AlertDialog.Action>
               <Button color="red" onClick={deleteContact}>
-                Xoá khách hàng
+                Xoá giao dịch
               </Button>
             </AlertDialog.Action>
           </Flex>
@@ -56,7 +60,7 @@ const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
         <AlertDialog.Content>
           <AlertDialog.Title>Lỗi</AlertDialog.Title>
           <AlertDialog.Description>
-            Khách hàng không thể xoá. Vui lòng thử lại sau.
+            Giao dịch không thể xoá. Vui lòng thử lại sau.
           </AlertDialog.Description>
           <Button
             color="gray"
@@ -72,4 +76,4 @@ const DeleteContactButton = ({ ContactId }: { ContactId: number }) => {
   );
 };
 
-export default DeleteContactButton;
+export default DeleteTransactionButton;
