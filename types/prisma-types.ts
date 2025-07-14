@@ -51,3 +51,24 @@ export const jewelryWithRelation = {
 export type JewelryWithRelation = Prisma.JewelryGetPayload<
   typeof jewelryWithRelation
 >;
+
+export const reportXNTHeaderWithRelation = {
+  include: {
+    taxPayer: true,
+    reportXNTs: {
+      include: {
+        golds: true,
+        jewelries: {
+          include: {
+            category: true,
+            jewelryType: true,
+          },
+        },
+      },
+    },
+  },
+};
+
+export type ReportXNTHeaderWithRelation = Prisma.ReportXNTHeaderGetPayload<
+  typeof reportXNTHeaderWithRelation
+>;

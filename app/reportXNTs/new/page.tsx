@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import ContactFormSkeleton from "../_components/ReportXNTHeaderFormSkeleton";
+import { prisma } from "@/prisma/client";
 
 const ReportHeaderForm = dynamic(
   () => import("../_components/ReportXNTHeaderForm"),
@@ -10,9 +11,9 @@ const ReportHeaderForm = dynamic(
 );
 
 const NewReportHeaderPage = async () => {
-  const taxPayer = [{ id: 1, name: "Người nộp thuế mẫu" }]; // Replace with actual tax payer fetching logic
+  const taxPayers = await prisma.taxPayer.findMany();
 
-  return <ReportHeaderForm taxPayers={taxPayer} />;
+  return <ReportHeaderForm taxPayers={taxPayers} />;
 };
 
 export default NewReportHeaderPage;

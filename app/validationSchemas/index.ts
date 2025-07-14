@@ -1,3 +1,4 @@
+export * from "./reportXNTHeaderSchemas";
 export * from "./transactionSchemas";
 export type * from "./transactionSchemas";
 export type * from "./contactSchemas";

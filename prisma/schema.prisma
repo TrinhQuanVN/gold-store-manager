@@ -91,6 +91,7 @@ model Jewelry {
   size        String?
 
   reportXNTId String?
+  reportXNT   ReportXNT? @relation("ReportXNTJewelry", fields: [reportXNTId], references: [id])
 
   supplierId String? //Mã trang sức của nhà
 
@@ -150,6 +151,9 @@ model ReportXNT {
 
   tonCuoiKyQuantity Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
   tonCuoiKyValue    Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
+
+  golds     Gold[]    @relation("ReportXNTGold")
+  jewelries Jewelry[] @relation("ReportXNTJewelry")
 }
 
 model Gold {
@@ -157,10 +161,12 @@ model Gold {
   name        String
   goldPercent Float  @default(0.0) // Tỷ lệ vàng trong nguyên liệu
 
-  reportXNTId String? // Mã báo cáo XNT nếu có
   description String?
 
   goldTransactionDetails GoldTransactionDetail[]
+
+  reportXNTId String?
+  reportXNT   ReportXNT? @relation("ReportXNTGold", fields: [reportXNTId], references: [id])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt

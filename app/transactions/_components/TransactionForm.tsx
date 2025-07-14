@@ -194,7 +194,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
                 timeIntervals={30}
                 timeCaption="Giờ"
                 placeholderText="Chọn ngày giờ"
-                className="w-full border px-3 py-2 rounded"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             )}
           />

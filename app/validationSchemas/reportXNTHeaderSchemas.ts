@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-// Hàm parse chuỗi dd/MM/yyyy thành Date
-const parseDDMMYYYY = (val: string) => {
-  const [day, month, year] = val.split("/").map(Number);
-  const date = new Date(year, month - 1, day); // tháng bắt đầu từ 0
-  return isNaN(date.getTime()) ? null : date;
-};
-
 export const rawReportXNTHeaderSchema = z.object({
   name: z.string().min(1).max(255),
 
@@ -18,38 +11,18 @@ export const rawReportXNTHeaderSchema = z.object({
 
   taxPayerId: z.string().regex(/^\d+$/, "taxPayerId phải là số"),
 
-  startDate: z
-    .string()
-    .regex(
-      /^\d{2}\/\d{2}\/\d{4}$/,
-      "Ngày bắt đầu phải có định dạng dd/MM/yyyy"
-    ),
+  startDate: z.string().min(1, "không bỏ trống"),
 
-  endDate: z
-    .string()
-    .regex(
-      /^\d{2}\/\d{2}\/\d{4}$/,
-      "Ngày kết thúc phải có định dạng dd/MM/yyyy"
-    ),
+  endDate: z.string().min(1, "không bỏ trống"),
 });
 
-export const reportXNTHeaderSchema = rawReportXNTHeaderSchema
-  .refine(
-    (data) => {
-      const start = parseDDMMYYYY(data.startDate);
-      const end = parseDDMMYYYY(data.endDate);
-      return start && end && start < end;
-    },
-    {
-      message: "Ngày kết thúc phải sau ngày bắt đầu",
-      path: ["endDate"],
-    }
-  )
-  .transform((data) => ({
+export const reportXNTHeaderSchema = rawReportXNTHeaderSchema.transform(
+  (data) => ({
     ...data,
     quarter: parseInt(data.quarter),
     year: parseInt(data.year),
     taxPayerId: parseInt(data.taxPayerId),
-    startDate: parseDDMMYYYY(data.startDate)!,
-    endDate: parseDDMMYYYY(data.endDate)!,
-  }));
+    startDate: new Date(data.startDate)!,
+    endDate: new Date(data.endDate)!,
+  })
+);

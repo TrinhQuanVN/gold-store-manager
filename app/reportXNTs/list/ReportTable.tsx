@@ -1,10 +1,17 @@
-import { ReportXNTHeader } from "@prisma/client";
+import ReportXNTHeaderModel from "./ReportXNTHeaderModel";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 
+export type ReportOrderField =
+  | "name"
+  | "tonDauKy"
+  | "nhap"
+  | "xuat"
+  | "tonCuoiKy";
+
 export interface ReportQuery {
-  orderBy: keyof ReportXNTHeader;
+  orderBy: keyof ReportXNTHeaderModel;
   orderDirection: "asc" | "desc";
   page: string;
   pageSize: string;
@@ -12,19 +19,16 @@ export interface ReportQuery {
 
 interface Props {
   searchParams: ReportQuery;
-  reports: ReportXNTHeader[];
+  reports: ReportXNTHeaderModel[];
 }
 
-const ReportTable = ({ searchParams, reports }: Props) => {
+const ReportHeaderTable = ({ searchParams, reports }: Props) => {
   return (
     <Table.Root variant="surface">
       <Table.Header>
         <Table.Row>
           {columns.map((column) => (
-            <Table.ColumnHeaderCell
-              key={column.value}
-              className={column.className}
-            >
+            <Table.ColumnHeaderCell key={column.value}>
               <NextLink
                 href={{
                   query: {
@@ -51,32 +55,24 @@ const ReportTable = ({ searchParams, reports }: Props) => {
           ))}
         </Table.Row>
       </Table.Header>
+
       <Table.Body>
         {reports.map((report) => (
           <Table.Row key={report.id}>
             <Table.Cell>
-              <Flex direction="column" gap="2" align="start">
-                <Link href={`/Reports/${report.id}`}>
-                  {report.name} quý {report.quarter} năm {report.year}
-                </Link>
-                <Text>
-                  Ngày tạo: {report.createdAt.toLocaleDateString("vn-VN")}
-                </Text>
-              </Flex>
+              <Text>{report.id}</Text>
             </Table.Cell>
             <Table.Cell className="">
-              <Flex direction="column" gap="2">
-                <Text color="grass" weight="medium">
-                  Nhập: {report.nhapValue}
-                </Text>
-                <Text color="tomato" weight="medium">
-                  Xuất: {report.xuatValue}
-                </Text>
-              </Flex>
+              <Text>
+                <Link href={`/reportXNTs/${report.id}`}>{report.name}</Link>
+              </Text>
             </Table.Cell>
-            <Table.Cell className="">{report.tonCuoiKyValue}</Table.Cell>
-            <Table.Cell className="">{report.xuatThucTeValue}</Table.Cell>
-            <Table.Cell className="">{report.thueValue}</Table.Cell>
+            <Table.Cell className="">{report.tonDauKy}</Table.Cell>
+            <Table.Cell className="">{report.nhapTrongKy}</Table.Cell>
+            <Table.Cell className="">{report.xuatTrongKy}</Table.Cell>
+            <Table.Cell className="">{report.tonCuoiKy}</Table.Cell>
+            <Table.Cell className="">{report.xuatThucTe}</Table.Cell>
+            <Table.Cell className="">{report.thue}</Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>
@@ -86,32 +82,17 @@ const ReportTable = ({ searchParams, reports }: Props) => {
 
 const columns: {
   label: string;
-  value: keyof ReportXNTHeader;
-  className?: string;
+  value: keyof ReportXNTHeaderModel;
 }[] = [
-  { label: "Tên báo cáo", value: "startDate" },
-  {
-    label: "Tồn đầu kỳ",
-    value: "tonDauKyValue",
-  },
-  {
-    label: "Nhập/Xuất trong kỳ",
-    value: "nhapValue",
-  },
-  {
-    label: "Tồn cuối kỳ",
-    value: "tonCuoiKyValue",
-  },
-  {
-    label: "Xuất thực tế",
-    value: "xuatThucTeValue",
-  },
-  {
-    label: "Thuế",
-    value: "thueValue",
-  },
+  { label: "Id", value: "id" },
+  { label: "Tên báo cáo", value: "name" },
+  { label: "Tồn đầu kỳ", value: "tonDauKy" },
+  { label: "Nhập trong kỳ", value: "nhapTrongKy" },
+  { label: "Xuất trong kỳ", value: "xuatTrongKy" },
+  { label: "Tồn cuối kỳ", value: "tonCuoiKy" },
+  { label: "Xuất thực tế ", value: "xuatThucTe" },
+  { label: "Thuế", value: "thue" },
 ];
-
 export const columnNames = columns.map((column) => column.value);
 
-export default ReportTable;
+export default ReportHeaderTable;
