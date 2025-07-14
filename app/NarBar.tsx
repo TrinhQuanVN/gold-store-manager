@@ -30,6 +30,7 @@ const NavLinks = () => {
 
   const links = [
     { label: "Dashboard", href: "/" },
+    { label: "Giao dịch", href: "/transactions/list" },
     { label: "Giá vàng", href: "/goldPrices/list" },
     { label: "Xuất/Nhập", href: "/transaction/list" },
     { label: "Trang sức", href: "/jewelry/list" },

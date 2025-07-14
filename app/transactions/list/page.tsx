@@ -3,26 +3,24 @@ import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { Prisma } from "@prisma/client";
 import { Flex } from "@radix-ui/themes";
-import ContactActions from "./ContactActions";
+import TransactionActions from "./TransactionActions";
 import ContactSearchForm from "./ContactSearchForm";
-import ContactTable, { columnNames } from "./ContactTable";
+import TransactionTable, { columnNames } from "./TransactionTable";
 import { ContactSearchQuery } from "./ContactSearchQuery";
+import { transactionWithRelation } from "@/types";
 interface Props {
   searchParams: ContactSearchQuery;
 }
 
-const ContactsPage = async ({ searchParams }: Props) => {
+const TransactionPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
-
-  console.log("columnNames type:", typeof columnNames);
-  console.log("columnNames:", columnNames);
 
   const orderDirection = params.orderDirection === "desc" ? "desc" : "asc";
 
   const page = parseInt(params.page) || 1;
   const pageSize = parseInt(params.pageSize) || 10;
 
-  const where: Prisma.ContactWhereInput = {
+  const where = {
     ...(params.name && {
       OR: [
         { name: { contains: params.name } },
@@ -41,32 +39,30 @@ const ContactsPage = async ({ searchParams }: Props) => {
     }),
   };
 
-  const contacts = await prisma.contact.findMany({
-    where,
+  const transactions = await prisma.transactionHeader.findMany({
+    // where,
     orderBy: columnNames.includes(params.orderBy)
       ? [{ [params.orderBy]: orderDirection }, { createdAt: "desc" }]
       : [{ createdAt: "desc" }],
     skip: (page - 1) * pageSize,
     take: pageSize,
-    include: {
-      group: true,
-    },
+    ...transactionWithRelation,
   });
 
-  const contactCount = await prisma.contact.count({
-    where,
+  const transactionCount = await prisma.transactionHeader.count({
+    // where,
   });
 
   return (
     <Flex direction="column" gap="3">
-      <ContactActions />
-      <ContactSearchForm searchParams={params} /> {/* 👈 Thêm ở đây */}
-      <ContactTable searchParams={params} contacts={contacts} />
+      <TransactionActions />
+      {/* <ContactSearchForm searchParams={params} /> */}
+      <TransactionTable searchParams={params} transactions={transactions} />
       <Flex gap="2">
         <Pagination
           pageSize={pageSize}
           currentPage={page}
-          itemCount={contactCount}
+          itemCount={transactionCount}
         />
       </Flex>
     </Flex>
@@ -80,4 +76,4 @@ export const dynamic = "force-dynamic";
 //   description: "View all project Contacts",
 // };
 
-export default ContactsPage;
+export default TransactionPage;

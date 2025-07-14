@@ -1,13 +1,13 @@
 import { Skeleton } from "@/app/components";
 import { Table } from "@radix-ui/themes";
-import ContactActions from "./ContactActions";
+import TransactionActions from "./TransactionActions";
 
 const LoadingContactPage = () => {
   const contacts = [1, 2, 3, 4, 5];
 
   return (
     <div>
-      <ContactActions />
+      <TransactionActions />
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>

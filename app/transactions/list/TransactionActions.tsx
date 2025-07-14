@@ -1,14 +1,14 @@
 import { Button, Flex } from "@radix-ui/themes";
 import Link from "next/link";
 
-const ContactActions = () => {
+const TransactionActions = () => {
   return (
     <Flex justify="between">
       <Button>
-        <Link href="/contacts/new">Thêm khách hàng</Link>
+        <Link href="/transactions/new">Thêm giao dịch</Link>
       </Button>
     </Flex>
   );
 };
 
-export default ContactActions;
+export default TransactionActions;
