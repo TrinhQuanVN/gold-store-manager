@@ -1,4 +1,4 @@
-import { reportXNTSchema } from "@/app/validationSchemas/reportXNTSchemas";
+import { reportXNTTransferedSchema } from "@/app/validationSchemas/reportXNTSchemas";
 import { prisma } from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Header not found" }, { status: 404 });
   }
   const body = await request.json();
-  const validation = reportXNTSchema.safeParse(body);
+  const validation = reportXNTTransferedSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), {

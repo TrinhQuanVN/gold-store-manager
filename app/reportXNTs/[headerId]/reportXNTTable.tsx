@@ -65,7 +65,9 @@ const ReportXNTTable = ({ searchParams, reports }: Props) => {
           <Table.Row key={r.id}>
             <Table.Cell>{r.id}</Table.Cell>
             <Table.Cell>
-              <Link href={`/reportXNTs/${r.headerId}/${r.id}`}>{r.name}</Link>
+              <Link href={`/reportXNTs/${r.headerId}/report/${r.id}`}>
+                {r.name}
+              </Link>
             </Table.Cell>
             <Table.Cell className="text-right">{r.tonDauKyQuantity}</Table.Cell>
             <Table.Cell className="text-right">{r.tonDauKyValue}</Table.Cell>

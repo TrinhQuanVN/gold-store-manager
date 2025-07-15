@@ -50,3 +50,17 @@ export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({
   ),
   tonCuoiKyValue: transformCurrencyStringToNumber(data.tonCuoiKyValue ?? "0"),
 }));
+
+export const reportXNTTransferedSchema = z.object({
+  headerId: z.number().min(1),
+  id: z.string().min(1),
+  name: z.string().min(1),
+  nhapQuantity: z.number().optional(),
+  nhapValue: z.number().optional(),
+  tonCuoiKyQuantity: z.number().optional(),
+  tonCuoiKyValue: z.number().optional(),
+  tonDauKyQuantity: z.number().optional(),
+  tonDauKyValue: z.number().optional(),
+  xuatQuantity: z.number().optional(),
+  xuatValue: z.number().optional(),
+});
