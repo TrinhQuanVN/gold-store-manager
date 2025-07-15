@@ -1,11 +1,11 @@
 import { reportXNTHeaderSchema } from "@/app/validationSchemas";
+import { reportXNTSchema } from "@/app/validationSchemas/reportXNTSchemas";
 import { prisma } from "@/prisma/client";
-import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { headerId: string } }
 ) {
   const body = await request.json();
   const validation = reportXNTHeaderSchema.safeParse(body);
@@ -19,7 +19,7 @@ export async function PATCH(
 
   const _params = await params;
   const header = await prisma.reportXNTHeader.findUnique({
-    where: { id: parseInt(_params.id) },
+    where: { id: parseInt(_params.headerId) },
   });
   if (!header) {
     return NextResponse.json({ error: "Header not found" }, { status: 404 });
@@ -39,7 +39,7 @@ export async function PATCH(
   }
 
   const updatedHeader = await prisma.reportXNTHeader.update({
-    where: { id: parseInt(_params.id) },
+    where: { id: parseInt(_params.headerId) },
     data: {
       name: data.name ?? header.name,
       taxPayerId: data.taxPayerId ?? header.taxPayerId,
@@ -55,11 +55,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { headerId: string } }
 ) {
   const _params = await params;
   const header = await prisma.reportXNTHeader.findUnique({
-    where: { id: parseInt(_params.id) },
+    where: { id: parseInt(_params.headerId) },
   });
   if (!header) {
     return NextResponse.json(
@@ -68,10 +68,51 @@ export async function DELETE(
     );
   }
   await prisma.reportXNTHeader.delete({
-    where: { id: parseInt(_params.id) },
+    where: { id: parseInt(_params.headerId) },
   });
   return NextResponse.json(
     { message: "header deleted successfully" },
     { status: 200 }
   );
+}
+
+//POST cearate reportXNT
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { headerId: string } }
+) {
+  const _params = await params;
+  const headerId = parseInt(_params.headerId);
+  const body = await request.json();
+  const validation = reportXNTSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), {
+      status: 400,
+    });
+  }
+  const data = validation.data;
+  const header = await prisma.reportXNTHeader.findUnique({
+    where: { id: headerId },
+  });
+  if (!header) {
+    return NextResponse.json({ error: "Invalid taxPayer id" }, { status: 404 });
+  }
+
+  const report = await prisma.reportXNT.create({
+    data: {
+      headerId: headerId,
+      name: data.name,
+      id: data.id,
+      tonDauKyQuantity: data.tonDauKyQuantity,
+      tonDauKyValue: data.tonDauKyValue,
+      nhapQuantity: data.nhapQuantity,
+      nhapValue: data.nhapValue,
+      xuatQuantity: data.xuatQuantity,
+      xuatValue: data.xuatValue,
+      tonCuoiKyQuantity: data.tonCuoiKyQuantity,
+      tonCuoiKyValue: data.tonCuoiKyValue,
+    },
+  });
+
+  return NextResponse.json(report, { status: 201 });
 }

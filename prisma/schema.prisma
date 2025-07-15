@@ -147,7 +147,7 @@ model ReportXNT {
   xuatQuantity Float @default(0)
   xuatValue    Float @default(0) //Xuất trong kỳ tính bằng xuatDonGia * xuatSoLuong
 
-  xuatDonGia Float @default(0) //đơn giá xuất trong kỳ tính bàng (tonDauKyValue + nhapValue) / (tonDauKyQuantity + nhapQuantity)
+  // xuatDonGia Float @default(0) //đơn giá xuất trong kỳ tính bàng (tonDauKyValue + nhapValue) / (tonDauKyQuantity + nhapQuantity)
 
   tonCuoiKyQuantity Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
   tonCuoiKyValue    Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue

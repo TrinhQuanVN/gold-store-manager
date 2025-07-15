@@ -14,7 +14,7 @@ const ReportXNTHeaderForm = dynamic(
 );
 
 interface Props {
-  params: { id: string };
+  params: { headerId: string };
 }
 
 const EditReportXNTHeaderPage = async ({ params }: Props) => {
@@ -25,7 +25,7 @@ const EditReportXNTHeaderPage = async ({ params }: Props) => {
   }
 
   const header = await prisma.reportXNTHeader.findUnique({
-    where: { id: parseInt(_params.id) },
+    where: { id: parseInt(_params.headerId) },
     include: {
       taxPayer: true, // Include the ContactGroup relation
     },

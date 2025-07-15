@@ -28,7 +28,7 @@ const DeleteReportXNTHeaderButton = ({ headerId }: { headerId: number }) => {
       <AlertDialog.Root>
         <AlertDialog.Trigger>
           <Button color="red" disabled={isDeleting}>
-            Xoá báo cáo xuất nhập tồn
+            Xoá báo cáo
             {isDeleting && <Spinner />}
           </Button>
         </AlertDialog.Trigger>

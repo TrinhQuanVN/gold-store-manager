@@ -5,7 +5,7 @@ const ReportAction = () => {
   return (
     <Flex justify="between">
       <Button>
-        <Link href="/reportXNTs/new">Thêm mới báo cáo xuất nhập tồn</Link>
+        <Link href="/reportXNTs/new">Thêm mới báo cáo</Link>
       </Button>
     </Flex>
   );
