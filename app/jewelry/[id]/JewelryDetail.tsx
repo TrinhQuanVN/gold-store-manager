@@ -4,12 +4,14 @@ import { Card, Flex, Text, Heading, DataList } from "@radix-ui/themes";
 import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
 import JewelryBadge from "@/app/components/JewelryBadge";
 import React from "react";
+import {
+  JewelryCategoryNumber,
+  JewelryRelationNumber,
+  JewelryTypeNumber,
+} from "@/prismaRepositories";
 
 interface Props {
-  jewelry: Jewelry & {
-    category: JewelryCategory;
-    jewelryType: JewelryType;
-  };
+  jewelry: JewelryRelationNumber;
 }
 
 const JewelryDetail = ({ jewelry }: Props) => {

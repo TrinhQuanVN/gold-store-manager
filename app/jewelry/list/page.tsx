@@ -4,6 +4,11 @@ import { Flex } from "@radix-ui/themes";
 import JewelryActions from "./JewelryActions";
 import JewelrySearchForm from "./JewelrySearchForm";
 import JewelryTable, { JewelryQuery, columnNames } from "./JewelryTable";
+import {
+  convertJewelryCategoryToNumber,
+  convertJewelryRelationToNumber,
+  convertJewelryTypeToNumber,
+} from "@/prismaRepositories";
 
 interface Props {
   searchParams: JewelryQuery;
@@ -56,6 +61,8 @@ const JewelryPage = async ({ searchParams }: Props) => {
     },
   });
 
+  const convertJewelries = jewelries.map(convertJewelryRelationToNumber);
+
   const [types, categories] = await Promise.all([
     prisma.jewelryType.findMany(),
     prisma.jewelryCategory.findMany(),
@@ -68,10 +75,10 @@ const JewelryPage = async ({ searchParams }: Props) => {
       <JewelryActions />
       <JewelrySearchForm
         searchParams={params}
-        categories={categories}
-        types={types}
+        categories={categories.map(convertJewelryCategoryToNumber)}
+        types={types.map(convertJewelryTypeToNumber)}
       />
-      <JewelryTable searchParams={params} jewelries={jewelries} />
+      <JewelryTable searchParams={params} jewelries={convertJewelries} />
       <Flex gap="2">
         <Pagination
           pageSize={pageSize}

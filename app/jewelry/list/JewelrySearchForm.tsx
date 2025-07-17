@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { JewelryQuery } from "./JewelryTable";
 import { JewelryCategory, JewelryType } from "@prisma/client";
+import { JewelryCategoryNumber, JewelryTypeNumber } from "@/prismaRepositories";
 
 interface Props {
   searchParams: JewelryQuery;
-  categories: JewelryCategory[];
-  types: JewelryType[];
+  categories: JewelryCategoryNumber[];
+  types: JewelryTypeNumber[];
 }
 
 const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
@@ -35,7 +36,7 @@ const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
     const field = formData.get("field")?.toString();
     const value = formData.get("value")?.toString().trim();
     const categoryId = formData.get("categoryId")?.toString();
-    const jewelryTypeId = formData.get("jewelryTypeId")?.toString();
+    const jewelryTypeId = formData.get("typeId")?.toString();
     const inStock = formData.get("inStock") === "on" ? "true" : "false";
 
     if (field && value) {
@@ -44,7 +45,7 @@ const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
     } else {
       // only filter by category & type if not searching
       if (categoryId) params.set("categoryId", categoryId);
-      if (jewelryTypeId) params.set("jewelryTypeId", jewelryTypeId);
+      if (jewelryTypeId) params.set("typeId", jewelryTypeId);
     }
 
     params.set("inStock", inStock);
@@ -97,7 +98,7 @@ const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
             </Select.Root>
 
             <Select.Root
-              name="jewelryTypeId"
+              name="typeId"
               defaultValue={jewelryTypeId}
               onValueChange={setJewelryTypeId}
             >
@@ -112,7 +113,6 @@ const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
             </Select.Root>
           </>
         )}
-        <Checkbox name="inStock" defaultChecked={inStock} /> Tồn kho
         <Button type="submit" disabled={isPending}>
           Tìm kiếm
         </Button>

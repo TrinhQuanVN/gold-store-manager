@@ -3,6 +3,7 @@ import JewelryBadge from "@/app/components/JewelryBadge";
 import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
+import { JewelryRelationNumber } from "@/prismaRepositories";
 
 export interface JewelryQuery {
   orderBy: keyof Jewelry;
@@ -17,10 +18,7 @@ export interface JewelryQuery {
 }
 
 interface Props {
-  jewelries: (Jewelry & {
-    jewelryType: JewelryType;
-    category: JewelryCategory;
-  })[];
+  jewelries: JewelryRelationNumber[];
   searchParams: JewelryQuery;
 }
 
@@ -76,8 +74,8 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
               <Flex direction="column" gap="1">
                 <Link href={`/jewelry/${jewelry.id}`}>{jewelry.name}</Link>
                 <JewelryBadge
-                  category={jewelry.category}
-                  jewelryType={jewelry.jewelryType}
+                  category={jewelry.category!}
+                  jewelryType={jewelry.jewelryType!}
                 />
                 {jewelry.description && <Text>{jewelry.description}</Text>}
               </Flex>
@@ -86,15 +84,11 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
             <Table.Cell>
               <Flex direction="column" gap="2">
                 <Text>
-                  Vàng: {jewelry.goldWeight.toNumber().toLocaleString("vi-VN")}{" "}
-                  chỉ
+                  Vàng: {jewelry.goldWeight.toLocaleString("vi-VN")} chỉ
                 </Text>
+                <Text>Đá: {jewelry.gemWeight.toLocaleString("vi-VN")} chỉ</Text>
                 <Text>
-                  Đá: {jewelry.gemWeight.toNumber().toLocaleString("vi-VN")} chỉ
-                </Text>
-                <Text>
-                  Tổng: {jewelry.totalWeight.toNumber().toLocaleString("vi-VN")}{" "}
-                  chỉ
+                  Tổng: {jewelry.totalWeight.toLocaleString("vi-VN")} chỉ
                 </Text>
               </Flex>
             </Table.Cell>

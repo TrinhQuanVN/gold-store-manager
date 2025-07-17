@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import EditJewelryButton from "./EditJewelryButton";
 import DeleteJewelryButton from "./DeleteJewelryButton";
 import JewelryDetail from "./JewelryDetail";
+import { convertJewelryRelationToNumber } from "@/prismaRepositories";
 
 interface Props {
   params: { id: string };
@@ -21,10 +22,12 @@ const JewelryDetailPage = async ({ params }: Props) => {
 
   if (!jewelry) notFound();
 
+  const convertJewelries = convertJewelryRelationToNumber(jewelry);
+
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">
       <Box className="md:col-span-4">
-        <JewelryDetail jewelry={jewelry} />
+        <JewelryDetail jewelry={convertJewelries} />
       </Box>
       <Box>
         <Flex direction="column" gap="4">

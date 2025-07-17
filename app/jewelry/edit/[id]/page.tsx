@@ -2,6 +2,11 @@ import { prisma } from "@/prisma/client";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 import JewelryFormSkeleton from "../../_components/JewelryFormSkeleton";
+import {
+  convertJewelryCategoryToNumber,
+  convertJewelryToNumber,
+  convertJewelryTypeToNumber,
+} from "@/prismaRepositories";
 
 const JewelryForm = dynamic(() => import("../../_components/JewelryForm"), {
   loading: () => <JewelryFormSkeleton />,
@@ -28,7 +33,11 @@ const EditJewelryPage = async ({ params }: Props) => {
   if (!jewelry) notFound();
 
   return (
-    <JewelryForm jewelry={jewelry} types={types} categories={categories} />
+    <JewelryForm
+      jewelry={convertJewelryToNumber(jewelry)}
+      types={types.map(convertJewelryTypeToNumber)}
+      categories={categories.map(convertJewelryCategoryToNumber)}
+    />
   );
 };
 

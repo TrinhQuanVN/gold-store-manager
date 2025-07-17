@@ -4,6 +4,11 @@ import ErrorMessage from "@/app/components/ErrorMessage";
 import { NumericFormattedField } from "@/app/components/NumericFormattedField";
 import Spinner from "@/app/components/Spinner";
 import { rawJewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
+import {
+  JewelryNumber,
+  JewelryTypeNumber,
+  JewelryCategoryNumber,
+} from "@/prismaRepositories";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
 import {
@@ -25,9 +30,9 @@ import { z } from "zod";
 type JewelryFormData = z.infer<typeof rawJewelrySchema>;
 
 interface Props {
-  jewelry?: Jewelry;
-  types: JewelryType[];
-  categories: JewelryCategory[];
+  jewelry?: JewelryNumber;
+  types: JewelryTypeNumber[];
+  categories: JewelryCategoryNumber[];
 }
 
 const JewelryForm = ({ jewelry, types, categories }: Props) => {

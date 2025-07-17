@@ -1,5 +1,6 @@
 "use client";
 
+import { JewelryCategoryNumber, JewelryTypeNumber } from "@/prismaRepositories";
 import { JewelryCategory, JewelryType } from "@prisma/client";
 import { Badge, Flex } from "@radix-ui/themes";
 
@@ -36,8 +37,8 @@ function isBadgeColor(value: string | null | undefined): value is BadgeColor {
 }
 
 interface Props {
-  jewelryType: JewelryType;
-  category: JewelryCategory;
+  jewelryType: JewelryTypeNumber;
+  category: JewelryCategoryNumber;
 }
 
 const JewelryBadge = ({ jewelryType, category }: Props) => {
