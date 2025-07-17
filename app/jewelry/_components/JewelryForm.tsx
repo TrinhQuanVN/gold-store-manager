@@ -1,6 +1,7 @@
 "use client";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
+import { NumericFormattedField } from "@/app/components/NumericFormattedField";
 import Spinner from "@/app/components/Spinner";
 import { rawJewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,10 +10,12 @@ import {
   Button,
   Checkbox,
   Flex,
+  Grid,
   Select,
   TextArea,
   TextField,
 } from "@radix-ui/themes";
+import { Label } from "@radix-ui/themes/components/context-menu";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -46,8 +49,7 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
       totalWeight: jewelry?.totalWeight?.toString() ?? "",
       supplierId: jewelry?.supplierId?.toString() ?? "",
       categoryId: jewelry?.categoryId?.toString(),
-      jewelryTypeId: jewelry?.jewelryTypeId?.toString(),
-      inStock: jewelry?.inStock ? "true" : "false",
+      jewelryTypeId: jewelry?.typeId?.toString(),
     },
   });
 
@@ -71,90 +73,104 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4 max-w-xl">
       {error && <ErrorMessage>{error}</ErrorMessage>}
+      <Grid columns="repeat(2, 1fr)" gap="4" align="center">
+        <Label className="font-bold">Tên</Label>
 
-      <TextField.Root placeholder="Tên" {...register("name")} />
-      <ErrorMessage>{errors.name?.message}</ErrorMessage>
+        <Flex direction="column">
+          <TextField.Root placeholder="Tên" {...register("name")} />
+          <ErrorMessage>{errors.name?.message}</ErrorMessage>
+        </Flex>
 
-      <TextField.Root
-        placeholder="Trọng lượng vàng (chỉ)"
-        {...register("goldWeight")}
-      />
-      <ErrorMessage>{errors.goldWeight?.message}</ErrorMessage>
+        <Label>Trọng lượng vàng (chỉ)</Label>
+        <NumericFormattedField
+          name="goldWeight"
+          control={control}
+          placeholder="Trọng lượng vàng (chỉ)"
+          error={errors.goldWeight?.message}
+          maximumFractionDigits={4}
+        />
 
-      <Controller
-        name="jewelryTypeId"
-        control={control}
-        render={({ field }) => (
-          <Select.Root value={field.value} onValueChange={field.onChange}>
-            <Select.Trigger placeholder="Loại vàng" />
-            <Select.Content>
-              {types.map((t) => (
-                <Select.Item key={t.id} value={t.id.toString()}>
-                  {t.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        )}
-      />
-      <ErrorMessage>{errors.jewelryTypeId?.message}</ErrorMessage>
+        <Label>Trọng lượng đá (chỉ)</Label>
+        <NumericFormattedField
+          name="gemWeight"
+          control={control}
+          placeholder="Trọng lượng đá quý"
+          error={errors.gemWeight?.message}
+          maximumFractionDigits={4}
+        />
 
-      <Controller
-        name="categoryId"
-        control={control}
-        render={({ field }) => (
-          <Select.Root value={field.value} onValueChange={field.onChange}>
-            <Select.Trigger placeholder="Loại trang sức" />
-            <Select.Content>
-              {categories.map((c) => (
-                <Select.Item key={c.id} value={c.id.toString()}>
-                  {c.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        )}
-      />
-      <ErrorMessage>{errors.categoryId?.message}</ErrorMessage>
+        <Label>Trọng lượng tổng</Label>
+        <NumericFormattedField
+          name="totalWeight"
+          control={control}
+          placeholder="Tổng trọng lượng"
+          error={errors.totalWeight?.message}
+          maximumFractionDigits={4}
+        />
 
-      <TextField.Root placeholder="Tên đá quý" {...register("gemName")} />
-      <TextField.Root
-        placeholder="Trọng lượng đá quý"
-        {...register("gemWeight")}
-      />
-      <ErrorMessage>{errors.gemWeight?.message}</ErrorMessage>
+        <Label>Loại vàng</Label>
+        <Flex direction="column">
+          <Controller
+            name="jewelryTypeId"
+            control={control}
+            render={({ field }) => (
+              <Select.Root value={field.value} onValueChange={field.onChange}>
+                <Select.Trigger placeholder="Loại vàng" />
+                <Select.Content>
+                  {types.map((t) => (
+                    <Select.Item key={t.id} value={t.id.toString()}>
+                      {t.name}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            )}
+          />
+          <ErrorMessage>{errors.jewelryTypeId?.message}</ErrorMessage>
+        </Flex>
 
-      <TextField.Root
-        placeholder="Tổng trọng lượng"
-        {...register("totalWeight")}
-      />
-      <ErrorMessage>{errors.totalWeight?.message}</ErrorMessage>
+        <Label>Loại trang sức</Label>
+        <Flex direction="column">
+          <Controller
+            name="categoryId"
+            control={control}
+            render={({ field }) => (
+              <Select.Root value={field.value} onValueChange={field.onChange}>
+                <Select.Trigger placeholder="Loại trang sức" />
+                <Select.Content>
+                  {categories.map((c) => (
+                    <Select.Item key={c.id} value={c.id.toString()}>
+                      {c.name}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            )}
+          />
+          <ErrorMessage>{errors.categoryId?.message}</ErrorMessage>
+        </Flex>
 
-      <TextField.Root
-        placeholder="Mã báo cáo XNT"
-        {...register("reportXNTId")}
-      />
-      <TextField.Root placeholder="Mã của nhà " {...register("supplierId")} />
-      <TextField.Root placeholder="Xuất xứ" {...register("madeIn")} />
-      <TextField.Root placeholder="Kích thước" {...register("size")} />
-      <TextArea placeholder="Ghi chú" {...register("description")} />
+        <Label>Tên đá quý</Label>
+        <TextField.Root placeholder="Tên đá quý" {...register("gemName")} />
 
-      <Controller
-        name="inStock"
-        control={control}
-        render={({ field }) => (
-          <Flex align="center" gap="2">
-            <Checkbox
-              checked={field.value === "true"}
-              onCheckedChange={(checked) =>
-                field.onChange(checked ? "true" : "false")
-              }
-            />
-            <label>Còn trong kho</label>
-          </Flex>
-        )}
-      />
+        <Label>Mã báo cáo XNT</Label>
+        <TextField.Root
+          placeholder="Mã báo cáo XNT"
+          {...register("reportXNTId")}
+        />
 
+        <Label>Mã của nhà</Label>
+        <TextField.Root placeholder="Mã của nhà " {...register("supplierId")} />
+
+        <Label>Xuất xứ</Label>
+        <TextField.Root placeholder="Xuất xứ" {...register("madeIn")} />
+
+        <Label>Kích thước</Label>
+        <TextField.Root placeholder="Kích thước" {...register("size")} />
+
+        <Label>Ghi chú</Label>
+        <TextArea placeholder="Ghi chú" {...register("description")} />
+      </Grid>
       <Button type="submit" disabled={isSubmitting}>
         {jewelry ? "Cập nhật trang sức" : "Tạo mới"}{" "}
         {isSubmitting && <Spinner />}

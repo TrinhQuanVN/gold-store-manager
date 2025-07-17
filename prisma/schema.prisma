@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
 generator client {
   provider = "prisma-client-js"
   //output   = "../app/generated/prisma"
@@ -14,9 +15,14 @@ generator client {
 //   url      = env("DATABASE_URL")
 // }
 
+// datasource db {
+//   provider = "sqlite"
+//   url      = "file:./dev.db"
+// }
+
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model ContactGroup {
@@ -32,8 +38,10 @@ model ContactGroup {
 
 model Contact {
   id           Int          @id @default(autoincrement())
+
   groupId      Int          @default(1) // Default to group with id 1
   group        ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
   name         String
   unaccentName String
   address      String?
@@ -51,7 +59,7 @@ model Contact {
 model JewelryType {
   id          Int       @id @default(autoincrement())
   name        String
-  goldPercent Float     @default(0.0) // Gold percentage for the type
+  goldPercent Decimal     @default(0.0) @db.Decimal(4, 2) // Gold percentage for the type
   description String?
   color       String?   @default("gray") //color for GoldKaraBadge
   createdAt   DateTime  @default(now())
@@ -74,17 +82,17 @@ model JewelryCategory {
 model Jewelry {
   id         Int     @id @default(autoincrement())
   name       String
-  goldWeight Float
-  inStock    Boolean @default(true)
+
+  goldWeight Decimal @default(0) @db.Decimal(6, 4)
+  gemWeight   Decimal   @default(0) @db.Decimal(6, 4)
+  totalWeight Decimal   @default(0) @db.Decimal(6, 4)
 
   categoryId    Int
   category      JewelryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  jewelryTypeId Int
-  jewelryType   JewelryType     @relation(fields: [jewelryTypeId], references: [id], onDelete: Cascade)
+  typeId Int
+  jewelryType   JewelryType     @relation(fields: [typeId], references: [id], onDelete: Cascade)
 
-  gemWeight   Float   @default(0)
-  totalWeight Float   @default(0)
-  gemName     String?
+  gemName     String? 
 
   description String?
   madeIn      String? @default("Việt Nam") // Default to "Việt Nam"
@@ -138,19 +146,20 @@ model ReportXNT {
 
   name             String
   unit             String? @default("chỉ")
-  tonDauKyQuantity Float   @default(0)
-  tonDauKyValue    Float   @default(0)
 
-  nhapQuantity Float @default(0)
-  nhapValue    Float @default(0)
+  tonDauKyQuantity Decimal   @default(0) @db.Decimal(9, 4)
+  tonDauKyValue    Decimal   @default(0) @db.Decimal(13, 2)
 
-  xuatQuantity Float @default(0)
-  xuatValue    Float @default(0) //Xuất trong kỳ tính bằng xuatDonGia * xuatSoLuong
+  nhapQuantity Decimal @default(0) @db.Decimal(9, 4)
+  nhapValue    Decimal @default(0) @db.Decimal(13, 2)
+
+  xuatQuantity Decimal @default(0) @db.Decimal(9, 4)
+  xuatValue    Decimal @default(0) @db.Decimal(13, 2) //Xuất trong kỳ tính bằng xuatDonGia * xuatSoLuong
 
   // xuatDonGia Float @default(0) //đơn giá xuất trong kỳ tính bàng (tonDauKyValue + nhapValue) / (tonDauKyQuantity + nhapQuantity)
 
-  tonCuoiKyQuantity Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
-  tonCuoiKyValue    Float @default(0) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
+  tonCuoiKyQuantity Decimal @default(0) @db.Decimal(9, 4) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
+  tonCuoiKyValue    Decimal @default(0) @db.Decimal(13, 2) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
 
   golds     Gold[]    @relation("ReportXNTGold")
   jewelries Jewelry[] @relation("ReportXNTJewelry")
@@ -159,7 +168,7 @@ model ReportXNT {
 model Gold {
   id          Int    @id @default(autoincrement())
   name        String
-  goldPercent Float  @default(0.0) // Tỷ lệ vàng trong nguyên liệu
+  goldPercent Decimal  @default(0.0) @db.Decimal(4,2) // Tỷ lệ vàng trong nguyên liệu
 
   description String?
 
@@ -177,9 +186,9 @@ model JewelryTransactionDetail {
   jewelryId Int
   jewelry   Jewelry @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
 
-  price    Float
-  discount Float @default(0) // Giảm giá nếu có
-  amount   Float // tổng tiền giao dịch của sản phẩm này
+  price    Decimal @default(0) @db.Decimal(8,0)
+  discount Decimal @default(0) @db.Decimal(8,0) // Giảm giá nếu có
+  amount   Decimal @default(0) @db.Decimal(11,0) // tổng tiền giao dịch của sản phẩm này
 
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
@@ -193,11 +202,11 @@ model GoldTransactionDetail {
   goldId Int
   gold   Gold @relation(fields: [goldId], references: [id], onDelete: Cascade)
 
-  price  Float
-  weight Float // Trọng lượng vàng giao dịch
+  price  Decimal @default(0) @db.Decimal(8,0)
+  weight Decimal @default(0) @db.Decimal(8,4)// Trọng lượng vàng giao dịch
 
-  discount Float @default(0) // Giảm giá nếu có
-  amount   Float
+  discount Decimal @default(0) @db.Decimal(8,0) // Giảm giá nếu có
+  amount   Decimal @db.Decimal(11,0)
 
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
@@ -209,14 +218,14 @@ model GoldTransactionDetail {
 model TransactionHeader {
   id       Int     @id @default(autoincrement())
   note     String?
-  isExport Boolean // 2 xuất hoặc 1 nhập
+  isExport Boolean
 
   paymentMethode PaymentMethode
 
   contactId Int
   contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
-  totalAmount Float @default(0) // Tổng số tiền giao dịch
+  totalAmount Decimal @default(0) @db.Decimal(11,0) // Tổng số tiền giao dịch
 
   paymentAmounts PaymentDetail[]
 
@@ -229,7 +238,7 @@ model TransactionHeader {
 
 model PaymentDetail {
   id                  Int               @id @default(autoincrement())
-  amount              Float // Số tiền thanh toán
+  amount              Decimal @db.Decimal(11,0) // Số tiền thanh toán
   transactionHeaderId Int
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
 
@@ -242,8 +251,8 @@ model PaymentDetail {
 model GoldPrice {
   id   Int    @id @default(autoincrement())
   name String // Tên của giá vàng, ví dụ: "Giá vàng SJC", "Giá vàng 9999"
-  buy  Float // Giá vàng mua vào
-  sell Float // Giá vàng bán ra
+  buy  Decimal @db.Decimal(8,0) // Giá vàng mua vào 99.999.999
+  sell Decimal @db.Decimal(8,0) // Giá vàng bán ra
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt

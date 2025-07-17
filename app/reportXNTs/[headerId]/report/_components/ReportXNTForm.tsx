@@ -6,6 +6,7 @@ import {
   rawReportXNTSchema,
   reportXNTSchema,
 } from "@/app/validationSchemas/reportXNTSchemas";
+import { ReportXNTNumber } from "@/prismaRepositories";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReportXNT } from "@prisma/client";
 import { Button, Callout, DataList, TextField } from "@radix-ui/themes";
@@ -17,7 +18,7 @@ import { z } from "zod";
 
 interface Props {
   headerId: number;
-  reportXNT?: ReportXNT;
+  reportXNT?: ReportXNTNumber;
 }
 
 const ReportXNTForm = ({ headerId, reportXNT }: Props) => {
@@ -29,10 +30,13 @@ const ReportXNTForm = ({ headerId, reportXNT }: Props) => {
     handleSubmit,
     control,
     register,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<z.infer<typeof rawReportXNTSchema>>({
     resolver: zodResolver(rawReportXNTSchema),
     defaultValues: {
+      id: reportXNT?.id,
       headerId: reportXNT?.headerId.toString() ?? headerId.toString(),
       name: reportXNT?.name ?? "",
       unit: reportXNT?.unit ?? "chỉ",
@@ -70,6 +74,14 @@ const ReportXNTForm = ({ headerId, reportXNT }: Props) => {
       setSubmitting(false);
     }
   });
+
+  // const tonDauKyQuantity = watch("tonDauKyQuantity");
+  // const nhapQuantity = watch("nhapQuantity");
+  // const xuatQuantity = watch("xuatQuantity");
+
+  // const tonDauKyValue = watch("tonDauKyValue");
+  // const nhapValue = watch("nhapValue");
+  // const xuatValue = watch("xuatValue");
 
   return (
     <form onSubmit={onSubmit} className="max-w-xl space-y-4">

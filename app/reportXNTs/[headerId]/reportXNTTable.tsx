@@ -4,6 +4,7 @@ import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { ReportXNT } from "@prisma/client";
+import { ReportXNTNumber } from "@/prismaRepositories";
 
 export type ReportXNTOrderField = keyof ReportXNT;
 
@@ -16,7 +17,7 @@ export interface ReportXNTQuery {
 
 interface Props {
   searchParams: ReportXNTQuery;
-  reports: ReportXNT[];
+  reports: ReportXNTNumber[];
 }
 
 const ReportXNTTable = ({ searchParams, reports }: Props) => {
@@ -69,16 +70,54 @@ const ReportXNTTable = ({ searchParams, reports }: Props) => {
                 {r.name}
               </Link>
             </Table.Cell>
-            <Table.Cell className="text-right">{r.tonDauKyQuantity}</Table.Cell>
-            <Table.Cell className="text-right">{r.tonDauKyValue}</Table.Cell>
-            <Table.Cell className="text-right">{r.nhapQuantity}</Table.Cell>
-            <Table.Cell className="text-right">{r.nhapValue}</Table.Cell>
-            <Table.Cell className="text-right">{r.xuatQuantity}</Table.Cell>
-            <Table.Cell className="text-right">{r.xuatValue}</Table.Cell>
             <Table.Cell className="text-right">
-              {r.tonCuoiKyQuantity}
+              {r.tonDauKyQuantity.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4,
+              })}
             </Table.Cell>
-            <Table.Cell className="text-right">{r.tonCuoiKyValue}</Table.Cell>
+            <Table.Cell className="text-right">
+              {r.tonDauKyValue.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.nhapQuantity.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.nhapValue.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.xuatQuantity.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.xuatValue.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.tonCuoiKyQuantity.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4,
+              })}
+            </Table.Cell>
+            <Table.Cell className="text-right">
+              {r.tonCuoiKyValue.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>

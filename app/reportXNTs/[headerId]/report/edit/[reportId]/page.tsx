@@ -3,6 +3,7 @@ import { prisma } from "@/prisma/client";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 import ReportXNTFormSkeleton from "../../_components/ReportXNTFormSkeleton";
+import { convertReportXNTToNumber } from "@/prismaRepositories";
 
 const ReportXNTForm = dynamic(() => import("../../_components/ReportXNTForm"), {
   //   ssr: false,
@@ -28,7 +29,7 @@ const EditReportXNTPage = async ({ params }: Props) => {
 
   return (
     <ReportXNTForm
-      reportXNT={reportXNT}
+      reportXNT={convertReportXNTToNumber(reportXNT)}
       headerId={parseInt(_params.headerId)}
     />
   );

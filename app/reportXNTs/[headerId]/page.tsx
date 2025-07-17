@@ -6,6 +6,7 @@ import EditReportXNTHeaderButton from "./EditReportXNTHeaderButton";
 import DeleteReportXNTHeaderButton from "./DeleteReportXNTHeaderButton";
 import ReportXNTTable from "./reportXNTTable";
 import ReportActions from "./ReportActions";
+import { getReportXNTHeaderWithNumbers } from "@/prismaRepositories";
 // import { getServerSession } from "next-auth";
 // import authOptions from "@/app/auth/authOptions";
 // import AssigneeSelect from "./AssigneeSelect";
@@ -19,13 +20,9 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
   //   const session = await getServerSession(authOptions);
   const _params = await params;
 
-  const header = await prisma.reportXNTHeader.findUnique({
-    where: { id: parseInt(_params.headerId) },
-    include: {
-      taxPayer: true,
-      reportXNTs: true, // Include the ContactGroup relation
-    },
-  });
+  const header = await getReportXNTHeaderWithNumbers(
+    parseInt(_params.headerId)
+  );
   if (!header) notFound();
 
   return (

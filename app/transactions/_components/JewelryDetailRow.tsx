@@ -55,7 +55,7 @@ const JewelryDetailRow = ({
         `jewelryDetails.${index}.jewelryName`,
         `${jew.name} - ${jew.jewelryType.name} - ${jew.category.name}`
       );
-      setValue(`jewelryDetails.${index}.weight`, jew.totalWeight.toString());
+      setValue(`jewelryDetails.${index}.weight`, jew.goldWeight.toString());
 
       setValue(`jewelryDetails.${index}.price`, lastGoldPrice.toString());
     } catch {

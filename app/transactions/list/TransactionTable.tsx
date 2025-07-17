@@ -110,8 +110,6 @@ const TransactionTable = ({
               <Table.Cell>{paymentText}</Table.Cell>
               <Table.Cell>
                 {t.totalAmount.toLocaleString("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
                   maximumFractionDigits: 0,
                 })}
               </Table.Cell>

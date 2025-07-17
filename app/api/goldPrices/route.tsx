@@ -29,25 +29,33 @@ export async function POST(request: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const dateStr = searchParams.get("date"); // ex: "2025-06-20"
+  const dateStr = searchParams.get("date");
+
   if (!dateStr) {
     return NextResponse.json({ error: "Missing date" }, { status: 400 });
   }
+  console.log("date", dateStr);
+  const targetDate = parseISO(dateStr); // ví dụ: 2025-07-01T14:00:00.000Z
 
-  const startDate = parseISO(dateStr); // 2025-06-25T00:00:00.000Z
-  const endDate = addDays(startDate, 1); // 2025-06-26T00:00:00.000Z
+  console.log("targetDate", targetDate);
 
   const goldPrice = await prisma.goldPrice.findFirst({
     where: {
       createdAt: {
-        gte: startDate,
-        lte: endDate,
+        lte: targetDate, // tìm bản ghi gần nhất trước thời điểm này
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: "desc", // mới nhất trước thời điểm truyền vào
     },
   });
 
-  return NextResponse.json(goldPrice, { status: 201 });
+  if (!goldPrice) {
+    return NextResponse.json(
+      { error: "Không tìm thấy giá vàng phù hợp" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json(goldPrice, { status: 200 });
 }

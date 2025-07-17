@@ -66,7 +66,6 @@ export async function PATCH(
       description: data.description ?? jewelry.description,
       madeIn: data.madeIn ?? jewelry.madeIn,
       size: data.size ?? jewelry.size,
-      inStock: data.inStock ? data.inStock : jewelry.inStock,
 
       supplierId: data.supplierId ?? jewelry.supplierId, // ✅ mới thêm
     },

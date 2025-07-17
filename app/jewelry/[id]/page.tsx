@@ -10,8 +10,9 @@ interface Props {
 }
 
 const JewelryDetailPage = async ({ params }: Props) => {
+  const _params = await params;
   const jewelry = await prisma.jewelry.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: parseInt(_params.id) },
     include: {
       category: true,
       jewelryType: true,

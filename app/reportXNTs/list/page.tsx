@@ -35,26 +35,30 @@ const ReportPage = async ({ searchParams }: Props) => {
 
   const reports: ReportXNTHeaderModel[] = headers.map((header) => {
     const tonDauKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + xnt.tonDauKyValue,
+      (sum, xnt) => sum + Number(xnt.tonDauKyValue),
       0
     );
     const nhapTrongKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + xnt.nhapValue,
+      (sum, xnt) => sum + Number(xnt.nhapValue),
       0
     );
     const xuatTrongKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + xnt.xuatValue,
+      (sum, xnt) => sum + Number(xnt.xuatValue),
       0
     );
     const tonCuoiKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + xnt.tonCuoiKyValue,
+      (sum, xnt) => sum + Number(xnt.tonCuoiKyValue),
       0
     );
-    const xuatThucTe = header.reportXNTs.reduce(
-      (sum, xnt) => sum + xnt.xuatQuantity,
-      0
-    );
-    const thue = xuatTrongKy * 0.1; // giả sử VAT 10%
+    // const xuatThucTe = header.reportXNTs.reduce(
+    //   (sum, xnt) => sum + xnt.xuatQuantity,
+    //   0
+    // );
+    const xuatThucTe = 0; //!!TODO
+    const thue =
+      (xuatThucTe - xuatTrongKy) * 0.1 > 0
+        ? (xuatThucTe - xuatTrongKy) * 0.1
+        : 0; // giả sử VAT 10%
 
     return {
       id: header.id,

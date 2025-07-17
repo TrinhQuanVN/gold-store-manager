@@ -76,7 +76,6 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
               <Flex direction="column" gap="1">
                 <Link href={`/jewelry/${jewelry.id}`}>{jewelry.name}</Link>
                 <JewelryBadge
-                  inStock={jewelry.inStock}
                   category={jewelry.category}
                   jewelryType={jewelry.jewelryType}
                 />
@@ -86,9 +85,17 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
 
             <Table.Cell>
               <Flex direction="column" gap="2">
-                <Text>Vàng: {jewelry.goldWeight} chỉ</Text>
-                <Text>Đá: {jewelry.gemWeight} chỉ</Text>
-                <Text>Tổng: {jewelry.totalWeight} chỉ</Text>
+                <Text>
+                  Vàng: {jewelry.goldWeight.toNumber().toLocaleString("vi-VN")}{" "}
+                  chỉ
+                </Text>
+                <Text>
+                  Đá: {jewelry.gemWeight.toNumber().toLocaleString("vi-VN")} chỉ
+                </Text>
+                <Text>
+                  Tổng: {jewelry.totalWeight.toNumber().toLocaleString("vi-VN")}{" "}
+                  chỉ
+                </Text>
               </Flex>
             </Table.Cell>
 

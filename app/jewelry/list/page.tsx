@@ -19,11 +19,7 @@ const JewelryPage = async ({ searchParams }: Props) => {
   const field = params.field;
   const keyword = field ? params.value : undefined;
 
-  const inStock = params.inStock !== "false"; // default true
-
-  let where: any = {
-    inStock,
-  };
+  let where: any = {};
 
   if (field && keyword) {
     where = {
@@ -50,8 +46,8 @@ const JewelryPage = async ({ searchParams }: Props) => {
   const jewelries = await prisma.jewelry.findMany({
     where,
     orderBy: columnNames.includes(params.orderBy)
-      ? [{ [params.orderBy!]: orderDirection }, { createdAt: "desc" }]
-      : [{ createdAt: "desc" }],
+      ? [{ [params.orderBy!]: orderDirection }, { id: "asc" }]
+      : [{ id: "asc" }],
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: {

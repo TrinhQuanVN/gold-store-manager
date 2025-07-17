@@ -1,5 +1,6 @@
 "use client";
 
+import { JewelryCategory, JewelryType } from "@prisma/client";
 import { Badge, Flex } from "@radix-ui/themes";
 
 // Các màu hợp lệ với Radix Badge
@@ -35,14 +36,11 @@ function isBadgeColor(value: string | null | undefined): value is BadgeColor {
 }
 
 interface Props {
-  inStock?: boolean;
-  jewelryType: { name: string; color: string };
-  category: { name: string; color: string };
+  jewelryType: JewelryType;
+  category: JewelryCategory;
 }
 
-const JewelryBadge = ({ inStock, jewelryType, category }: Props) => {
-  const inStockColor: BadgeColor = inStock ? "green" : "red";
-
+const JewelryBadge = ({ jewelryType, category }: Props) => {
   const typeColor: BadgeColor = isBadgeColor(jewelryType.color)
     ? jewelryType.color!
     : "gray";
@@ -53,12 +51,6 @@ const JewelryBadge = ({ inStock, jewelryType, category }: Props) => {
 
   return (
     <Flex gap="2" align="center" wrap="wrap">
-      {inStock !== undefined && (
-        <Badge color={inStockColor} variant="soft" radius="full">
-          {inStock ? "Còn hàng" : "Hết hàng"}
-        </Badge>
-      )}
-
       <Badge color={typeColor} variant="soft" radius="full">
         {jewelryType.name}
       </Badge>

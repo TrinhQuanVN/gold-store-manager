@@ -38,6 +38,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { vi } from "date-fns/locale";
 import { TransactionHeaderWithRelation } from "@/types";
+import { NumericFormat } from "react-number-format";
 
 interface Props {
   transactionHeaderWithRelation?: TransactionHeaderWithRelation;
@@ -119,22 +120,35 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       setError("Lỗi không xác định đã xảy ra.");
     }
   });
+
+  const headerDate = useWatch({
+    control,
+    name: "header.date",
+  });
+
   useEffect(() => {
-    const fetchGoldPrice = async () => {
+    const fetchGoldPriceByDate = async () => {
+      if (!headerDate) return;
+
       try {
-        const response = await axios.get<GoldPrice>("/api/goldPrices/lastest", {
-          params: { name: "24K" },
+        const response = await axios.get<GoldPrice>("/api/goldPrices", {
+          params: { date: new Date(headerDate).toISOString() },
         });
-        setLastestGoldPrice(response.data.sell);
-        console.log("lastest gold price: " + response.data.sell);
+        const data = response.data;
+        if (data) {
+          setLastestGoldPrice(response.data.sell);
+        }
       } catch (err) {
-        console.error("Lỗi lấy giá vàng:", err);
+        console.error("Không thể lấy giá vàng theo ngày:", err);
+        setLastestGoldPrice(0);
       }
     };
-    fetchGoldPrice();
-  }, []);
+
+    fetchGoldPriceByDate();
+  }, [headerDate]);
 
   const isExport = watch("header.isExport");
+
   const goldDetails = useWatch({
     control,
     name: "goldDetails",
@@ -177,7 +191,12 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           <IsExportSegment control={control} />
         </Flex>
 
-        <Flex justify="center" align="center" style={{ height: "100%" }}>
+        <Flex
+          justify="center"
+          align="center"
+          style={{ height: "100%" }}
+          gap="3"
+        >
           <Controller
             control={control}
             name="header.date"
@@ -197,6 +216,20 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             )}
+          />
+          <label className="text-sm font-medium">Giá vàng:</label>
+          <NumericFormat
+            customInput={TextField.Root}
+            thousandSeparator="."
+            decimalSeparator=","
+            allowNegative={false}
+            decimalScale={0}
+            value={lastestGoldPrice}
+            onValueChange={(values) =>
+              setLastestGoldPrice(Number(values.value))
+            }
+            placeholder="Giá vàng"
+            style={{ textAlign: "right" }}
           />
         </Flex>
 

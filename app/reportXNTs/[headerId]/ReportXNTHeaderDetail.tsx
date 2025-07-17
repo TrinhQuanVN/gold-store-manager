@@ -3,9 +3,10 @@
 import { Card, DataList, Flex, Text, Heading } from "@radix-ui/themes";
 import { ReportXNTHeader, TaxPayer } from "@prisma/client";
 import React from "react";
+import { ReportXNTHeaderWithNumber } from "@/prismaRepositories";
 
 interface Props {
-  header: ReportXNTHeader & { taxPayer: TaxPayer };
+  header: ReportXNTHeaderWithNumber;
 }
 
 const formatDate = (date: Date) =>

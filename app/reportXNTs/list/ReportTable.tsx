@@ -1,3 +1,4 @@
+import { ReportXNTHeaderWithNumber } from "@/prismaRepositories";
 import ReportXNTHeaderModel from "./ReportXNTHeaderModel";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
@@ -67,12 +68,42 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
                 <Link href={`/reportXNTs/${report.id}`}>{report.name}</Link>
               </Text>
             </Table.Cell>
-            <Table.Cell className="">{report.tonDauKy}</Table.Cell>
-            <Table.Cell className="">{report.nhapTrongKy}</Table.Cell>
-            <Table.Cell className="">{report.xuatTrongKy}</Table.Cell>
-            <Table.Cell className="">{report.tonCuoiKy}</Table.Cell>
-            <Table.Cell className="">{report.xuatThucTe}</Table.Cell>
-            <Table.Cell className="">{report.thue}</Table.Cell>
+            <Table.Cell className="">
+              {report.tonDauKy.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="">
+              {report.nhapTrongKy.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="">
+              {report.xuatTrongKy.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="">
+              {report.tonCuoiKy.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="">
+              {report.xuatThucTe.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
+            <Table.Cell className="">
+              {report.thue.toLocaleString("vi-VN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
+            </Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>
