@@ -12,7 +12,6 @@ import {
   Control,
   FieldErrors,
   useFieldArray,
-  UseFormRegister,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
@@ -32,39 +31,14 @@ const CustomCollapsible = dynamic(
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
   setValue: UseFormSetValue<TransactionInputDataForm>;
-  register: UseFormRegister<TransactionInputDataForm>;
   errors: FieldErrors<TransactionInputDataForm>;
-  jewelryDetails: (JewelryTransactionDetail & { jewelry: Jewelry })[];
-  lastestGoldPrice?: number;
 }
 
-const JewelryTransactionForm = ({
-  control,
-  register,
-  errors,
-  setValue,
-  jewelryDetails,
-  lastestGoldPrice,
-}: Props) => {
+const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "jewelryDetails",
   });
-
-  useEffect(() => {
-    if (jewelryDetails.length > 0) {
-      // Prefill from edit data
-      jewelryDetails.forEach((detail) =>
-        append({
-          jewelryId: detail.jewelryId.toString(),
-          weight: detail.jewelry.goldWeight.toString(),
-          price: detail.price.toString(),
-          discount: detail.discount.toString(),
-          amount: detail.amount.toString(),
-        })
-      );
-    }
-  }, []);
 
   const jewelryDetailsWatch =
     useWatch({
@@ -102,6 +76,11 @@ const JewelryTransactionForm = ({
       setTitle("Trang sức");
     }
   }, [totalCount, totalWeight, totalAmount]);
+
+  const currentGoldPrice = useWatch({
+    control,
+    name: "header.currentGoldPrice",
+  });
 
   return (
     <CustomCollapsible title={title}>
@@ -141,12 +120,10 @@ const JewelryTransactionForm = ({
             <JewelryDetailRow
               key={field.id}
               index={index}
-              register={register}
               setValue={setValue}
               control={control}
-              errors={errors}
               onRemove={() => remove(index)}
-              lastGoldPrice={lastestGoldPrice ?? 0}
+              lastGoldPrice={parseFloat(currentGoldPrice) ?? 0}
             />
             <ErrorMessage>
               {[

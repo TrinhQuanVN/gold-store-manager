@@ -1,3 +1,4 @@
+import { toNumberVN } from "@/utils";
 import { z } from "zod";
 
 export const rawJewelrySchema = z.object({
@@ -5,50 +6,46 @@ export const rawJewelrySchema = z.object({
 
   goldWeight: z.string().regex(/^\d+(\.\d+)?$/, "Trọng lượng vàng phải là số"),
 
-  jewelryTypeId: z.string().regex(/^\d+$/, "Loại vàng không hợp lệ"),
+  typeId: z.string().regex(/^\d+$/, "Loại vàng không hợp lệ"),
 
   categoryId: z.string().regex(/^\d+$/, "Loại trang sức không hợp lệ"),
 
-  gemName: z.string().nullable().optional(),
+  gemName: z.string(),
 
   gemWeight: z
     .string()
-    .optional()
-    .nullable()
     .refine(
-      (val) => !val || val.trim() === "" || !isNaN(Number(val)),
+      (val) => !val || val.trim() === "" || !isNaN(toNumberVN(val)),
       "Trọng lượng đá phải là số hoặc để trống"
     ),
 
   totalWeight: z
     .string()
-    .optional()
-    .nullable()
     .refine(
-      (val) => !val || val.trim() === "" || !isNaN(Number(val)),
+      (val) => !val || val.trim() === "" || !isNaN(toNumberVN(val)),
       "Tổng trọng lượng phải là số hoặc để trống"
     ),
 
-  description: z.string().nullable().optional(),
-  madeIn: z.string().nullable().optional(),
-  size: z.string().nullable().optional(),
-  reportXNTId: z.string().nullable().optional(),
+  description: z.string(),
+  madeIn: z.string(),
+  size: z.string(),
+  reportXNTId: z.string(),
 
-  supplierId: z.string().nullable().optional(), // ✅ mới thêm
+  supplierId: z.string(), // ✅ mới thêm
 });
 
 export const jewelrySchema = rawJewelrySchema.transform((data) => ({
   ...data,
-  goldWeight: parseFloat(data.goldWeight),
-  jewelryTypeId: parseInt(data.jewelryTypeId),
+  goldWeight: toNumberVN(data.goldWeight),
+  typeId: parseInt(data.typeId),
   categoryId: parseInt(data.categoryId),
   gemWeight:
     data.gemWeight?.trim() === "" || data.gemWeight == null
       ? 0
-      : parseFloat(data.gemWeight),
+      : toNumberVN(data.gemWeight),
   totalWeight:
     data.totalWeight?.trim() === "" || data.totalWeight == null
       ? 0
-      : parseFloat(data.totalWeight),
+      : toNumberVN(data.totalWeight),
   supplierId: data.supplierId?.trim() || null, // ✅ chuyển chuỗi rỗng thành null
 }));

@@ -1,12 +1,14 @@
-import { TransactionInputDataForm } from "@/app/validationSchemas";
+import {
+  TransactionInputDataForm,
+  TransactionOutputDataForm,
+} from "@/app/validationSchemas";
 import { Gold } from "@prisma/client";
 import { Button, Flex, Grid, Text, TextField } from "@radix-ui/themes";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
+  Control,
   Controller,
-  FieldErrors,
-  UseFormRegister,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
@@ -15,19 +17,15 @@ import { NumericFormattedField } from "./NumericFormattedField";
 
 interface Props {
   index: number;
-  register: UseFormRegister<TransactionInputDataForm>;
   setValue: UseFormSetValue<TransactionInputDataForm>;
-  errors: FieldErrors<TransactionInputDataForm>;
-  control: any;
+  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
   onRemove: () => void;
   lastGoldPrice: number;
 }
 
 const GoldDetailRow = ({
   index,
-  register,
   setValue,
-  errors,
   control,
   onRemove,
   lastGoldPrice,
@@ -49,12 +47,6 @@ const GoldDetailRow = ({
   const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const id = e.target.value;
     if (!id) {
-      //trường hợp này sẽ xoá các dòng khác nếu xoá id
-      setValue(`goldDetails.${index}.goldName`, "");
-      setValue(`goldDetails.${index}.price`, "");
-      setValue(`goldDetails.${index}.weight`, "");
-      setValue(`goldDetails.${index}.discount`, "");
-      setValue(`goldDetails.${index}.amount`, "");
       return;
     }
 
@@ -92,11 +84,7 @@ const GoldDetailRow = ({
         )}
       />
 
-      <TextField.Root
-        value={goldName || "Lỗi hoặc không tồn tại"}
-        readOnly
-        className={!goldName ? "text-red-600" : ""}
-      />
+      <TextField.Root value={goldName ?? ""} readOnly className="" />
 
       <NumericFormattedField
         name={`goldDetails.${index}.weight`}

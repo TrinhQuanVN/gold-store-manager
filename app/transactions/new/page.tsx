@@ -10,9 +10,10 @@ const TransactionForm = dynamic(
     loading: () => <TransactionFormSkeleton />,
   }
 );
+const contactGroup = await prisma.contactGroup.findMany();
 
 const NewTransactionPage = async () => {
-  return <TransactionForm />;
+  return <TransactionForm contactGroup={contactGroup} />;
 };
 
 export default NewTransactionPage;

@@ -1,2 +1,2 @@
-export * from "./formatNumber";
+export * from "./formatVnNumber";
 export * from "./remove_accents";

@@ -32,5 +32,10 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json(contact, { status: 201 });
+  const contactWithGroup = await prisma.contact.findUnique({
+    where: { id: contact.id },
+    include: { group: true },
+  });
+
+  return NextResponse.json(contactWithGroup, { status: 201 });
 }

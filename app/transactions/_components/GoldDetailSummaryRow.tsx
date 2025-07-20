@@ -1,3 +1,4 @@
+import { toStringVN } from "@/utils";
 import { Grid, Text } from "@radix-ui/themes";
 
 interface Props {
@@ -6,12 +7,6 @@ interface Props {
   totalDiscount?: number;
   totalAmount?: number;
 }
-
-const formatVN = (val: number, digits = 0) =>
-  val.toLocaleString("vi-VN", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  });
 
 const GoldDetailSummaryRow = ({
   totalCount,
@@ -35,17 +30,17 @@ const GoldDetailSummaryRow = ({
         {totalCount} sản phẩm
       </Text>
       <Text size="2" align="right" color="indigo">
-        {formatVN(totalWeight ?? 0, 4)}
+        {toStringVN(totalWeight ?? 0, 0, 4)}
       </Text>
       <Text size="2" align="right" color="indigo">
         {/* Giá: thường không có tổng */}
         {/* Có thể để trống hoặc dấu `-` */}–
       </Text>
       <Text size="2" align="right" color="indigo">
-        {formatVN(totalDiscount ?? 0, 0)}
+        {toStringVN(totalDiscount ?? 0, 0)}
       </Text>
       <Text size="2" align="right" color="indigo">
-        {formatVN(totalAmount ?? 0, 0)}
+        {toStringVN(totalAmount ?? 0, 0)}
       </Text>
       <div /> {/* Cột nút X trống */}
     </Grid>

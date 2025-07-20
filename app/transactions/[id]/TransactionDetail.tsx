@@ -1,10 +1,12 @@
 "use client";
 
-import { TransactionHeaderWithRelation } from "@/types"; // hoặc nơi bạn export type
+import { ContactGroupBadge } from "@/app/components";
+import { ConvertedTransactionHeaderWithRelation } from "@/prismaRepositories/StringConverted";
+import { DateToStringVN, toStringVN } from "@/utils";
 import { DataList, Flex, Table, Text } from "@radix-ui/themes";
 
 interface Props {
-  transaction: TransactionHeaderWithRelation;
+  transaction: ConvertedTransactionHeaderWithRelation & { totalAmount: number };
 }
 
 export default function TransactionDetail({ transaction }: Props) {
@@ -24,6 +26,13 @@ export default function TransactionDetail({ transaction }: Props) {
     <Flex direction="column" gap="4">
       <DataList.Root>
         <DataList.Item>
+          <DataList.Label>Ngày giao dịch</DataList.Label>
+          <DataList.Value>
+            {DateToStringVN(transaction.createdAt)}
+          </DataList.Value>
+        </DataList.Item>
+
+        <DataList.Item>
           <DataList.Label>Loại giao dịch</DataList.Label>
           <DataList.Value>{isExport ? "Xuất" : "Nhập"}</DataList.Value>
         </DataList.Item>
@@ -31,14 +40,17 @@ export default function TransactionDetail({ transaction }: Props) {
         <DataList.Item>
           <DataList.Label>Khách hàng</DataList.Label>
           <DataList.Value>
-            {contact?.name} ({contact?.group?.name})
+            {contact?.name}
+            <ContactGroupBadge ContactGroup={contact?.group} />
           </DataList.Value>
         </DataList.Item>
 
-        <DataList.Item>
-          <DataList.Label>Ghi chú</DataList.Label>
-          <DataList.Value>{note || "Không có"}</DataList.Value>
-        </DataList.Item>
+        {note ?? (
+          <DataList.Item>
+            <DataList.Label>Ghi chú</DataList.Label>
+            <DataList.Value>{note}</DataList.Value>
+          </DataList.Item>
+        )}
 
         <DataList.Item>
           <DataList.Label>Phương thức thanh toán</DataList.Label>
@@ -48,25 +60,13 @@ export default function TransactionDetail({ transaction }: Props) {
         <DataList.Item>
           <DataList.Label>Tổng tiền</DataList.Label>
           <DataList.Value>
-            {totalAmount.toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })}
-          </DataList.Value>
-        </DataList.Item>
-
-        <DataList.Item>
-          <DataList.Label>Chi tiết thanh toán</DataList.Label>
-          <DataList.Value>
+            {toStringVN(totalAmount)} (
             {paymentAmounts.map((p) => (
               <div key={p.id}>
-                {p.type}:{" "}
-                {p.amount.toLocaleString("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                })}
+                {p.type}: {toStringVN(p.amount)} |
               </div>
             ))}
+            )
           </DataList.Value>
         </DataList.Item>
       </DataList.Root>
@@ -87,9 +87,9 @@ export default function TransactionDetail({ transaction }: Props) {
           {goldDetails.map((g) => (
             <Table.Row key={g.id}>
               <Table.Cell>{g.gold.name}</Table.Cell>
-              <Table.Cell>{g.weight} chỉ</Table.Cell>
-              <Table.Cell>{g.price.toLocaleString("vi-VN")}</Table.Cell>
-              <Table.Cell>{g.amount.toLocaleString("vi-VN")}</Table.Cell>
+              <Table.Cell>{toStringVN(g.weight, 0, 4)} chỉ</Table.Cell>
+              <Table.Cell>{toStringVN(g.price)}</Table.Cell>
+              <Table.Cell>{toStringVN(g.amount)}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
@@ -115,9 +115,11 @@ export default function TransactionDetail({ transaction }: Props) {
                 {j.jewelry.jewelryType.name}
               </Table.Cell>
 
-              <Table.Cell>{j.jewelry.goldWeight} chỉ</Table.Cell>
-              <Table.Cell>{j.price.toLocaleString("vi-VN")}</Table.Cell>
-              <Table.Cell>{j.amount.toLocaleString("vi-VN")}</Table.Cell>
+              <Table.Cell>
+                {toStringVN(j.jewelry.goldWeight, 0, 4)} chỉ
+              </Table.Cell>
+              <Table.Cell>{toStringVN(j.price)}</Table.Cell>
+              <Table.Cell>{toStringVN(j.amount)}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>

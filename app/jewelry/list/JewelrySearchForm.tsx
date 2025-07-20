@@ -9,8 +9,8 @@ import { JewelryCategoryNumber, JewelryTypeNumber } from "@/prismaRepositories";
 
 interface Props {
   searchParams: JewelryQuery;
-  categories: JewelryCategoryNumber[];
-  types: JewelryTypeNumber[];
+  categories: JewelryCategory[];
+  types: JewelryType[];
 }
 
 const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {

@@ -37,8 +37,8 @@ function isBadgeColor(value: string | null | undefined): value is BadgeColor {
 }
 
 interface Props {
-  jewelryType: JewelryTypeNumber;
-  category: JewelryCategoryNumber;
+  jewelryType: JewelryType;
+  category: JewelryCategory;
 }
 
 const JewelryBadge = ({ jewelryType, category }: Props) => {

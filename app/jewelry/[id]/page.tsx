@@ -5,6 +5,7 @@ import EditJewelryButton from "./EditJewelryButton";
 import DeleteJewelryButton from "./DeleteJewelryButton";
 import JewelryDetail from "./JewelryDetail";
 import { convertJewelryRelationToNumber } from "@/prismaRepositories";
+import { convertPrismaJewelryWithCateogryAndTypeToString } from "@/prismaRepositories/StringConverted";
 
 interface Props {
   params: { id: string };
@@ -22,7 +23,8 @@ const JewelryDetailPage = async ({ params }: Props) => {
 
   if (!jewelry) notFound();
 
-  const convertJewelries = convertJewelryRelationToNumber(jewelry);
+  const convertJewelries =
+    convertPrismaJewelryWithCateogryAndTypeToString(jewelry);
 
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">

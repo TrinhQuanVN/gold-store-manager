@@ -4,7 +4,7 @@ import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
-import { transformCurrencyStringToNumber } from "@/utils";
+import { toNumberVN } from "@/utils";
 import { PaymentDetail } from "@prisma/client";
 import { Flex, Grid } from "@radix-ui/themes";
 import { Label } from "@radix-ui/themes/components/context-menu";
@@ -31,31 +31,30 @@ interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
   watch: UseFormWatch<TransactionInputDataForm>;
   setValue: UseFormSetValue<TransactionInputDataForm>;
-  paymentDetails?: PaymentDetail[]; // for edit
 }
 
-const PaymentForm = ({ control, watch, setValue, paymentDetails }: Props) => {
+const PaymentForm = ({ control, setValue }: Props) => {
   const amounts = useWatch({ control: control, name: "paymentAmounts" });
 
   useEffect(() => {
-    const bank = amounts.find((a) => a.type === "BANK");
-    const cash = amounts.find((a) => a.type === "CASH");
+    const bank = amounts.find((a) => a.type === "CK");
+    const cash = amounts.find((a) => a.type === "TM");
 
-    const bankAmount = transformCurrencyStringToNumber(bank?.amount || "0");
-    const cashAmount = transformCurrencyStringToNumber(cash?.amount || "0");
+    const bankAmount = toNumberVN(bank?.amount || "0");
+    const cashAmount = toNumberVN(cash?.amount || "0");
 
     if (bankAmount > 0 && cashAmount > 0) {
-      setValue("header.paymentMethode", "CASH_AND_BANK");
+      setValue("header.paymentMethode", "CK_TM");
     } else if (bankAmount > 0) {
-      setValue("header.paymentMethode", "BANK");
+      setValue("header.paymentMethode", "CK");
     } else if (cashAmount > 0) {
-      setValue("header.paymentMethode", "CASH");
+      setValue("header.paymentMethode", "TM");
     } else {
-      setValue("header.paymentMethode", "BANK"); // mặc định nếu cả 2 đều = 0
+      setValue("header.paymentMethode", "CK"); // mặc định nếu cả 2 đều = 0
     }
   }, [amounts, setValue]);
 
-  const handleChangeAmount = (type: "BANK" | "CASH", value: string) => {
+  const handleChangeAmount = (type: "CK" | "TM", value: string) => {
     const index = amounts.findIndex((item) => item.type === type);
     if (index >= 0) {
       const updated = [...amounts];
@@ -79,12 +78,12 @@ const PaymentForm = ({ control, watch, setValue, paymentDetails }: Props) => {
               <Label className="font-bold">Chuyển khoản:</Label>
               <NumericFormat
                 placeholder="Chuyển khoản"
-                value={amounts.find((a) => a.type === "BANK")?.amount || ""}
+                value={amounts.find((a) => a.type === "CK")?.amount || ""}
                 thousandSeparator="."
                 decimalSeparator=","
                 allowNegative={false}
                 onValueChange={(values) => {
-                  handleChangeAmount("BANK", values.value);
+                  handleChangeAmount("CK", values.value);
                 }}
                 customInput={InputWrapper}
               />
@@ -92,12 +91,12 @@ const PaymentForm = ({ control, watch, setValue, paymentDetails }: Props) => {
               <Label className="font-bold">Tiền mặt:</Label>
               <NumericFormat
                 placeholder="Tiền mặt"
-                value={amounts.find((a) => a.type === "CASH")?.amount || ""}
+                value={amounts.find((a) => a.type === "TM")?.amount || ""}
                 thousandSeparator="."
                 decimalSeparator=","
                 allowNegative={false}
                 onValueChange={(values) => {
-                  handleChangeAmount("CASH", values.value);
+                  handleChangeAmount("TM", values.value);
                 }}
                 customInput={InputWrapper}
               />

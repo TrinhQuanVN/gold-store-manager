@@ -50,8 +50,12 @@ export async function PATCH(
       note: data.note ?? contact.note,
     },
   });
+  const contactWithGroup = await prisma.contact.findUnique({
+    where: { id: updatedContact.id },
+    include: { group: true },
+  });
 
-  return NextResponse.json(updatedContact, { status: 200 });
+  return NextResponse.json(contactWithGroup, { status: 200 });
 }
 
 export async function DELETE(

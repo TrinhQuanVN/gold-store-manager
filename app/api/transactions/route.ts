@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
     data: {
       isExport: data.header.isExport,
       contactId: data.header.contactId,
-      totalAmount: data.header.totalAmount,
       note: data.header.note,
       paymentMethode: data.header.paymentMethode,
     },

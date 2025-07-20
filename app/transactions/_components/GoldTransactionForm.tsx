@@ -5,7 +5,6 @@ import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
-import { Gold, GoldTransactionDetail } from "@prisma/client";
 import { Button, Flex, Grid, Text } from "@radix-ui/themes";
 import dynamic from "next/dynamic";
 import {
@@ -20,6 +19,7 @@ import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailRow from "./GoldDetailRow";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 import { useEffect, useState } from "react";
+import { toNumberVN, toStringVN } from "@/utils";
 
 const CustomCollapsible = dynamic(
   () => import("@/app/components/CustomCollapsible"),
@@ -32,20 +32,10 @@ const CustomCollapsible = dynamic(
 interface Props {
   control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
   setValue: UseFormSetValue<TransactionInputDataForm>;
-  register: UseFormRegister<TransactionInputDataForm>;
   errors: FieldErrors<TransactionInputDataForm>;
-  goldDetails: (GoldTransactionDetail & { gold: Gold })[];
-  lastestGoldPrice?: number;
 }
 
-const GoldTransactionForm = ({
-  control,
-  register,
-  errors,
-  setValue,
-  goldDetails,
-  lastestGoldPrice,
-}: Props) => {
+const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "goldDetails",
@@ -61,17 +51,17 @@ const GoldTransactionForm = ({
       .length ?? 0;
 
   const totalWeight = goldDetailsWatch?.reduce((sum, row) => {
-    const w = parseFloat(row.weight || "0");
+    const w = toNumberVN(row.weight || "0");
     return sum + (isNaN(w) ? 0 : w);
   }, 0);
 
   const totalDiscount = goldDetailsWatch?.reduce((sum, row) => {
-    const d = parseFloat(row.discount || "0");
+    const d = toNumberVN(row.discount || "0");
     return sum + (isNaN(d) ? 0 : d);
   }, 0);
 
   const totalAmount = goldDetailsWatch?.reduce((sum, row) => {
-    const a = parseFloat(row.amount || "0");
+    const a = toNumberVN(row.amount || "0");
     return sum + (isNaN(a) ? 0 : a);
   }, 0);
 
@@ -79,14 +69,19 @@ const GoldTransactionForm = ({
 
   useEffect(() => {
     if (totalCount > 0) {
-      const formatted = `${totalWeight.toLocaleString(
-        "vn-VN"
-      )} chỉ nhẫn tròn = ${totalAmount.toLocaleString("vn-VN")}`;
+      const formatted = `${toStringVN(
+        totalWeight
+      )} chỉ nhẫn tròn = ${toStringVN(totalAmount)}`;
       setTitle(formatted);
     } else {
       setTitle("Nhẫn tròn");
     }
   }, [totalCount, totalWeight, totalAmount]);
+
+  const currentGoldPrice = useWatch({
+    control,
+    name: "header.currentGoldPrice",
+  });
 
   return (
     <CustomCollapsible title={title} defaultOpen={true}>
@@ -126,12 +121,10 @@ const GoldTransactionForm = ({
             <GoldDetailRow
               key={field.id}
               index={index}
-              register={register}
               setValue={setValue}
               control={control}
-              errors={errors}
               onRemove={() => remove(index)}
-              lastGoldPrice={lastestGoldPrice ?? 0}
+              lastGoldPrice={parseFloat(currentGoldPrice) ?? 0}
             />
             <ErrorMessage>
               {errors?.goldDetails?.[index]?.goldId?.message}

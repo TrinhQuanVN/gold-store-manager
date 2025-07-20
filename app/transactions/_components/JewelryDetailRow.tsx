@@ -13,12 +13,11 @@ import {
 import { TiDelete } from "react-icons/ti";
 import { NumericFormattedField } from "./NumericFormattedField";
 import { JewelryWithRelation } from "@/types";
+import { toNumberVN, toStringVN } from "@/utils";
 
 interface Props {
   index: number;
-  register: UseFormRegister<TransactionInputDataForm>;
   setValue: UseFormSetValue<TransactionInputDataForm>;
-  errors: FieldErrors<TransactionInputDataForm>;
   control: any;
   onRemove: () => void;
   lastGoldPrice: number;
@@ -26,9 +25,7 @@ interface Props {
 
 const JewelryDetailRow = ({
   index,
-  register,
   setValue,
-  errors,
   control,
   onRemove,
   lastGoldPrice,
@@ -55,7 +52,10 @@ const JewelryDetailRow = ({
         `jewelryDetails.${index}.jewelryName`,
         `${jew.name} - ${jew.jewelryType.name} - ${jew.category.name}`
       );
-      setValue(`jewelryDetails.${index}.weight`, jew.goldWeight.toString());
+      setValue(
+        `jewelryDetails.${index}.weight`,
+        Number(jew.goldWeight).toString()
+      );
 
       setValue(`jewelryDetails.${index}.price`, lastGoldPrice.toString());
     } catch {
@@ -100,11 +100,7 @@ const JewelryDetailRow = ({
         )}
       />
 
-      <TextField.Root
-        value={jewelryName || "Lỗi hoặc không tồn tại"}
-        readOnly
-        className={!jewelryName ? "text-red-600" : ""}
-      />
+      <TextField.Root value={jewelryName ?? ""} readOnly className="" />
 
       <NumericFormattedField
         name={`jewelryDetails.${index}.weight`}

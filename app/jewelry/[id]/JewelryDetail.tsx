@@ -1,17 +1,11 @@
 "use client";
 
-import { Card, Flex, Text, Heading, DataList } from "@radix-ui/themes";
-import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
 import JewelryBadge from "@/app/components/JewelryBadge";
-import React from "react";
-import {
-  JewelryCategoryNumber,
-  JewelryRelationNumber,
-  JewelryTypeNumber,
-} from "@/prismaRepositories";
+import { ConvertedJewelryWithCateogryAndType } from "@/prismaRepositories/StringConverted";
+import { Card, DataList, Flex, Heading } from "@radix-ui/themes";
 
 interface Props {
-  jewelry: JewelryRelationNumber;
+  jewelry: ConvertedJewelryWithCateogryAndType;
 }
 
 const JewelryDetail = ({ jewelry }: Props) => {
@@ -34,32 +28,17 @@ const JewelryDetail = ({ jewelry }: Props) => {
 
           <DataList.Item>
             <DataList.Label>Trọng lượng vàng</DataList.Label>
-            <DataList.Value>
-              {Number(jewelry.goldWeight).toLocaleString("vi-VN", {
-                maximumFractionDigits: 4,
-              })}{" "}
-              chỉ
-            </DataList.Value>
+            <DataList.Value>{jewelry.goldWeight} chỉ</DataList.Value>
           </DataList.Item>
 
           <DataList.Item>
             <DataList.Label>Trọng lượng đá</DataList.Label>
-            <DataList.Value>
-              {Number(jewelry.gemWeight).toLocaleString("vi-VN", {
-                maximumFractionDigits: 4,
-              })}{" "}
-              chỉ
-            </DataList.Value>
+            <DataList.Value>{jewelry.gemWeight} chỉ</DataList.Value>
           </DataList.Item>
 
           <DataList.Item>
             <DataList.Label>Tổng trọng lượng</DataList.Label>
-            <DataList.Value>
-              {Number(jewelry.totalWeight).toLocaleString("vi-VN", {
-                maximumFractionDigits: 4,
-              })}{" "}
-              chỉ
-            </DataList.Value>
+            <DataList.Value>{jewelry.totalWeight} chỉ</DataList.Value>
           </DataList.Item>
 
           <DataList.Item>
@@ -89,9 +68,7 @@ const JewelryDetail = ({ jewelry }: Props) => {
 
           <DataList.Item>
             <DataList.Label>Ngày tạo</DataList.Label>
-            <DataList.Value>
-              {new Date(jewelry.createdAt).toLocaleString("vi-VN")}
-            </DataList.Value>
+            <DataList.Value>{jewelry.createdAt}</DataList.Value>
           </DataList.Item>
         </DataList.Root>
       </Flex>

@@ -1,13 +1,13 @@
 import Pagination from "@/app/components/Pagination";
 import { prisma } from "@/prisma/client";
-import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
-import { Prisma } from "@prisma/client";
-import { Flex } from "@radix-ui/themes";
-import TransactionActions from "./TransactionActions";
-import ContactSearchForm from "./ContactSearchForm";
-import TransactionTable, { columnNames } from "./TransactionTable";
-import { ContactSearchQuery } from "./ContactSearchQuery";
+import { convertPrismaTransactionHeaderWithRelationToString } from "@/prismaRepositories/StringConverted";
 import { transactionWithRelation } from "@/types";
+import { toStringVN } from "@/utils";
+import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
+import { Flex } from "@radix-ui/themes";
+import { ContactSearchQuery } from "./ContactSearchQuery";
+import TransactionActions from "./TransactionActions";
+import TransactionTable, { columnNames } from "./TransactionTable";
 interface Props {
   searchParams: ContactSearchQuery;
 }
@@ -53,11 +53,32 @@ const TransactionPage = async ({ searchParams }: Props) => {
     // where,
   });
 
+  const transactionsWithTotalAmount = transactions.map((t) => {
+    const converted = convertPrismaTransactionHeaderWithRelationToString(t);
+
+    const goldTotal = t.goldTransactionDetails.reduce(
+      (sum, g) => sum + Number(g.amount ?? 0),
+      0
+    );
+    const jewelryTotal = t.jewelryTransactionDetails.reduce(
+      (sum, j) => sum + Number(j.amount ?? 0),
+      0
+    );
+
+    return {
+      ...converted,
+      totalAmount: goldTotal + jewelryTotal,
+    };
+  });
+
   return (
     <Flex direction="column" gap="3">
       <TransactionActions />
       {/* <ContactSearchForm searchParams={params} /> */}
-      <TransactionTable searchParams={params} transactions={transactions} />
+      <TransactionTable
+        searchParams={params}
+        transactions={transactionsWithTotalAmount}
+      />
       <Flex gap="2">
         <Pagination
           pageSize={pageSize}

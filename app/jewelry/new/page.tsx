@@ -22,12 +22,7 @@ const NewJewelryPage = async () => {
   // Nếu không có dữ liệu nào thì trả về notFound
   if (!types.length || !categories.length) notFound();
 
-  return (
-    <JewelryForm
-      types={types.map(convertJewelryTypeToNumber)}
-      categories={categories.map(convertJewelryCategoryToNumber)}
-    />
-  );
+  return <JewelryForm types={types} categories={categories} />;
 };
 
 export default NewJewelryPage;

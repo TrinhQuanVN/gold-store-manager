@@ -59,7 +59,7 @@ model Contact {
 model JewelryType {
   id          Int       @id @default(autoincrement())
   name        String
-  goldPercent Decimal     @default(0.0) @db.Decimal(4, 2) // Gold percentage for the type
+  goldPercent Float     @default(0.0)// Gold percentage for the type
   description String?
   color       String?   @default("gray") //color for GoldKaraBadge
   createdAt   DateTime  @default(now())
@@ -136,14 +136,27 @@ model ReportXNTHeader {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
-  reportXNTs ReportXNT[]
+  group ReportXNTGroup[]
+}
+
+model ReportXNTGroup{
+  id Int @id @default(autoincrement())
+  name String
+  stt String
+
+  headerId Int
+  header  ReportXNTHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
+
+  ReportXNTs ReportXNT[]
 }
 
 model ReportXNT {
-  id       String          @id
-  headerId Int
-  header   ReportXNTHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  id       String          @id 
 
+  groupId Int
+  group   ReportXNTGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  stt Int @default(1)
   name             String
   unit             String? @default("chỉ")
 
@@ -168,7 +181,7 @@ model ReportXNT {
 model Gold {
   id          Int    @id @default(autoincrement())
   name        String
-  goldPercent Decimal  @default(0.0) @db.Decimal(4,2) // Tỷ lệ vàng trong nguyên liệu
+  goldPercent Float  @default(0.0) // Tỷ lệ vàng trong nguyên liệu
 
   description String?
 
@@ -225,15 +238,12 @@ model TransactionHeader {
   contactId Int
   contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
-  totalAmount Decimal @default(0) @db.Decimal(11,0) // Tổng số tiền giao dịch
-
-  paymentAmounts PaymentDetail[]
-
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
   jewelryTransactionDetails JewelryTransactionDetail[]
   goldTransactionDetails    GoldTransactionDetail[]
+  paymentAmounts PaymentDetail[]
 }
 
 model PaymentDetail {
@@ -259,12 +269,12 @@ model GoldPrice {
 }
 
 enum PaymentType {
-  BANK
-  CASH
+  CK
+  TM
 }
 
 enum PaymentMethode {
-  BANK
-  CASH
-  CASH_AND_BANK
+  CK
+  TM
+  CK_TM
 }

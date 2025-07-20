@@ -1,73 +1,81 @@
 "use client";
 
 import { ContactGroupBadge } from "@/app/components";
-// import CustomCollapsible from "@/app/components/CustomCollapsible";
-import { Contact, ContactGroup } from "@prisma/client";
-import { DataList, Flex, Text } from "@radix-ui/themes";
+import { DataList, Flex, Text, Button, Dialog } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { Control, Controller, useController } from "react-hook-form";
-// import ContactSelect from "./ContactSelect";
-import dynamic from "next/dynamic";
 import { ContactWithGroup } from "@/types";
+import axios from "axios";
+import dynamic from "next/dynamic";
+import { ContactGroup } from "@prisma/client";
 
-const CustomCollapsible = dynamic(
-  () => import("@/app/components/CustomCollapsible"),
-  {
-    ssr: false,
-    // loading: () => <ContactFormSkeleton />,
-  }
-);
-
-const ContactSelect = dynamic(() => import("./ContactSelect"), {
+const ContactSelect = dynamic(() => import("./ContactSelect"), { ssr: false });
+const ContactFormPopup = dynamic(() => import("./ContactFormPopup"), {
   ssr: false,
-  // loading: () => <ContactFormSkeleton />,
 });
 
 interface Props {
   name: string;
-  control: Control<any>; // hoặc Control<RawTransactionDataForm>
-  contact?: ContactWithGroup | null; // optional, truyền khi edit
+  control: Control<any>;
+  contact?: ContactWithGroup | null;
+  groups: ContactGroup[];
 }
 
-const ContactForm = ({ name, control, contact }: Props) => {
+const ContactForm = ({ name, control, contact, groups }: Props) => {
   const {
     field: { value: contactId, onChange },
-    fieldState: { error },
   } = useController({ name, control, defaultValue: contact?.id ?? "" });
 
   const [selected, setSelected] = useState<typeof contact | null>(
     contact ?? null
   );
 
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+
   useEffect(() => {
     if (contact) setSelected(contact);
   }, [contact]);
 
   return (
-    <CustomCollapsible
-      defaultOpen={true}
-      title={
-        selected
-          ? `Lựa chọn khách hàng: ${selected.name}`
-          : "Lựa chọn khách hàng"
-      }
-    >
-      <Flex direction="column" gap="4">
-        <Controller
-          name={name}
-          control={control}
-          defaultValue={contact?.id ?? ""}
-          render={({ field }) => (
-            <ContactSelect
-              value={selected}
-              onChange={(contact) => {
-                setSelected(contact);
-                field.onChange(contact.id.toString()); // ✅ dùng contact.id để cập nhật react-hook-form
-              }}
-            />
-          )}
-        />
+    <Flex direction="column" gap="4">
+      <Flex gap="3" align="center" className="w-full">
+        <div className="flex-1">
+          <Controller
+            name={name}
+            control={control}
+            render={({ field }) => (
+              <ContactSelect
+                value={selected}
+                onChange={(contact) => {
+                  setSelected(contact);
+                  field.onChange(contact.id.toString());
+                }}
+              />
+            )}
+          />
+        </div>
 
+        <Dialog.Root open={openDialog} onOpenChange={setOpenDialog}>
+          <Dialog.Trigger>
+            <Button size="2">Thêm khách hàng</Button>
+          </Dialog.Trigger>
+
+          <Dialog.Content maxWidth="450px">
+            <Dialog.Title>Thêm khách hàng</Dialog.Title>
+            <ContactFormPopup
+              groups={groups}
+              onSuccess={(newContact) => {
+                setSelected(newContact);
+                onChange(newContact.id.toString());
+                setOpenDialog(false);
+              }}
+              onCancel={() => setOpenDialog(false)}
+            />
+          </Dialog.Content>
+        </Dialog.Root>
+      </Flex>
+      <Flex>
         {selected && (
           <DataList.Root>
             <DataList.Item>
@@ -75,9 +83,37 @@ const ContactForm = ({ name, control, contact }: Props) => {
                 Tên khách hàng:
               </DataList.Label>
               <DataList.Value>
-                <Flex gap="2">
+                <Flex gap="2" align="center">
                   <Text>{selected.name}</Text>
                   <ContactGroupBadge ContactGroup={selected.group} />
+                  <Dialog.Root
+                    open={openEditDialog}
+                    onOpenChange={setOpenEditDialog}
+                  >
+                    <Dialog.Trigger>
+                      <Button
+                        size="1"
+                        variant="soft"
+                        aria-label="Sửa khách hàng"
+                        className="hover:bg-gray-500 transition-colors"
+                      >
+                        ✏️
+                      </Button>
+                    </Dialog.Trigger>
+                    <Dialog.Content maxWidth="450px">
+                      <Dialog.Title>Sửa thông tin khách hàng</Dialog.Title>
+                      <ContactFormPopup
+                        contact={selected}
+                        groups={groups}
+                        onSuccess={(updatedContact) => {
+                          setSelected(updatedContact);
+                          onChange(updatedContact.id.toString());
+                          setOpenEditDialog(false);
+                        }}
+                        onCancel={() => setOpenEditDialog(false)}
+                      />
+                    </Dialog.Content>
+                  </Dialog.Root>
                 </Flex>
               </DataList.Value>
             </DataList.Item>
@@ -123,7 +159,7 @@ const ContactForm = ({ name, control, contact }: Props) => {
           </DataList.Root>
         )}
       </Flex>
-    </CustomCollapsible>
+    </Flex>
   );
 };
 

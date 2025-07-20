@@ -1,19 +1,19 @@
 //import { ContactStatusBadge } from '@/app/components'
-import ContactGroupBadge from "@/app/components/ContactGroupBadge";
+import { ConvertedTransactionHeaderWithRelation } from "@/prismaRepositories/StringConverted";
+import { DateToStringVN, toNumberVN, toStringVN } from "@/utils";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
-import { Flex, Table, Text } from "@radix-ui/themes";
+import { Table } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 import { ContactSearchQuery } from "./ContactSearchQuery";
-import { TransactionHeaderWithRelation } from "@/types";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 const TransactionTable = ({
   searchParams,
   transactions,
 }: {
   searchParams: ContactSearchQuery;
-  transactions: TransactionHeaderWithRelation[];
+  transactions: (ConvertedTransactionHeaderWithRelation & {
+    totalAmount: number;
+  })[];
 }) => {
   return (
     <Table.Root variant="surface">
@@ -58,47 +58,55 @@ const TransactionTable = ({
       <Table.Body>
         {transactions.map((t) => {
           const goldExport = t.goldTransactionDetails
-            .map((g) => `${g.gold.name} × ${g.weight}`)
-            .join(", ");
+            .map((g) => `${g.weight} chỉ ${g.gold.name}`)
+            .join("; ");
           const jewelryExport = t.jewelryTransactionDetails
-            .map((j) => `${j.jewelry.name} × ${j.jewelry.goldWeight}`)
-            .join(", ");
+            .map((j) => `${j.jewelry.goldWeight} chỉ ${j.jewelry.name}`)
+            .join("; ");
           const exportContent =
             t.isExport &&
             [goldExport, jewelryExport].filter(Boolean).join(" | ");
 
           const goldImport = t.goldTransactionDetails
-            .map((g) => `${g.gold.name} × ${g.weight}`)
-            .join(", ");
+            .map((g) => `${g.weight} chỉ ${g.gold.name}`)
+            .join("; ");
           const jewelryImport = t.jewelryTransactionDetails
-            .map((j) => `${j.jewelry.name} × ${j.jewelry.goldWeight}`)
-            .join(", ");
+            .map((j) => `${j.jewelry.goldWeight} chỉ ${j.jewelry.name}`)
+            .join("; ");
           const importContent =
             !t.isExport &&
             [goldImport, jewelryImport].filter(Boolean).join(" | ");
 
           const cash = t.paymentAmounts
-            .filter((p) => p.type === "CASH")
+            .filter((p) => p.type === "TM")
             .reduce((sum, p) => sum + p.amount, 0);
           const bank = t.paymentAmounts
-            .filter((p) => p.type === "BANK")
+            .filter((p) => p.type === "CK")
             .reduce((sum, p) => sum + p.amount, 0);
           const paymentText = [
-            cash ? `Tiền mặt: ${cash.toLocaleString("vi-VN")}` : "",
-            bank ? `Chuyển khoản: ${bank.toLocaleString("vi-VN")}` : "",
+            cash ? `Tiền mặt: ${toStringVN(cash)}` : "",
+            bank ? `Chuyển khoản: ${toStringVN(bank)}` : "",
           ]
             .filter(Boolean)
             .join(" | ");
 
           return (
             <Table.Row key={t.id}>
-              <Table.Cell>{t.id}</Table.Cell>
               <Table.Cell>
-                {format(new Date(t.createdAt), "dd/MM/yy", { locale: vi })}
+                <Link
+                  className=" text-blue-400 hover:text-blue-1000"
+                  href={`/transactions/${t.id}`}
+                >
+                  {t.id}
+                </Link>
               </Table.Cell>
+              <Table.Cell>{DateToStringVN(t.createdAt)}</Table.Cell>
               <Table.Cell>
                 {t.contact ? (
-                  <Link href={`/contacts/${t.contact.id}`}>
+                  <Link
+                    className=" text-blue-400 hover:text-blue-1000"
+                    href={`/contacts/${t.contact.id}`}
+                  >
                     {t.contact.name}
                   </Link>
                 ) : (
@@ -108,11 +116,7 @@ const TransactionTable = ({
               <Table.Cell>{exportContent || "-"}</Table.Cell>
               <Table.Cell>{importContent || "-"}</Table.Cell>
               <Table.Cell>{paymentText}</Table.Cell>
-              <Table.Cell>
-                {t.totalAmount.toLocaleString("vi-VN", {
-                  maximumFractionDigits: 0,
-                })}
-              </Table.Cell>
+              <Table.Cell>{toStringVN(t.totalAmount)}</Table.Cell>
             </Table.Row>
           );
         })}

@@ -1,12 +1,8 @@
 import { prisma } from "@/prisma/client";
-import { notFound } from "next/navigation";
+import { convertPrismaJewelryToString } from "@/prismaRepositories/StringConverted";
 import dynamic from "next/dynamic";
+import { notFound } from "next/navigation";
 import JewelryFormSkeleton from "../../_components/JewelryFormSkeleton";
-import {
-  convertJewelryCategoryToNumber,
-  convertJewelryToNumber,
-  convertJewelryTypeToNumber,
-} from "@/prismaRepositories";
 
 const JewelryForm = dynamic(() => import("../../_components/JewelryForm"), {
   loading: () => <JewelryFormSkeleton />,
@@ -34,9 +30,9 @@ const EditJewelryPage = async ({ params }: Props) => {
 
   return (
     <JewelryForm
-      jewelry={convertJewelryToNumber(jewelry)}
-      types={types.map(convertJewelryTypeToNumber)}
-      categories={categories.map(convertJewelryCategoryToNumber)}
+      jewelry={convertPrismaJewelryToString(jewelry)}
+      types={types}
+      categories={categories}
     />
   );
 };

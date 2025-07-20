@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const data = validation.data;
   //check if goldKaraId is a valid number
   const jewelryType = await prisma.jewelryType.findUnique({
-    where: { id: data.jewelryTypeId },
+    where: { id: data.typeId },
   });
   if (!jewelryType) {
     return NextResponse.json(
@@ -37,14 +37,13 @@ export async function POST(request: NextRequest) {
       name: data.name,
       goldWeight: data.goldWeight,
       categoryId: data.categoryId,
-      jewelryTypeId: data.jewelryTypeId,
+      typeId: data.typeId,
       gemName: data.gemName || null,
       gemWeight: data.gemWeight ? data.gemWeight : 0,
       totalWeight: data.totalWeight ? data.totalWeight : 0.0,
       description: data.description || null,
       madeIn: data.madeIn || null,
       size: data.size || null,
-      inStock: data.inStock,
       supplierId: data.supplierId ? data.supplierId : null,
       reportXNTId: data.reportXNTId ? data.reportXNTId : null, // Optional field
     },

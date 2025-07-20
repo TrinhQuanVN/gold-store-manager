@@ -1,19 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Contact,
-  ContactGroup,
-  Gold,
-  GoldPrice,
-  GoldTransactionDetail,
-  Jewelry,
-  JewelryCategory,
-  JewelryTransactionDetail,
-  JewelryType,
-  PaymentDetail,
-  TransactionHeader,
-} from "@prisma/client";
+import { ContactGroup, GoldPrice } from "@prisma/client";
 import { Button, Callout, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 // import { useRouter } from "next/navigation";
@@ -27,28 +15,35 @@ import {
   TransactionInputDataForm,
   TransactionOutputDataForm,
 } from "@/app/validationSchemas";
+import { ConvertedTransactionHeaderWithRelation } from "@/prismaRepositories/StringConverted";
+import { toDateStringIso, toDateStringVn, toStringVN } from "@/utils";
+import { vi } from "date-fns/locale";
 import { useRouter } from "next/navigation";
-import ContactForm from "./ContactForm";
-import GoldTransactionForm from "./GoldTransactionForm";
-import JewelryTransactionForm from "./JewelryTransactionForm";
-import IsExportSegment from "./IsExportSegment";
-import PaymentForm from "./PaymentForm";
-import { transformCurrencyStringToNumber } from "@/utils";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { vi } from "date-fns/locale";
-import { TransactionHeaderWithRelation } from "@/types";
 import { NumericFormat } from "react-number-format";
+import ContactForm from "./ContactForm";
+import GoldTransactionForm from "./GoldTransactionForm";
+import IsExportSegment from "./IsExportSegment";
+import JewelryTransactionForm from "./JewelryTransactionForm";
+import PaymentForm from "./PaymentForm";
 
 interface Props {
-  transactionHeaderWithRelation?: TransactionHeaderWithRelation;
+  transactionHeaderWithRelation?: ConvertedTransactionHeaderWithRelation & {
+    currentGoldPrice: number;
+    totalAmount: number;
+  };
+  contactGroup: ContactGroup[];
 }
 
-const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
+const TransactionForm = ({
+  transactionHeaderWithRelation,
+  contactGroup,
+}: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
-  const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
+  // const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
   const {
     register,
     handleSubmit,
@@ -63,11 +58,14 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       header: {
         contactId: transactionHeaderWithRelation?.contactId?.toString() ?? "",
         note: transactionHeaderWithRelation?.note ?? "",
-        date: transactionHeaderWithRelation?.createdAt ?? new Date(),
+        date:
+          transactionHeaderWithRelation?.createdAt ?? new Date().toISOString(),
+        currentGoldPrice:
+          transactionHeaderWithRelation?.currentGoldPrice?.toString() ?? "0",
         isExport: transactionHeaderWithRelation?.isExport ?? true,
         totalAmount:
-          transactionHeaderWithRelation?.totalAmount?.toString() ?? "0",
-        paymentMethode: transactionHeaderWithRelation?.paymentMethode ?? "BANK",
+          transactionHeaderWithRelation?.totalAmount.toString() ?? "0",
+        paymentMethode: transactionHeaderWithRelation?.paymentMethode ?? "CK",
       },
       paymentAmounts: transactionHeaderWithRelation?.paymentAmounts.map(
         (p) => ({
@@ -75,8 +73,8 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           amount: p.amount.toString(),
         })
       ) ?? [
-        { type: "BANK", amount: "0" },
-        { type: "CASH", amount: "0" },
+        { type: "CK", amount: "0" },
+        { type: "TM", amount: "0" },
       ],
       goldDetails:
         transactionHeaderWithRelation?.goldTransactionDetails.map((g) => ({
@@ -84,7 +82,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           goldName: g.gold.name,
           price: g.price.toString(),
           weight: g.weight.toString(),
-          discount: g.discount?.toString() ?? "0",
+          discount: g.discount.toString() ?? "0",
           amount: g.amount.toString(),
         })) ?? [],
       jewelryDetails:
@@ -93,7 +91,7 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           jewelryName: `${j.jewelry.name} - ${j.jewelry.jewelryType.name} - ${j.jewelry.category.name}`,
           price: j.price.toString(),
           weight: j.jewelry.totalWeight.toString(),
-          discount: j.discount?.toString() ?? "0",
+          discount: j.discount.toString() ?? "0",
           amount: j.amount.toString(),
         })) ?? [],
     },
@@ -101,8 +99,11 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      console.log("....");
       console.log(data);
+      console.log("Form errors:", errors);
       setSubmitting(true);
+      console.log();
 
       if (transactionHeaderWithRelation) {
         await axios.patch(
@@ -110,7 +111,9 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
           data
         );
       } else {
+        console.log("start creating transaction");
         await axios.post("/api/transactions", data);
+        console.log("end creating transaction");
       }
       router.push("/transactions/list");
       router.refresh();
@@ -120,32 +123,6 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       setError("Lỗi không xác định đã xảy ra.");
     }
   });
-
-  const headerDate = useWatch({
-    control,
-    name: "header.date",
-  });
-
-  useEffect(() => {
-    const fetchGoldPriceByDate = async () => {
-      if (!headerDate) return;
-
-      try {
-        const response = await axios.get<GoldPrice>("/api/goldPrices", {
-          params: { date: new Date(headerDate).toISOString() },
-        });
-        const data = response.data;
-        if (data) {
-          setLastestGoldPrice(response.data.sell);
-        }
-      } catch (err) {
-        console.error("Không thể lấy giá vàng theo ngày:", err);
-        setLastestGoldPrice(0);
-      }
-    };
-
-    fetchGoldPriceByDate();
-  }, [headerDate]);
 
   const isExport = watch("header.isExport");
 
@@ -158,19 +135,46 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
     name: "jewelryDetails",
   });
 
+  const fetchGoldPriceByDate = async (date: Date) => {
+    try {
+      const response = await axios.get<GoldPrice>("/api/goldPrices", {
+        params: { date: date.toISOString() },
+      });
+      const data = response.data;
+      if (data) {
+        setValue(
+          "header.currentGoldPrice",
+          Number(response.data.sell).toString()
+        );
+      }
+    } catch (err) {
+      console.error("Không thể lấy giá vàng theo ngày:", err);
+      setValue("header.currentGoldPrice", "0");
+    }
+  };
+
   useEffect(() => {
     const sumAmount = (arr?: { amount?: string }[]) =>
       Array.isArray(arr)
-        ? arr.reduce(
-            (total, item) =>
-              total + transformCurrencyStringToNumber(item.amount ?? "0"),
-            0
-          )
+        ? arr.reduce((total, item) => total + parseFloat(item.amount ?? "0"), 0)
         : 0;
 
     const total = sumAmount(goldDetails) + sumAmount(jewelryDetails);
     setValue("header.totalAmount", total.toString());
   }, [goldDetails, jewelryDetails, setValue]);
+
+  // const flattenErrors = (errors: any, path = ""): string[] => {
+  //   let result: string[] = [];
+  //   for (const key in errors) {
+  //     const currentPath = path ? `${path}.${key}` : key;
+  //     if (errors[key]?.message) {
+  //       result.push(`${currentPath}: ${errors[key].message}`);
+  //     } else if (typeof errors[key] === "object") {
+  //       result = result.concat(flattenErrors(errors[key], currentPath));
+  //     }
+  //   }
+  //   return result;
+  // };
 
   return (
     <div
@@ -181,6 +185,15 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
       } transition-colors`}
     >
       <form onSubmit={onSubmit} className="space-y-4">
+        {/* <Callout.Root color="red" className="mb-4">
+          <ul className="list-disc ml-4 space-y-1 px-3 py-2">
+            {flattenErrors(errors).map((err, idx) => (
+              <li key={idx}>
+                <Callout.Text>{err}</Callout.Text>
+              </li>
+            ))}
+          </ul>
+        </Callout.Root> */}
         {error && (
           <Callout.Root color="red" className="mb-4">
             <Callout.Text>{error}</Callout.Text>
@@ -206,7 +219,10 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
                 dateFormat="dd/MM/yyyy HH:mm:ss"
                 selected={field.value ? new Date(field.value) : null}
                 onChange={(date) => {
-                  if (date) field.onChange(date);
+                  if (date) {
+                    field.onChange(date.toISOString());
+                    fetchGoldPriceByDate(date);
+                  }
                 }}
                 showTimeSelect
                 timeFormat="HH:mm"
@@ -218,18 +234,22 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
             )}
           />
           <label className="text-sm font-medium">Giá vàng:</label>
-          <NumericFormat
-            customInput={TextField.Root}
-            thousandSeparator="."
-            decimalSeparator=","
-            allowNegative={false}
-            decimalScale={0}
-            value={lastestGoldPrice}
-            onValueChange={(values) =>
-              setLastestGoldPrice(Number(values.value))
-            }
-            placeholder="Giá vàng"
-            style={{ textAlign: "right" }}
+          <Controller
+            control={control}
+            name="header.currentGoldPrice"
+            render={({ field }) => (
+              <NumericFormat
+                {...field}
+                customInput={TextField.Root}
+                thousandSeparator="."
+                decimalSeparator=","
+                allowNegative={false}
+                decimalScale={0}
+                value={field.value}
+                onValueChange={(values) => field.onChange(values.value)}
+                style={{ textAlign: "right" }}
+              />
+            )}
           />
         </Flex>
 
@@ -239,53 +259,41 @@ const TransactionForm = ({ transactionHeaderWithRelation }: Props) => {
         ></TextField.Root>
         <ErrorMessage>{errors.header?.note?.message}</ErrorMessage>
 
-        <ContactForm
-          name="header.contactId"
-          control={control}
-          contact={transactionHeaderWithRelation?.contact}
-        />
-        <ErrorMessage>{errors.header?.contactId?.message}</ErrorMessage>
+        <Flex direction="column" gap="4">
+          <ContactForm
+            groups={contactGroup}
+            name="header.contactId"
+            control={control}
+            contact={transactionHeaderWithRelation?.contact}
+          />
+          <ErrorMessage>{errors.header?.contactId?.message}</ErrorMessage>
 
-        <GoldTransactionForm
-          control={control}
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          goldDetails={
-            transactionHeaderWithRelation?.goldTransactionDetails ?? []
-          }
-          lastestGoldPrice={lastestGoldPrice}
-        />
+          <GoldTransactionForm
+            control={control}
+            errors={errors}
+            setValue={setValue}
+          />
 
-        <JewelryTransactionForm
-          control={control}
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          jewelryDetails={
-            transactionHeaderWithRelation?.jewelryTransactionDetails ?? []
-          }
-          lastestGoldPrice={lastestGoldPrice}
-        />
-        <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
+          <JewelryTransactionForm
+            control={control}
+            errors={errors}
+            setValue={setValue}
+          />
+          <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
+        </Flex>
 
         <hr className="my-4 border-indigo-600" />
 
         <Flex justify="end" className="my-4 border-gray-300">
           <strong>
             Tổng tiền:{" "}
-            {Number(watch("header.totalAmount")) > 0
-              ? Number(watch("header.totalAmount")).toLocaleString("vi-VN")
+            {parseFloat(watch("header.totalAmount")) > 0
+              ? toStringVN(parseFloat(watch("header.totalAmount")))
               : "0"}
           </strong>
         </Flex>
 
-        <PaymentForm
-          control={control}
-          watch={watch}
-          setValue={setValue}
-          paymentDetails={transactionHeaderWithRelation?.paymentAmounts}
-        />
+        <PaymentForm control={control} watch={watch} setValue={setValue} />
 
         <ErrorMessage>{errors.paymentAmounts?.message}</ErrorMessage>
 

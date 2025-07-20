@@ -1,9 +1,10 @@
-import { default as Link, default as NextLink } from "next/link";
 import JewelryBadge from "@/app/components/JewelryBadge";
-import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
+import { ConvertedJewelryWithCateogryAndType } from "@/prismaRepositories/StringConverted";
+import { toStringVN } from "@/utils";
+import { Jewelry } from "@prisma/client";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
-import { JewelryRelationNumber } from "@/prismaRepositories";
+import { default as Link, default as NextLink } from "next/link";
 
 export interface JewelryQuery {
   orderBy: keyof Jewelry;
@@ -18,7 +19,7 @@ export interface JewelryQuery {
 }
 
 interface Props {
-  jewelries: JewelryRelationNumber[];
+  jewelries: ConvertedJewelryWithCateogryAndType[];
   searchParams: JewelryQuery;
 }
 
@@ -83,21 +84,15 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
 
             <Table.Cell>
               <Flex direction="column" gap="2">
-                <Text>
-                  Vàng: {jewelry.goldWeight.toLocaleString("vi-VN")} chỉ
-                </Text>
-                <Text>Đá: {jewelry.gemWeight.toLocaleString("vi-VN")} chỉ</Text>
-                <Text>
-                  Tổng: {jewelry.totalWeight.toLocaleString("vi-VN")} chỉ
-                </Text>
+                <Text>Vàng: {toStringVN(jewelry.goldWeight, 0, 4)} chỉ</Text>
+                <Text>Đá: {toStringVN(jewelry.gemWeight, 0, 4)} chỉ</Text>
+                <Text>Tổng: {toStringVN(jewelry.totalWeight, 0, 4)} chỉ</Text>
               </Flex>
             </Table.Cell>
 
             <Table.Cell>{jewelry.reportXNTId || "-"}</Table.Cell>
 
-            <Table.Cell>
-              {new Date(jewelry.createdAt).toLocaleDateString("vi-VN")}
-            </Table.Cell>
+            <Table.Cell>{jewelry.createdAt}</Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>

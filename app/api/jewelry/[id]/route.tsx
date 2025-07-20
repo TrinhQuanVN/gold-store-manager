@@ -25,9 +25,9 @@ export async function PATCH(
 
   // Check if goldKara is provided and valid
   if (
-    data.jewelryTypeId &&
+    data.typeId &&
     (await prisma.jewelryType.findUnique({
-      where: { id: data.jewelryTypeId },
+      where: { id: data.typeId },
     })) === null
   ) {
     return NextResponse.json(
@@ -54,9 +54,7 @@ export async function PATCH(
     data: {
       name: data.name ?? jewelry.name,
       goldWeight: data.goldWeight ? data.goldWeight : jewelry.goldWeight,
-      jewelryTypeId: data.jewelryTypeId
-        ? data.jewelryTypeId
-        : jewelry.jewelryTypeId,
+      typeId: data.typeId ? data.typeId : jewelry.typeId,
       categoryId: data.categoryId ? data.categoryId : jewelry.categoryId,
 
       gemName: data.gemName ?? jewelry.gemName,

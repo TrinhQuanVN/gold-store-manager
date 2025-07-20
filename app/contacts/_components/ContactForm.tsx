@@ -6,19 +6,11 @@ import {
 } from "@/app/validationSchemas/contactSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Contact, ContactGroup } from "@prisma/client";
-import {
-  Button,
-  Callout,
-  Flex,
-  Select,
-  TextArea,
-  TextField,
-} from "@radix-ui/themes";
+import { Button, Callout, Flex, Select, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
@@ -26,9 +18,10 @@ import Spinner from "@/app/components/Spinner";
 interface Props {
   contact?: Contact & { group: ContactGroup };
   groups: ContactGroup[]; // List of available groups
+  onSuccess?: () => void; // ✅ gọi khi tạo/sửa thành công
 }
 
-const ContactForm = ({ contact, groups }: Props) => {
+const ContactForm = ({ contact, groups, onSuccess }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
@@ -43,7 +36,7 @@ const ContactForm = ({ contact, groups }: Props) => {
     mode: "onChange",
     defaultValues: {
       name: contact?.name ?? "",
-      groupId: contact?.group?.id?.toString() ?? "",
+      groupId: contact?.group?.id?.toString() ?? "1",
       address: contact?.address,
       phone: contact?.phone ?? "",
       cccd: contact?.cccd ?? "",
@@ -59,8 +52,13 @@ const ContactForm = ({ contact, groups }: Props) => {
       } else {
         await axios.post("/api/contacts", data);
       }
-      router.push("/contacts/list");
-      router.refresh();
+      setSubmitting(false);
+
+      if (onSuccess) onSuccess(); // ✅ gọi callback
+      else {
+        router.push("/contacts/list"); // fallback cho route mặc định
+        router.refresh();
+      }
     } catch (err) {
       console.error(err);
       setSubmitting(false);
@@ -84,6 +82,15 @@ const ContactForm = ({ contact, groups }: Props) => {
           ></TextField.Root>
           <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
+          <TextField.Root placeholder="CCCD" {...register("cccd")}>
+            <TextField.Slot></TextField.Slot>
+          </TextField.Root>
+
+          <TextField.Root
+            placeholder="Địa chỉ"
+            {...register("address")}
+          ></TextField.Root>
+
           <Controller
             name="groupId"
             control={control}
@@ -101,23 +108,16 @@ const ContactForm = ({ contact, groups }: Props) => {
             )}
           />
           <ErrorMessage>{errors.groupId?.message}</ErrorMessage>
+
           <TextField.Root
             className="mt4"
             placeholder="Số điện thoại"
             {...register("phone")}
           ></TextField.Root>
-          <TextField.Root placeholder="CCCD" {...register("cccd")}>
-            <TextField.Slot></TextField.Slot>
-          </TextField.Root>
 
           <TextField.Root
             placeholder="Mã số thuế"
             {...register("taxcode")}
-          ></TextField.Root>
-
-          <TextField.Root
-            placeholder="Địa chỉ"
-            {...register("address")}
           ></TextField.Root>
 
           <TextField.Root placeholder="Ghi chú" {...register("note")} />

@@ -5,6 +5,8 @@ import { transactionWithRelation } from "@/types";
 import { Grid, Box, Flex } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
 import TransactionDetail from "./TransactionDetail";
+import { convertPrismaTransactionHeaderWithRelationToString } from "@/prismaRepositories/StringConverted";
+import { toStringVN } from "@/utils";
 
 interface Props {
   params: { id: string };
@@ -25,10 +27,24 @@ const TransactionDetailPage = async ({ params }: Props) => {
   });
   if (!transaction) notFound();
 
+  const goldTotal = transaction.goldTransactionDetails.reduce(
+    (sum, g) => sum + Number(g.amount ?? 0),
+    0
+  );
+  const jewelryTotal = transaction.jewelryTransactionDetails.reduce(
+    (sum, j) => sum + Number(j.amount ?? 0),
+    0
+  );
+
+  const converted = {
+    ...convertPrismaTransactionHeaderWithRelationToString(transaction),
+    totalAmount: goldTotal + jewelryTotal,
+  };
+
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">
       <Box className="md:col-span-4">
-        <TransactionDetail transaction={transaction} />
+        <TransactionDetail transaction={converted} />
       </Box>
       <Box>
         <Flex direction="column" gap="4">

@@ -39,6 +39,7 @@ export async function PATCH(
   const updatedReport = await prisma.reportXNT.update({
     where: { id: _params.reportId },
     data: {
+      id: data.id ?? report.id,
       name: data.name ?? report.name,
       tonDauKyQuantity: data.tonDauKyQuantity ?? report.tonDauKyQuantity,
       tonDauKyValue: data.tonDauKyValue ?? report.tonDauKyValue,

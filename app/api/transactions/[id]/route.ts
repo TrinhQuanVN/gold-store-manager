@@ -52,7 +52,7 @@ export async function PATCH(
     const jewelryIds = data.jewelryDetails.map((j) => j.jewelryId);
     const existingJewelry = await prisma.jewelry.findMany({
       where: { id: { in: jewelryIds } },
-      select: { id: true, inStock: false },
+      select: { id: true },
     });
     const validJewelryIds = new Set(existingJewelry.map((j) => j.id));
 
@@ -85,7 +85,6 @@ export async function PATCH(
         note: data.header.note,
         isExport: data.header.isExport,
         contactId: data.header.contactId,
-        totalAmount: data.header.totalAmount,
         paymentMethode: data.header.paymentMethode,
         createdAt: data.header.date,
       },

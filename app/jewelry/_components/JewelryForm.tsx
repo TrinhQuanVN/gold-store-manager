@@ -4,16 +4,11 @@ import ErrorMessage from "@/app/components/ErrorMessage";
 import { NumericFormattedField } from "@/app/components/NumericFormattedField";
 import Spinner from "@/app/components/Spinner";
 import { rawJewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
-import {
-  JewelryNumber,
-  JewelryTypeNumber,
-  JewelryCategoryNumber,
-} from "@/prismaRepositories";
+import { ConvertedJewlery } from "@/prismaRepositories/StringConverted";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
+import { JewelryCategory, JewelryType } from "@prisma/client";
 import {
   Button,
-  Checkbox,
   Flex,
   Grid,
   Select,
@@ -30,9 +25,9 @@ import { z } from "zod";
 type JewelryFormData = z.infer<typeof rawJewelrySchema>;
 
 interface Props {
-  jewelry?: JewelryNumber;
-  types: JewelryTypeNumber[];
-  categories: JewelryCategoryNumber[];
+  jewelry?: ConvertedJewlery;
+  types: JewelryType[];
+  categories: JewelryCategory[];
 }
 
 const JewelryForm = ({ jewelry, types, categories }: Props) => {
@@ -48,13 +43,21 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
   } = useForm<JewelryFormData>({
     resolver: zodResolver(rawJewelrySchema),
     defaultValues: {
-      ...jewelry,
-      goldWeight: jewelry?.goldWeight?.toString() ?? "",
-      gemWeight: jewelry?.gemWeight?.toString() ?? "",
-      totalWeight: jewelry?.totalWeight?.toString() ?? "",
-      supplierId: jewelry?.supplierId?.toString() ?? "",
-      categoryId: jewelry?.categoryId?.toString(),
-      jewelryTypeId: jewelry?.typeId?.toString(),
+      name: jewelry?.name ?? "",
+
+      goldWeight: jewelry?.goldWeight.toString() ?? "",
+      gemWeight: jewelry?.gemWeight.toString() ?? "",
+      totalWeight: jewelry?.totalWeight.toString() ?? "",
+
+      categoryId: jewelry?.categoryId.toString() ?? "",
+      typeId: jewelry?.typeId.toString() ?? "",
+
+      gemName: jewelry?.gemName ?? "",
+      description: jewelry?.description ?? "",
+      madeIn: jewelry?.madeIn ?? "",
+      size: jewelry?.size ?? "",
+      reportXNTId: jewelry?.reportXNTId ?? "",
+      supplierId: jewelry?.supplierId ?? "",
     },
   });
 
@@ -116,7 +119,7 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
         <Label>Loại vàng</Label>
         <Flex direction="column">
           <Controller
-            name="jewelryTypeId"
+            name="typeId"
             control={control}
             render={({ field }) => (
               <Select.Root value={field.value} onValueChange={field.onChange}>
@@ -131,7 +134,7 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
               </Select.Root>
             )}
           />
-          <ErrorMessage>{errors.jewelryTypeId?.message}</ErrorMessage>
+          <ErrorMessage>{errors.typeId?.message}</ErrorMessage>
         </Flex>
 
         <Label>Loại trang sức</Label>
