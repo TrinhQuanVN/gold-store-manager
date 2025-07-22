@@ -9,7 +9,46 @@ conn = psycopg2.connect(
     host="localhost",
     port="5432"
 )
+
+header_id = 1
+
 cur = conn.cursor()
+cur.execute("TRUNCATE TABLE \"TaxPayer\" RESTART IDENTITY CASCADE;")
+conn.commit()
+taxpayer = [["Tên người nộp thuế: Doanh nghiệp tư nhân vàng bạc đá quý Hồng Quân",
+             "0700756585",
+             "SN 91, đường Nguyễn Văn Trỗi, phường Phủ Lý, tỉnh Ninh Bình"],
+          ]
+for name, taxcode, address in taxpayer:
+    cur.execute(
+        """
+        INSERT INTO "TaxPayer" ("name", "taxCode", "address")
+        VALUES (%s, %s, %s)
+        """,
+        (name, taxcode, address),
+    )
+
+conn.commit()
+
+cur = conn.cursor()
+cur.execute("TRUNCATE TABLE \"ReportXNTGroup\" RESTART IDENTITY CASCADE;")
+conn.commit()
+groups = [["Vàng 9999 (24K)","I"],["Vàng trang sức 999 (23K)","II"],
+          ["Vàng trang sức 999 (23K)","II"],
+          ["Vàng trang sức 75% (18K)","III"],
+          ["Vàng trang sức 58,5% (14K)","VI"],
+          ["Vàng trang sức 41,6% (10K)","V"],
+          ["Bạc 999","VI"],]
+for name, stt in groups:
+    cur.execute(
+        """
+        INSERT INTO "ReportXNTGroup" ("name", "stt", "headerId")
+        VALUES (%s, %s, %s)
+        """,
+        (name, stt, header_id),
+    )
+
+conn.commit()
 
 # === 1. RESET bảng ReportXNT ===
 cur.execute("TRUNCATE TABLE \"ReportXNT\" RESTART IDENTITY CASCADE;")
@@ -21,7 +60,7 @@ excel_path = r"C:\Users\Admin\Desktop\duLieuVangQ1_2025.xlsx"  # 👉 thay bằn
 wb = load_workbook(excel_path)
 ws = wb.active
 
-header_id = 1
+
 
 # Bỏ qua dòng header nếu có
 row_start = 2 if isinstance(ws["A1"].value, str) else 1
@@ -31,26 +70,25 @@ inserted_count = 0
 for row in ws.iter_rows(min_row=row_start, values_only=True):
     if not row or not row[0]:  # Bỏ dòng rỗng
         continue
-
     (
-        id, name,
+        groupId, stt, id, name,
         tonDauKyQuantity, tonDauKyValue,
         nhapQuantity, nhapValue,
         xuatQuantity, xuatValue,
         tonCuoiKyQuantity, tonCuoiKyValue
-    ) = row[:10]
+    ) = row[:12]
 
     cur.execute("""
         INSERT INTO "ReportXNT" (
-            "id", "headerId", "name", "unit",
+            "groupId", "stt","id", "headerId", "name", "unit",
             "tonDauKyQuantity", "tonDauKyValue",
             "nhapQuantity", "nhapValue",
             "xuatQuantity", "xuatValue",
             "tonCuoiKyQuantity", "tonCuoiKyValue"
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        str(id), header_id, str(name), "chỉ",
+        groupId, stt, str(id), header_id, str(name), "chỉ",
         tonDauKyQuantity or 0, tonDauKyValue or 0,
         nhapQuantity or 0, nhapValue or 0,
         xuatQuantity or 0, xuatValue or 0,

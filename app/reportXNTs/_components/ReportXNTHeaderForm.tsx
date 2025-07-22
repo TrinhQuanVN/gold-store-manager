@@ -1,6 +1,9 @@
 "use client";
 
-import { rawReportXNTHeaderSchema } from "@/app/validationSchemas/reportXNTHeaderSchemas";
+import {
+  RawReportXNTHeaderForm,
+  rawReportXNTHeaderSchema,
+} from "@/app/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Callout, Flex, Select, TextField } from "@radix-ui/themes";
 import axios from "axios";
@@ -17,15 +20,26 @@ import "react-datepicker/dist/react-datepicker.css";
 
 interface Props {
   taxPayers: { id: number; name: string }[];
-  reportHeader?: ReportXNTHeader;
+  reportHeader?: RawReportXNTHeaderForm;
 }
 
 const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
-  const quarter = Math.floor(new Date().getMonth() / 3) + 1;
-  const year = new Date().getFullYear();
+  const now = new Date();
+  const defaultQuarter = (Math.floor(now.getMonth() / 3) + 1).toString();
+  const defaultYear = now.getFullYear().toString();
+  const defaultStartDate = new Date(
+    now.getFullYear(),
+    (parseInt(defaultQuarter) - 1) * 3,
+    1
+  ).toISOString();
+  const defaultEndDate = new Date(
+    now.getFullYear(),
+    parseInt(defaultQuarter) * 3,
+    0
+  ).toISOString();
   const {
     register,
     handleSubmit,
@@ -33,22 +47,15 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<z.infer<typeof rawReportXNTHeaderSchema>>({
+  } = useForm<RawReportXNTHeaderForm>({
     resolver: zodResolver(rawReportXNTHeaderSchema),
-    defaultValues: {
-      name: reportHeader?.name ?? "Báo cáo xuất nhập tồn",
-      quarter: reportHeader?.quarter.toString() ?? quarter.toString(),
-      year: reportHeader?.year.toString() ?? year.toString(),
-      taxPayerId:
-        reportHeader?.taxPayerId.toString() ??
-        taxPayers[taxPayers.length - 1]?.id.toString(),
-      startDate:
-        reportHeader?.startDate.toISOString() ??
-        new Date(year, (quarter - 1) * 3, 1).toISOString(),
-      endDate:
-        reportHeader?.endDate.toISOString() ??
-        new Date(year, quarter * 3, 0).toISOString(),
-    },
+    defaultValues: rawReportXNTHeaderSchema.parse({
+      quarter: defaultQuarter,
+      year: defaultYear,
+      startDate: defaultStartDate,
+      endDate: defaultEndDate,
+      ...(reportHeader ?? {}), // nếu có reportHeader sẽ override mặc định
+    }),
   });
 
   const onSubmit = handleSubmit(async (data) => {

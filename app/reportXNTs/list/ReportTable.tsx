@@ -1,7 +1,7 @@
-import { ReportXNTHeaderWithNumber } from "@/prismaRepositories";
-import ReportXNTHeaderModel from "./ReportXNTHeaderModel";
+import { RawReportXNTHeaderForm } from "@/app/validationSchemas";
+import { toStringVN } from "@/utils";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
-import { Flex, Table, Text } from "@radix-ui/themes";
+import { Table, Text } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 
 export type ReportOrderField =
@@ -12,7 +12,7 @@ export type ReportOrderField =
   | "tonCuoiKy";
 
 export interface ReportQuery {
-  orderBy: keyof ReportXNTHeaderModel;
+  orderBy: keyof RawReportXNTHeaderForm;
   orderDirection: "asc" | "desc";
   page: string;
   pageSize: string;
@@ -20,13 +20,13 @@ export interface ReportQuery {
 
 interface Props {
   searchParams: ReportQuery;
-  reports: ReportXNTHeaderModel[];
+  reports: RawReportXNTHeaderForm[];
 }
 
 const ReportHeaderTable = ({ searchParams, reports }: Props) => {
   return (
     <Table.Root variant="surface">
-      <Table.Header>
+      {/* <Table.Header>
         <Table.Row>
           {columns.map((column) => (
             <Table.ColumnHeaderCell key={column.value}>
@@ -55,6 +55,140 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
             </Table.ColumnHeaderCell>
           ))}
         </Table.Row>
+      </Table.Header> */}
+
+      <Table.Header>
+        <Table.Row>
+          <Table.ColumnHeaderCell
+            rowSpan={2}
+            style={{
+              verticalAlign: "middle",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            ID
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            rowSpan={2}
+            style={{
+              verticalAlign: "middle",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Tên báo cáo
+          </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            colSpan={2}
+            style={{ textAlign: "center", borderRight: "1px solid #e5e7eb" }}
+          >
+            Tồn đầu kỳ
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            colSpan={2}
+            style={{ textAlign: "center", borderRight: "1px solid #e5e7eb" }}
+          >
+            Nhập
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            colSpan={2}
+            style={{ textAlign: "center", borderRight: "1px solid #e5e7eb" }}
+          >
+            Xuất
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            colSpan={2}
+            style={{ textAlign: "center", borderRight: "1px solid #e5e7eb" }}
+          >
+            Tồn cuối kỳ
+          </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            rowSpan={2}
+            style={{
+              verticalAlign: "middle",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Xuất thực tế
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            rowSpan={2}
+            style={{ verticalAlign: "middle" }}
+          >
+            Thuế
+          </Table.ColumnHeaderCell>
+        </Table.Row>
+
+        <Table.Row>
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Trọng lượng
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Giá trị
+          </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Trọng lượng
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Giá trị
+          </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Trọng lượng
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Giá trị
+          </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Trọng lượng
+          </Table.ColumnHeaderCell>
+          <Table.ColumnHeaderCell
+            style={{
+              textAlign: "center",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Giá trị
+          </Table.ColumnHeaderCell>
+        </Table.Row>
       </Table.Header>
 
       <Table.Body>
@@ -63,46 +197,60 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
             <Table.Cell>
               <Text>{report.id}</Text>
             </Table.Cell>
-            <Table.Cell className="">
-              <Text>
-                <Link href={`/reportXNTs/${report.id}`}>{report.name}</Link>
-              </Text>
+            <Table.Cell>
+              <Link
+                href={`/reportXNTs/${report.id}`}
+                className="text-blue-400 font-semibold hover:underline hover:text-blue-600 transition"
+              >
+                {report.name} quý {report.quarter} năm {report.year}
+              </Link>
             </Table.Cell>
-            <Table.Cell className="">
-              {report.tonDauKy.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+
+            <Table.Cell>
+              {report?.tonDauKyQuantityTotal
+                ? toStringVN(+report.tonDauKyQuantityTotal)
+                : ""}
             </Table.Cell>
-            <Table.Cell className="">
-              {report.nhapTrongKy.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+            <Table.Cell>
+              {report?.tonDauKyValueTotal
+                ? toStringVN(+report.tonDauKyValueTotal)
+                : ""}
             </Table.Cell>
-            <Table.Cell className="">
-              {report.xuatTrongKy.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+
+            <Table.Cell>
+              {report?.nhapQuantityTotal
+                ? toStringVN(+report.nhapQuantityTotal)
+                : ""}
             </Table.Cell>
-            <Table.Cell className="">
-              {report.tonCuoiKy.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+            <Table.Cell>
+              {report?.nhapValueTotal ? toStringVN(+report.nhapValueTotal) : ""}
             </Table.Cell>
-            <Table.Cell className="">
-              {report.xuatThucTe.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+
+            <Table.Cell>
+              {report?.xuatQuantityTotal
+                ? toStringVN(+report.xuatQuantityTotal)
+                : ""}
             </Table.Cell>
-            <Table.Cell className="">
-              {report.thue.toLocaleString("vi-VN", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              })}
+            <Table.Cell>
+              {report?.xuatValueTotal ? toStringVN(+report.xuatValueTotal) : ""}
+            </Table.Cell>
+
+            <Table.Cell>
+              {report?.tonCuoiKyQuantityTotal
+                ? toStringVN(+report.tonCuoiKyQuantityTotal)
+                : ""}
+            </Table.Cell>
+            <Table.Cell>
+              {report?.tonCuoiKyValueTotal
+                ? toStringVN(+report.tonCuoiKyValueTotal)
+                : ""}
+            </Table.Cell>
+
+            <Table.Cell>
+              {report?.xuatThucTe ? toStringVN(+report.xuatThucTe) : ""}
+            </Table.Cell>
+            <Table.Cell>
+              {report?.thue ? toStringVN(+report.thue) : ""}
             </Table.Cell>
           </Table.Row>
         ))}
@@ -113,14 +261,23 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
 
 const columns: {
   label: string;
-  value: keyof ReportXNTHeaderModel;
+  value: keyof RawReportXNTHeaderForm;
 }[] = [
   { label: "Id", value: "id" },
   { label: "Tên báo cáo", value: "name" },
-  { label: "Tồn đầu kỳ", value: "tonDauKy" },
-  { label: "Nhập trong kỳ", value: "nhapTrongKy" },
-  { label: "Xuất trong kỳ", value: "xuatTrongKy" },
-  { label: "Tồn cuối kỳ", value: "tonCuoiKy" },
+
+  { label: "Trọng lượng", value: "tonDauKyQuantityTotal" },
+  { label: "Giá trị", value: "tonDauKyValueTotal" },
+
+  { label: "Trọng lượng", value: "nhapQuantityTotal" },
+  { label: "Giá trị", value: "nhapValueTotal" },
+
+  { label: "Trọng lượng", value: "xuatQuantityTotal" },
+  { label: "Giá trị", value: "xuatValueTotal" },
+
+  { label: "Trọng lượng", value: "tonCuoiKyQuantityTotal" },
+  { label: "Giá trị", value: "tonCuoiKyValueTotal" },
+
   { label: "Xuất thực tế ", value: "xuatThucTe" },
   { label: "Thuế", value: "thue" },
 ];

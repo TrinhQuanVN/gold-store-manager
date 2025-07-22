@@ -1,20 +1,12 @@
 "use client";
 
-import { Card, DataList, Flex, Text, Heading } from "@radix-ui/themes";
-import { ReportXNTHeader, TaxPayer } from "@prisma/client";
-import React from "react";
-import { ReportXNTHeaderWithNumber } from "@/prismaRepositories";
+import { RawReportXNTHeaderForm } from "@/app/validationSchemas";
+import { DateToStringVN } from "@/utils";
+import { Card, DataList, Heading } from "@radix-ui/themes";
 
 interface Props {
-  header: ReportXNTHeaderWithNumber;
+  header: RawReportXNTHeaderForm;
 }
-
-const formatDate = (date: Date) =>
-  new Date(date).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 
 const ReportXNTHeaderDetail = ({ header }: Props) => {
   return (
@@ -39,25 +31,25 @@ const ReportXNTHeaderDetail = ({ header }: Props) => {
 
         <DataList.Item>
           <DataList.Label>Ngày bắt đầu</DataList.Label>
-          <DataList.Value>{formatDate(header.startDate)}</DataList.Value>
+          <DataList.Value>{DateToStringVN(header.startDate)}</DataList.Value>
         </DataList.Item>
 
         <DataList.Item>
           <DataList.Label>Ngày kết thúc</DataList.Label>
-          <DataList.Value>{formatDate(header.endDate)}</DataList.Value>
+          <DataList.Value>{DateToStringVN(header.endDate)}</DataList.Value>
         </DataList.Item>
 
         <DataList.Item>
           <DataList.Label>Người nộp thuế</DataList.Label>
-          <DataList.Value>{header.taxPayer.name}</DataList.Value>
+          <DataList.Value>{header.taxPayer?.name}</DataList.Value>
         </DataList.Item>
 
         <DataList.Item>
           <DataList.Label>Mã số thuế</DataList.Label>
-          <DataList.Value>{header.taxPayer.taxCode}</DataList.Value>
+          <DataList.Value>{header.taxPayer?.taxCode}</DataList.Value>
         </DataList.Item>
 
-        {header.taxPayer.address && (
+        {header.taxPayer?.address && (
           <DataList.Item>
             <DataList.Label>Địa chỉ</DataList.Label>
             <DataList.Value>{header.taxPayer.address}</DataList.Value>

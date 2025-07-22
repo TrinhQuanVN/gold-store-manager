@@ -5,7 +5,10 @@ import { Table, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { ReportXNT } from "@prisma/client";
 import { ReportXNTNumber } from "@/prismaRepositories";
-import { RawReportXNTGroupForm } from "@/app/validationSchemas";
+import {
+  RawReportXNTForm,
+  RawReportXNTGroupForm,
+} from "@/app/validationSchemas";
 import { Collapsible } from "radix-ui";
 import { useState } from "react";
 import { toStringVN } from "@/utils";
@@ -21,10 +24,11 @@ export interface ReportXNTQuery {
 
 interface Props {
   searchParams: ReportXNTQuery;
-  groups?: RawReportXNTGroupForm[];
+  headerId: number;
+  reports?: RawReportXNTForm[];
 }
 
-const ReportXNTTable = ({ searchParams, groups }: Props) => {
+const ReportXNTTable = ({ searchParams, headerId, reports }: Props) => {
   return (
     <Table.Root variant="surface">
       <Table.Header>
@@ -162,56 +166,50 @@ const ReportXNTTable = ({ searchParams, groups }: Props) => {
       </Table.Header>
 
       <Table.Body>
-        {groups?.map((group) => {
+        {reports?.map((report) => {
           return (
-            <Table.Row className="" key={group.id}>
-              <Table.Cell className="text-center">{group.id}</Table.Cell>
+            <Table.Row className="" key={report.id}>
+              <Table.Cell className="text-center">{report.id}</Table.Cell>
               <Table.Cell className="text-center">
-                <Link href={`/reportXNTs/${group.headerId}/group/${group.id}`}>
-                  {group.name}
+                <Link href={`/reportXNTs/${headerId}/group/${report.id}`}>
+                  {report.name}
                 </Link>
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.tonDauKyQuantityTotal
-                  ? toStringVN(+group.tonDauKyQuantityTotal)
+                {report?.tonDauKyQuantity
+                  ? toStringVN(+report.tonDauKyQuantity)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.tonDauKyValueTotal
-                  ? toStringVN(+group.tonDauKyValueTotal)
+                {report?.tonDauKyValue ? toStringVN(+report.tonDauKyValue) : ""}
+              </Table.Cell>
+              <Table.Cell className="text-right">
+                {report?.nhapQuantity ? toStringVN(+report.nhapQuantity) : ""}
+              </Table.Cell>
+              <Table.Cell className="text-right">
+                {report?.nhapValue ? toStringVN(+report.nhapValue) : ""}
+              </Table.Cell>
+              <Table.Cell className="text-right">
+                {report?.xuatQuantity ? toStringVN(+report.xuatQuantity) : ""}
+              </Table.Cell>
+              <Table.Cell className="text-right">
+                {report?.xuatValue ? toStringVN(+report.xuatValue) : ""}
+              </Table.Cell>
+              <Table.Cell className="text-right">
+                {report?.tonCuoiKyQuantity
+                  ? toStringVN(+report.tonCuoiKyQuantity)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.nhapQuantityTotal
-                  ? toStringVN(+group.nhapQuantityTotal)
+                {report?.tonCuoiKyValue
+                  ? toStringVN(+report.tonCuoiKyValue)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.nhapValueTotal ? toStringVN(+group.nhapValueTotal) : ""}
+                {report?.xuatThucTe ? toStringVN(+report.xuatThucTe) : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.xuatQuantityTotal
-                  ? toStringVN(+group.xuatQuantityTotal)
-                  : ""}
-              </Table.Cell>
-              <Table.Cell className="text-right">
-                {group?.xuatValueTotal ? toStringVN(+group.xuatValueTotal) : ""}
-              </Table.Cell>
-              <Table.Cell className="text-right">
-                {group?.tonCuoiKyQuantityTotal
-                  ? toStringVN(+group.tonCuoiKyQuantityTotal)
-                  : ""}
-              </Table.Cell>
-              <Table.Cell className="text-right">
-                {group?.tonCuoiKyValueTotal
-                  ? toStringVN(+group.tonCuoiKyValueTotal)
-                  : ""}
-              </Table.Cell>
-              <Table.Cell className="text-right">
-                {group?.xuatThucTe ? toStringVN(+group.xuatThucTe) : ""}
-              </Table.Cell>
-              <Table.Cell className="text-right">
-                {group?.thue ? toStringVN(+group.thue) : ""}
+                {report?.thue ? toStringVN(+report.thue) : ""}
               </Table.Cell>
             </Table.Row>
           );

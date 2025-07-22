@@ -1,11 +1,10 @@
-import { prisma } from "@/prisma/client";
-import { Flex } from "@radix-ui/themes";
 import Pagination from "@/app/components/Pagination";
+import { prisma } from "@/prisma/client";
+import { Prisma } from "@prisma/client";
+import { Flex } from "@radix-ui/themes";
 import ReportAction from "./ReportAction";
 import ReportTable, { ReportQuery, columnNames } from "./ReportTable";
-import { Prisma } from "@prisma/client";
-import { reportXNTHeaderWithRelation } from "@/types";
-import ReportXNTHeaderModel from "./ReportXNTHeaderModel";
+import { convertToRawReportXNTHeaderForm } from "../_components/convertToRawReportXNTHeaderForm";
 
 interface Props {
   searchParams: ReportQuery;
@@ -29,47 +28,13 @@ const ReportPage = async ({ searchParams }: Props) => {
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: {
-      reportXNTs: true,
+      taxPayer: true,
+      group: {
+        include: {
+          ReportXNTs: true,
+        },
+      },
     },
-  });
-
-  const reports: ReportXNTHeaderModel[] = headers.map((header) => {
-    const tonDauKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + Number(xnt.tonDauKyValue),
-      0
-    );
-    const nhapTrongKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + Number(xnt.nhapValue),
-      0
-    );
-    const xuatTrongKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + Number(xnt.xuatValue),
-      0
-    );
-    const tonCuoiKy = header.reportXNTs.reduce(
-      (sum, xnt) => sum + Number(xnt.tonCuoiKyValue),
-      0
-    );
-    // const xuatThucTe = header.reportXNTs.reduce(
-    //   (sum, xnt) => sum + xnt.xuatQuantity,
-    //   0
-    // );
-    const xuatThucTe = 0; //!!TODO
-    const thue =
-      (xuatThucTe - xuatTrongKy) * 0.1 > 0
-        ? (xuatThucTe - xuatTrongKy) * 0.1
-        : 0; // giả sử VAT 10%
-
-    return {
-      id: header.id,
-      name: `${header.name} ${header.quarter}/${header.year}`,
-      tonDauKy,
-      nhapTrongKy,
-      xuatTrongKy,
-      tonCuoiKy,
-      xuatThucTe,
-      thue,
-    };
   });
 
   const reportCount = await prisma.reportXNTHeader.count({ where });
@@ -77,7 +42,10 @@ const ReportPage = async ({ searchParams }: Props) => {
   return (
     <Flex direction="column" gap="3">
       <ReportAction />
-      <ReportTable searchParams={params} reports={reports} />
+      <ReportTable
+        searchParams={params}
+        reports={headers?.map(convertToRawReportXNTHeaderForm)}
+      />
       <Flex>
         <Pagination
           currentPage={page}

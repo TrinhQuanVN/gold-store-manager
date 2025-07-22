@@ -1,4 +1,11 @@
 export * from "./reportXNTHeaderSchemas";
+export * from "./reportXNTSchemas";
+export * from "./reportXNTGroupSchemas";
+
+export type * from "./reportXNTHeaderSchemas";
+export type * from "./reportXNTSchemas";
+export type * from "./reportXNTGroupSchemas";
+
 export * from "./transactionSchemas";
 export type * from "./transactionSchemas";
 export type * from "./contactSchemas";

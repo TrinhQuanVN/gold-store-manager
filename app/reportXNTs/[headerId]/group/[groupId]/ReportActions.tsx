@@ -3,21 +3,28 @@
 import { Button, Dialog } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import ReportXNTGroupFormPopup from "../_components/ReportXNTGroupFormPopup";
+import ReportXNTFormPopup from "../../../_components/ReportXNTFormPopup";
 
-const ReportActions = ({ reportHeaderId }: { reportHeaderId: number }) => {
+const ReportActions = ({
+  reportHeaderId,
+  groupId,
+}: {
+  reportHeaderId: number;
+  groupId: number;
+}) => {
   const [openDialog, setOpenDialog] = useState(false);
   const router = useRouter(); // ✅ gọi router
   return (
     <Dialog.Root open={openDialog} onOpenChange={setOpenDialog}>
       <Dialog.Trigger>
-        <Button size="2">Thêm nhóm báo cáo</Button>
+        <Button size="2">Thêm sản phẩm</Button>
       </Dialog.Trigger>
 
       <Dialog.Content maxWidth="450px">
-        <Dialog.Title>Thêm khách hàng</Dialog.Title>
-        <ReportXNTGroupFormPopup
-          headerId={reportHeaderId} // ✅ truyền headerId
+        <Dialog.Title>Thêm sản phẩm thuộc nhóm báo cáo</Dialog.Title>
+        <ReportXNTFormPopup
+          headerId={reportHeaderId}
+          groupId={groupId} // ✅ truyền headerId
           onSuccess={() => {
             setOpenDialog(false);
             router.refresh(); // ✅ reload lại trang server component
