@@ -1,3 +1,4 @@
+import { RawContactDataForm } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
@@ -35,11 +36,29 @@ export async function GET(req: NextRequest) {
     prisma.contact.count({ where: whereClause }),
   ]);
 
+  const convertToRawContact: RawContactDataForm[] = contacts.map((c) => ({
+    id: c.id.toString(),
+    groupId: c.group?.id.toString(),
+    name: c.name,
+    phone: c.phone,
+    cccd: c.cccd,
+    address: c.address,
+    taxcode: c.taxcode,
+    note: c.note,
+    unaccentName: c.unaccentName,
+    group: {
+      id: c.group.id.toString(),
+      name: c.group?.name,
+      description: c.group?.description || "",
+      color: c.group?.color || "gray",
+    },
+  }));
+
   const hasMore = offset + PAGE_SIZE < total;
 
   return NextResponse.json(
     {
-      contactWithGroups: contacts,
+      contactWithGroups: convertToRawContact,
       hasMore,
     },
     { status: 200 }

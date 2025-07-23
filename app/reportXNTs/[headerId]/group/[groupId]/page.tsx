@@ -40,7 +40,12 @@ const ReportXNTGroupDetailPage = async ({
     <>
       <Grid columns={{ initial: "1", sm: "5" }} gap="5">
         <Box className="md:col-span-4">
-          <ReportXNTGroupDetail group={group} />
+          <ReportXNTGroupDetail
+            group={{
+              name: group.name,
+              stt: group.stt.toString(),
+            }}
+          />
         </Box>
         <Box>
           <Flex direction="column" gap="4">

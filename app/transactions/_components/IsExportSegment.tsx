@@ -2,18 +2,18 @@
 
 import { Control, Controller } from "react-hook-form";
 import { SegmentedControl } from "@radix-ui/themes";
-import { TransactionInputDataForm } from "@/app/validationSchemas";
 import { BackGroundTransactionFormColor } from "./TransactionForm";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 
 interface Props {
-  control: Control<any>;
+  control: Control<RawTransactionHeaderFormData>;
 }
 
 const IsExportSegment = ({ control }: Props) => {
   return (
     <Controller
       control={control}
-      name="header.isExport"
+      name="isExport"
       render={({ field }) => (
         <SegmentedControl.Root
           value={field.value ? "export" : "import"}

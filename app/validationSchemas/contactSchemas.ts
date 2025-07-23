@@ -1,10 +1,11 @@
 import { Contact, ContactGroup } from "@prisma/client";
+import { group } from "console";
 import { z } from "zod";
 
 export const rawContactGroup = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Xin nhập tên nhóm khách hàng").max(255),
-  color: z.string().optional(),
+  color: z.string().default("gray"),
   description: z.string().optional(),
 });
 
@@ -18,11 +19,12 @@ export const rawContactSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Xin nhập tên khách hàng").max(255),
   groupId: z.string().min(1, "Xin chọn nhóm khách hàng"),
-  phone: z.string().nullable().optional(),
-  cccd: z.string().nullable().optional(),
-  taxcode: z.string().nullable().optional(),
-  address: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
+  group: rawContactGroup.nullable(),
+  phone: z.string().nullable(),
+  cccd: z.string().nullable(),
+  taxcode: z.string().nullable(),
+  address: z.string().nullable(),
+  note: z.string().nullable(),
 });
 
 export const contactSchema = rawContactSchema.transform((data) => ({
@@ -30,7 +32,7 @@ export const contactSchema = rawContactSchema.transform((data) => ({
   groupId: parseInt(data.groupId!),
 }));
 
-export type RawContactDataForm = z.infer<typeof rawContactSchema>;
+export type RawContactDataForm = z.input<typeof rawContactSchema>;
 
 // export function toRawContact(
 //   contact: Contact & { group: ContactGroup }

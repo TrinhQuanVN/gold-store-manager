@@ -1,25 +1,21 @@
 "use client";
 
 import { ErrorMessage } from "@/app/components";
-import {
-  TransactionInputDataForm,
-  TransactionOutputDataForm,
-} from "@/app/validationSchemas";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
+import { toNumberVN, toStringVN } from "@/utils";
 import { Button, Flex, Grid, Text } from "@radix-ui/themes";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import {
   Control,
   FieldErrors,
   useFieldArray,
-  UseFormRegister,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
 import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailRow from "./GoldDetailRow";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
-import { useEffect, useState } from "react";
-import { toNumberVN, toStringVN } from "@/utils";
 
 const CustomCollapsible = dynamic(
   () => import("@/app/components/CustomCollapsible"),
@@ -30,9 +26,9 @@ const CustomCollapsible = dynamic(
 );
 
 interface Props {
-  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
-  setValue: UseFormSetValue<TransactionInputDataForm>;
-  errors: FieldErrors<TransactionInputDataForm>;
+  control: Control<RawTransactionHeaderFormData>;
+  setValue: UseFormSetValue<RawTransactionHeaderFormData>;
+  errors: FieldErrors<RawTransactionHeaderFormData>;
 }
 
 const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
@@ -51,17 +47,17 @@ const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
       .length ?? 0;
 
   const totalWeight = goldDetailsWatch?.reduce((sum, row) => {
-    const w = toNumberVN(row.weight || "0");
+    const w = parseFloat(row.weight || "0");
     return sum + (isNaN(w) ? 0 : w);
   }, 0);
 
   const totalDiscount = goldDetailsWatch?.reduce((sum, row) => {
-    const d = toNumberVN(row.discount || "0");
+    const d = parseFloat(row.discount || "0");
     return sum + (isNaN(d) ? 0 : d);
   }, 0);
 
   const totalAmount = goldDetailsWatch?.reduce((sum, row) => {
-    const a = toNumberVN(row.amount || "0");
+    const a = parseFloat(row.amount || "0");
     return sum + (isNaN(a) ? 0 : a);
   }, 0);
 
@@ -70,8 +66,8 @@ const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
   useEffect(() => {
     if (totalCount > 0) {
       const formatted = `${toStringVN(
-        totalWeight
-      )} chỉ nhẫn tròn = ${toStringVN(totalAmount)}`;
+        totalWeight ?? 0
+      )} chỉ nhẫn tròn = ${toStringVN(totalAmount ?? 0)}`;
       setTitle(formatted);
     } else {
       setTitle("Nhẫn tròn");
@@ -80,7 +76,7 @@ const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
 
   const currentGoldPrice = useWatch({
     control,
-    name: "header.currentGoldPrice",
+    name: "currentGoldPrice",
   });
 
   return (

@@ -3,7 +3,7 @@ import Spinner from "@/app/components/Spinner";
 import { rawGroup, rawGroupFormData } from "@/app/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReportXNTGroup } from "@prisma/client";
-import { Button, Flex, TextField } from "@radix-ui/themes";
+import { Button, Flex, TextField, Text } from "@radix-ui/themes";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,9 +57,11 @@ const ReportXNTGroupFormPopup = ({
   return (
     <form onSubmit={onSubmit}>
       <Flex direction="column" gap="3">
+        <Text>Tên nhóm báo cáo:</Text>
         <TextField.Root placeholder="Tên nhóm báo cáo" {...register("name")} />
         <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
+        <Text>Số thứ tự trong báo cáo:</Text>
         <TextField.Root placeholder="Số thứ tự" {...register("stt")} />
         <ErrorMessage>{errors.stt?.message}</ErrorMessage>
 

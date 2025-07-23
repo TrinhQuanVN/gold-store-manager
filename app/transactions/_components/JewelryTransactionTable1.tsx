@@ -1,7 +1,6 @@
 "use client";
 
 import { CustomCollapsible, JewelryBadge } from "@/app/components";
-import { formatNumberVN } from "@/utils";
 import {
   Jewelry,
   JewelryCategory,

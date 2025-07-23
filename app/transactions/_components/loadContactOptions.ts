@@ -2,15 +2,12 @@ import { Contact, ContactGroup } from "@prisma/client";
 import type { GroupBase, OptionsOrGroups } from "react-select";
 import axios from "axios";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
-
-export interface contactWithGroups extends Contact {
-  group: ContactGroup;
-}
+import { RawContactDataForm } from "@/app/validationSchemas";
 
 export type OptionType = {
   value: number;
   label: string;
-  data: contactWithGroups;
+  data: RawContactDataForm;
   searchValues: string[];
 };
 
@@ -31,12 +28,12 @@ export const loadOptions = async (
   });
 
   const { contactWithGroups: contacts, hasMore } = response.data as {
-    contactWithGroups: contactWithGroups[];
+    contactWithGroups: RawContactDataForm[];
     hasMore: boolean;
   };
 
   const options: OptionType[] = contacts.map((c) => ({
-    value: c.id,
+    value: parseInt(c.id!),
     label: `${c.name} - ${c.phone ?? ""} - ${c.cccd ?? ""} - ${
       c.address ?? ""
     }`,

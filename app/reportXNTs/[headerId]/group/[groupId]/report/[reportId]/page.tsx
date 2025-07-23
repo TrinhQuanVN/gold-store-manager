@@ -13,16 +13,22 @@ import { convertToRawReportXNTForm } from "@/app/reportXNTs/_components/convertT
 const ContactDetailPage = async ({
   params,
 }: {
-  params: { headerId: string; reportId: string };
+  params: { headerId: string; groupId: string; reportId: string };
 }) => {
   //   const session = await getServerSession(authOptions);
   const _params = await params;
   const headerId = parseInt(_params.headerId);
+  const groupId = parseInt(_params.groupId);
 
   const header = await prisma.reportXNTHeader.findUnique({
     where: { id: headerId },
   });
   if (!header) notFound();
+
+  const group = await prisma.reportXNTGroup.findUnique({
+    where: { id: groupId },
+  });
+  if (!group) notFound();
 
   const report = await prisma.reportXNT.findUnique({
     where: { id: _params.reportId },
@@ -42,10 +48,12 @@ const ContactDetailPage = async ({
         <Flex direction="column" gap="4">
           <EditReportXNTButton
             headerId={headerId}
+            groupId={groupId}
             reportId={_params.reportId}
           />
           <DeleteReportXNTButton
             headerId={headerId}
+            groupId={groupId}
             reportId={_params.reportId}
           />
         </Flex>

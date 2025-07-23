@@ -1,7 +1,4 @@
-import {
-  TransactionInputDataForm,
-  TransactionOutputDataForm,
-} from "@/app/validationSchemas";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 import { Gold } from "@prisma/client";
 import { Button, Flex, Grid, Text, TextField } from "@radix-ui/themes";
 import axios from "axios";
@@ -17,8 +14,8 @@ import { NumericFormattedField } from "./NumericFormattedField";
 
 interface Props {
   index: number;
-  setValue: UseFormSetValue<TransactionInputDataForm>;
-  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
+  setValue: UseFormSetValue<RawTransactionHeaderFormData>;
+  control: Control<RawTransactionHeaderFormData>;
   onRemove: () => void;
   lastGoldPrice: number;
 }

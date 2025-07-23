@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import TransactionFormSkeleton from "../../_components/TransactionFormSkeleton";
 import { convertPrismaTransactionHeaderWithRelationToString } from "@/prismaRepositories/StringConverted";
 import { toStringVN } from "@/utils";
+import { converttoRawTransactionHeaderFormData } from "../../_components/convertToRaw";
 // import ContactForm from "../../_components/ContactForm";
 
 const TransactionForm = dynamic(
@@ -36,12 +37,7 @@ const EditTransactionPage = async ({ params }: Props) => {
       },
       jewelryTransactionDetails: {
         include: {
-          jewelry: {
-            include: {
-              category: true,
-              jewelryType: true,
-            },
-          },
+          jewelry: true,
         },
       },
       paymentAmounts: true,
@@ -49,41 +45,9 @@ const EditTransactionPage = async ({ params }: Props) => {
   });
   if (!transaction) notFound();
 
-  const goldTotal = transaction.goldTransactionDetails.reduce(
-    (sum, g) => sum + Number(g.amount ?? 0),
-    0
-  );
-  const jewelryTotal = transaction.jewelryTransactionDetails.reduce(
-    (sum, j) => sum + Number(j.amount ?? 0),
-    0
-  );
-  const currentGoldPrice = await prisma.goldPrice.findFirst({
-    where: {
-      createdAt: {
-        lte: transaction.createdAt, // tìm bản ghi gần nhất trước thời điểm này
-      },
-    },
-    orderBy: {
-      createdAt: "desc", // mới nhất trước thời điểm truyền vào
-    },
-  });
+  const converted = converttoRawTransactionHeaderFormData(transaction);
 
-  const converted = {
-    ...convertPrismaTransactionHeaderWithRelationToString(transaction),
-    totalAmount: goldTotal + jewelryTotal,
-    currentGoldPrice: Number(currentGoldPrice?.sell ?? 0),
-  };
-
-  const contactGroup = await prisma.contactGroup.findMany();
-
-  console.log(converted.createdAt);
-
-  return (
-    <TransactionForm
-      transactionHeaderWithRelation={converted}
-      contactGroup={contactGroup}
-    />
-  );
+  return <TransactionForm transaction={converted} />;
 };
 
 export default EditTransactionPage;

@@ -34,19 +34,19 @@ function isBadgeColor(value: string | null): value is BadgeColor {
 }
 
 const ContactStatusBadge = ({
-  ContactGroup,
+  name,
+  color,
 }: {
-  ContactGroup: ContactGroup;
+  name: string;
+  color: string | "gray";
 }) => {
   const fallbackColor: BadgeColor = "gray";
 
-  const badgeColor: BadgeColor = isBadgeColor(ContactGroup.color)
-    ? ContactGroup.color
-    : fallbackColor;
+  const badgeColor: BadgeColor = isBadgeColor(color) ? color : fallbackColor;
 
   return (
     <Badge color={badgeColor} variant="soft" radius="full">
-      {ContactGroup.name}
+      {name}
     </Badge>
   );
 };

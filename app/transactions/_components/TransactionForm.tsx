@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ContactGroup, GoldPrice } from "@prisma/client";
+import { GoldPrice } from "@prisma/client";
 import { Button, Callout, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 // import { useRouter } from "next/navigation";
@@ -11,12 +11,10 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
 import {
-  rawTransactionSchema,
-  TransactionInputDataForm,
-  TransactionOutputDataForm,
+  RawTransactionHeaderFormData,
+  rawTransactionHeaderSchema,
 } from "@/app/validationSchemas";
-import { ConvertedTransactionHeaderWithRelation } from "@/prismaRepositories/StringConverted";
-import { toDateStringIso, toDateStringVn, toStringVN } from "@/utils";
+import { toStringVN } from "@/utils";
 import { vi } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
@@ -27,19 +25,15 @@ import GoldTransactionForm from "./GoldTransactionForm";
 import IsExportSegment from "./IsExportSegment";
 import JewelryTransactionForm from "./JewelryTransactionForm";
 import PaymentForm from "./PaymentForm";
+import { ContactWithGroup } from "@/types";
 
 interface Props {
-  transactionHeaderWithRelation?: ConvertedTransactionHeaderWithRelation & {
-    currentGoldPrice: number;
-    totalAmount: number;
-  };
-  contactGroup: ContactGroup[];
+  id?: number;
+  transaction?: RawTransactionHeaderFormData;
+  contactGroup: ContactWithGroup[];
 }
 
-const TransactionForm = ({
-  transactionHeaderWithRelation,
-  contactGroup,
-}: Props) => {
+const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
@@ -51,49 +45,22 @@ const TransactionForm = ({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<TransactionInputDataForm, any, TransactionOutputDataForm>({
-    mode: "onSubmit",
-    resolver: zodResolver(rawTransactionSchema),
-    defaultValues: {
-      header: {
-        contactId: transactionHeaderWithRelation?.contactId?.toString() ?? "",
-        note: transactionHeaderWithRelation?.note ?? "",
-        date:
-          transactionHeaderWithRelation?.createdAt ?? new Date().toISOString(),
-        currentGoldPrice:
-          transactionHeaderWithRelation?.currentGoldPrice?.toString() ?? "0",
-        isExport: transactionHeaderWithRelation?.isExport ?? true,
-        totalAmount:
-          transactionHeaderWithRelation?.totalAmount.toString() ?? "0",
-        paymentMethode: transactionHeaderWithRelation?.paymentMethode ?? "CK",
-      },
-      paymentAmounts: transactionHeaderWithRelation?.paymentAmounts.map(
-        (p) => ({
-          type: p.type,
-          amount: p.amount.toString(),
-        })
-      ) ?? [
-        { type: "CK", amount: "0" },
-        { type: "TM", amount: "0" },
+  } = useForm<RawTransactionHeaderFormData>({
+    mode: "onChange",
+    resolver: zodResolver(rawTransactionHeaderSchema),
+    defaultValues: transaction ?? {
+      date: new Date().toISOString(),
+      currentGoldPrice: "",
+      totalAmount: "",
+      isExport: true,
+      contactId: "",
+      goldDetails: [],
+      jewelryDetails: [],
+      payments: [
+        { amount: "", type: "CK" },
+        { amount: "", type: "TM" },
       ],
-      goldDetails:
-        transactionHeaderWithRelation?.goldTransactionDetails.map((g) => ({
-          goldId: g.goldId.toString(),
-          goldName: g.gold.name,
-          price: g.price.toString(),
-          weight: g.weight.toString(),
-          discount: g.discount.toString() ?? "0",
-          amount: g.amount.toString(),
-        })) ?? [],
-      jewelryDetails:
-        transactionHeaderWithRelation?.jewelryTransactionDetails.map((j) => ({
-          jewelryId: j.jewelryId.toString(),
-          jewelryName: `${j.jewelry.name} - ${j.jewelry.jewelryType.name} - ${j.jewelry.category.name}`,
-          price: j.price.toString(),
-          weight: j.jewelry.totalWeight.toString(),
-          discount: j.discount.toString() ?? "0",
-          amount: j.amount.toString(),
-        })) ?? [],
+      paymentMethode: "CK",
     },
   });
 
@@ -105,15 +72,10 @@ const TransactionForm = ({
       setSubmitting(true);
       console.log();
 
-      if (transactionHeaderWithRelation) {
-        await axios.patch(
-          "/api/transactions/" + transactionHeaderWithRelation.id,
-          data
-        );
+      if (transaction) {
+        await axios.patch("/api/transactions/" + id, data);
       } else {
-        console.log("start creating transaction");
         await axios.post("/api/transactions", data);
-        console.log("end creating transaction");
       }
       router.push("/transactions/list");
       router.refresh();
@@ -124,7 +86,7 @@ const TransactionForm = ({
     }
   });
 
-  const isExport = watch("header.isExport");
+  const isExport = watch("isExport");
 
   const goldDetails = useWatch({
     control,
@@ -142,25 +104,22 @@ const TransactionForm = ({
       });
       const data = response.data;
       if (data) {
-        setValue(
-          "header.currentGoldPrice",
-          Number(response.data.sell).toString()
-        );
+        setValue("currentGoldPrice", Number(response.data.sell).toString());
       }
     } catch (err) {
       console.error("Không thể lấy giá vàng theo ngày:", err);
-      setValue("header.currentGoldPrice", "0");
+      setValue("currentGoldPrice", "0");
     }
   };
 
   useEffect(() => {
-    const sumAmount = (arr?: { amount?: string }[]) =>
+    const sumAmount = (arr?: { amount?: string }[] | null) =>
       Array.isArray(arr)
         ? arr.reduce((total, item) => total + parseFloat(item.amount ?? "0"), 0)
         : 0;
 
     const total = sumAmount(goldDetails) + sumAmount(jewelryDetails);
-    setValue("header.totalAmount", total.toString());
+    setValue("totalAmount", total.toString());
   }, [goldDetails, jewelryDetails, setValue]);
 
   // const flattenErrors = (errors: any, path = ""): string[] => {
@@ -212,7 +171,7 @@ const TransactionForm = ({
         >
           <Controller
             control={control}
-            name="header.date"
+            name="date"
             render={({ field }) => (
               <DatePicker
                 locale={vi}
@@ -236,7 +195,7 @@ const TransactionForm = ({
           <label className="text-sm font-medium">Giá vàng:</label>
           <Controller
             control={control}
-            name="header.currentGoldPrice"
+            name="currentGoldPrice"
             render={({ field }) => (
               <NumericFormat
                 {...field}
@@ -255,18 +214,13 @@ const TransactionForm = ({
 
         <TextField.Root
           placeholder="Ghi chú"
-          {...register("header.note")}
+          {...register("note")}
         ></TextField.Root>
-        <ErrorMessage>{errors.header?.note?.message}</ErrorMessage>
+        <ErrorMessage>{errors.note?.message}</ErrorMessage>
 
         <Flex direction="column" gap="4">
-          <ContactForm
-            groups={contactGroup}
-            name="header.contactId"
-            control={control}
-            contact={transactionHeaderWithRelation?.contact}
-          />
-          <ErrorMessage>{errors.header?.contactId?.message}</ErrorMessage>
+          <ContactForm contactGroup={contactGroup} control={control} />
+          <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
 
           <GoldTransactionForm
             control={control}
@@ -287,19 +241,18 @@ const TransactionForm = ({
         <Flex justify="end" className="my-4 border-gray-300">
           <strong>
             Tổng tiền:{" "}
-            {parseFloat(watch("header.totalAmount")) > 0
-              ? toStringVN(parseFloat(watch("header.totalAmount")))
+            {parseFloat(watch("totalAmount")) > 0
+              ? toStringVN(parseFloat(watch("totalAmount")))
               : "0"}
           </strong>
         </Flex>
 
         <PaymentForm control={control} watch={watch} setValue={setValue} />
 
-        <ErrorMessage>{errors.paymentAmounts?.message}</ErrorMessage>
+        <ErrorMessage>{errors.payments?.message}</ErrorMessage>
 
         <Button type="submit" disabled={isSubmitting}>
-          {transactionHeaderWithRelation ? "Cập nhật" : "Tạo mới"}{" "}
-          {isSubmitting && <Spinner />}
+          {transaction ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}
         </Button>
       </form>
     </div>

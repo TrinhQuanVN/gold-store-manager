@@ -4,16 +4,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { headerId: string; reportId: string } }
+  {
+    params,
+  }: { params: { headerId: string; groupId: string; reportId: string } }
 ) {
   const _params = await params;
   const headerId = parseInt(_params.headerId);
+  const groupId = parseInt(_params.groupId);
   const header = await prisma.reportXNTHeader.findUnique({
     where: { id: headerId },
   });
   if (!header) {
     return NextResponse.json({ error: "Header not found" }, { status: 404 });
   }
+  const group = await prisma.reportXNTGroup.findUnique({
+    where: { id: groupId },
+  });
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
   const body = await request.json();
   const validation = reportXNTTransferedSchema.safeParse(body);
 
@@ -57,18 +67,26 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { headerId: string; reportId: string } }
+  {
+    params,
+  }: { params: { headerId: string; groupId: string; reportId: string } }
 ) {
   const _params = await params;
+  const headerId = parseInt(_params.headerId);
+  const groupId = parseInt(_params.groupId);
   const header = await prisma.reportXNTHeader.findUnique({
-    where: { id: parseInt(_params.headerId) },
+    where: { id: headerId },
   });
   if (!header) {
-    return NextResponse.json(
-      { error: "report xnt header not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Header not found" }, { status: 404 });
   }
+  const group = await prisma.reportXNTGroup.findUnique({
+    where: { id: groupId },
+  });
+  if (!group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
   const report = await prisma.reportXNT.findUnique({
     where: { id: _params.reportId },
   });

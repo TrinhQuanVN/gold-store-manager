@@ -171,7 +171,9 @@ const ReportXNTTable = ({ searchParams, headerId, reports }: Props) => {
             <Table.Row className="" key={report.id}>
               <Table.Cell className="text-center">{report.id}</Table.Cell>
               <Table.Cell className="text-center">
-                <Link href={`/reportXNTs/${headerId}/group/${report.id}`}>
+                <Link
+                  href={`/reportXNTs/${headerId}/group/${report.groupId}/report/${report.id}`}
+                >
                   {report.name}
                 </Link>
               </Table.Cell>

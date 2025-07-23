@@ -1,4 +1,4 @@
-import { transactionTransferSchema } from "@/app/validationSchemas";
+import { rawTransactionHeaderSchema } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,7 +9,7 @@ export async function PATCH(
   const _params = await params;
   const id = parseInt(_params.id);
   const body = await request.json();
-  const validation = transactionTransferSchema.safeParse(body);
+  const validation = rawTransactionHeaderSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
@@ -30,7 +30,7 @@ export async function PATCH(
 
   // Kiểm tra goldId
   if (data.goldDetails?.length) {
-    const goldIds = data.goldDetails.map((g) => g.goldId);
+    const goldIds = data.goldDetails.map((g) => parseInt(g.goldId));
     const existingGolds = await prisma.gold.findMany({
       where: { id: { in: goldIds } },
       select: { id: true },
@@ -38,7 +38,7 @@ export async function PATCH(
     const validGoldIds = new Set(existingGolds.map((g) => g.id));
 
     for (const detail of data.goldDetails) {
-      if (!validGoldIds.has(detail.goldId)) {
+      if (!validGoldIds.has(parseInt(detail.goldId))) {
         return NextResponse.json(
           { error: `Invalid goldId: ${detail.goldId}` },
           { status: 400 }
@@ -49,7 +49,7 @@ export async function PATCH(
 
   // Kiểm tra jewelryId
   if (data.jewelryDetails?.length) {
-    const jewelryIds = data.jewelryDetails.map((j) => j.jewelryId);
+    const jewelryIds = data.jewelryDetails.map((j) => parseInt(j.jewelryId));
     const existingJewelry = await prisma.jewelry.findMany({
       where: { id: { in: jewelryIds } },
       select: { id: true },
@@ -57,13 +57,24 @@ export async function PATCH(
     const validJewelryIds = new Set(existingJewelry.map((j) => j.id));
 
     for (const detail of data.jewelryDetails) {
-      if (!validJewelryIds.has(detail.jewelryId)) {
+      if (!validJewelryIds.has(parseInt(detail.jewelryId))) {
         return NextResponse.json(
           { error: `Invalid jewelryId: ${detail.jewelryId}` },
           { status: 400 }
         );
       }
     }
+  }
+
+  const contactId = parseInt(data.contact?.id ?? "");
+  if (!contactId) {
+    return NextResponse.json({ error: "Invalid contact id" }, { status: 404 });
+  }
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+  });
+  if (!contact) {
+    return NextResponse.json({ error: "Invalid contact id" }, { status: 404 });
   }
 
   await prisma.$transaction(async (tx) => {
@@ -82,17 +93,17 @@ export async function PATCH(
     await tx.transactionHeader.update({
       where: { id },
       data: {
-        note: data.header.note,
-        isExport: data.header.isExport,
-        contactId: data.header.contactId,
-        paymentMethode: data.header.paymentMethode,
-        createdAt: data.header.date,
+        note: data.note,
+        isExport: data.isExport,
+        contactId: contact.id,
+        paymentMethode: data.paymentMethode,
+        createdAt: data.date,
       },
     });
 
     // Step 3: Recreate payment details
     await tx.paymentDetail.createMany({
-      data: data.paymentAmounts.map((p) => ({
+      data: data.payments.map((p) => ({
         transactionHeaderId: id,
         amount: p.amount,
         type: p.type,
@@ -104,7 +115,7 @@ export async function PATCH(
       await tx.goldTransactionDetail.createMany({
         data: data.goldDetails.map((g) => ({
           transactionHeaderId: id,
-          goldId: g.goldId,
+          goldId: parseInt(g.goldId),
           price: g.price,
           weight: g.weight,
           discount: g.discount ?? 0,
@@ -118,7 +129,7 @@ export async function PATCH(
       await tx.jewelryTransactionDetail.createMany({
         data: data.jewelryDetails.map((j) => ({
           transactionHeaderId: id,
-          jewelryId: j.jewelryId,
+          jewelryId: parseInt(j.jewelryId),
           price: j.price,
           discount: j.discount ?? 0,
           amount: j.amount,

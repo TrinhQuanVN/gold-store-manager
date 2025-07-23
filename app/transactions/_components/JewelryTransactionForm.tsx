@@ -1,12 +1,9 @@
 "use client";
 
 import { ErrorMessage } from "@/app/components";
-import {
-  TransactionInputDataForm,
-  TransactionOutputDataForm,
-} from "@/app/validationSchemas";
-import { Jewelry, JewelryTransactionDetail } from "@prisma/client";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 import { Button, Flex, Grid, Text } from "@radix-ui/themes";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import {
   Control,
@@ -18,7 +15,6 @@ import {
 import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 import JewelryDetailRow from "./JewelryDetailRow";
-import dynamic from "next/dynamic";
 
 const CustomCollapsible = dynamic(
   () => import("@/app/components/CustomCollapsible"),
@@ -29,9 +25,9 @@ const CustomCollapsible = dynamic(
 );
 
 interface Props {
-  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
-  setValue: UseFormSetValue<TransactionInputDataForm>;
-  errors: FieldErrors<TransactionInputDataForm>;
+  control: Control<RawTransactionHeaderFormData>;
+  setValue: UseFormSetValue<RawTransactionHeaderFormData>;
+  errors: FieldErrors<RawTransactionHeaderFormData>;
 }
 
 const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
@@ -79,7 +75,7 @@ const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
 
   const currentGoldPrice = useWatch({
     control,
-    name: "header.currentGoldPrice",
+    name: "currentGoldPrice",
   });
 
   return (

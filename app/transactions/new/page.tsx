@@ -1,18 +1,22 @@
 import dynamic from "next/dynamic";
 import TransactionFormSkeleton from "../_components/TransactionFormSkeleton";
-import { notFound } from "next/navigation";
+import { group } from "console";
 import { prisma } from "@/prisma/client";
 
 const TransactionForm = dynamic(
   () => import("../_components/TransactionForm"),
   {
-    //   ssr: false,
+    // ssr: true,
     loading: () => <TransactionFormSkeleton />,
   }
 );
-const contactGroup = await prisma.contactGroup.findMany();
 
 const NewTransactionPage = async () => {
+  const contactGroup = await prisma.contact.findMany({
+    include: {
+      group: true,
+    },
+  });
   return <TransactionForm contactGroup={contactGroup} />;
 };
 

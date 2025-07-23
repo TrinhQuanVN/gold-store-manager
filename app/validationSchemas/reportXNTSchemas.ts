@@ -21,8 +21,8 @@ export const rawReportXNTSchema = z.object({
 
   //   xuatDonGia: z.string().optional(),
 
-  tonCuoiKyQuantity: z.string().default("0"),
-  tonCuoiKyValue: z.string().default("0"),
+  tonCuoiKyQuantity: z.string().nullable(),
+  tonCuoiKyValue: z.string().nullable(),
 
   xuatThucTe: z.string().default("0"),
   thue: z.string().default("0"),
@@ -51,7 +51,7 @@ export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({
 }));
 
 export const reportXNTTransferedSchema = z.object({
-  headerId: z.number().min(1),
+  groupId: z.number().min(1),
   id: z.string().min(1),
   name: z.string().min(1),
   nhapQuantity: z.number().optional(),

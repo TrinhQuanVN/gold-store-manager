@@ -1,12 +1,10 @@
 "use client";
 
-import { RawReportXNTHeaderForm } from "@/app/validationSchemas";
-import { DateToStringVN } from "@/utils";
-import { ReportXNTGroup } from "@prisma/client";
+import { rawGroupFormData } from "@/app/validationSchemas";
 import { Card, DataList, Heading } from "@radix-ui/themes";
 
 interface Props {
-  group: ReportXNTGroup;
+  group: rawGroupFormData;
 }
 
 const ReportXNTGroupDetail = ({ group }: Props) => {

@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  TransactionInputDataForm,
-  TransactionOutputDataForm,
-} from "@/app/validationSchemas";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 import { toNumberVN } from "@/utils";
-import { PaymentDetail } from "@prisma/client";
 import { Flex, Grid } from "@radix-ui/themes";
 import { Label } from "@radix-ui/themes/components/context-menu";
 import dynamic from "next/dynamic";
@@ -28,13 +24,13 @@ const CustomCollapsible = dynamic(
 );
 
 interface Props {
-  control: Control<TransactionInputDataForm, any, TransactionOutputDataForm>;
-  watch: UseFormWatch<TransactionInputDataForm>;
-  setValue: UseFormSetValue<TransactionInputDataForm>;
+  control: Control<RawTransactionHeaderFormData>;
+  watch: UseFormWatch<RawTransactionHeaderFormData>;
+  setValue: UseFormSetValue<RawTransactionHeaderFormData>;
 }
 
 const PaymentForm = ({ control, setValue }: Props) => {
-  const amounts = useWatch({ control: control, name: "paymentAmounts" });
+  const amounts = useWatch({ control: control, name: "payments" });
 
   useEffect(() => {
     const bank = amounts.find((a) => a.type === "CK");
@@ -44,13 +40,13 @@ const PaymentForm = ({ control, setValue }: Props) => {
     const cashAmount = toNumberVN(cash?.amount || "0");
 
     if (bankAmount > 0 && cashAmount > 0) {
-      setValue("header.paymentMethode", "CK_TM");
+      setValue("paymentMethode", "CK_TM");
     } else if (bankAmount > 0) {
-      setValue("header.paymentMethode", "CK");
+      setValue("paymentMethode", "CK");
     } else if (cashAmount > 0) {
-      setValue("header.paymentMethode", "TM");
+      setValue("paymentMethode", "TM");
     } else {
-      setValue("header.paymentMethode", "CK"); // mặc định nếu cả 2 đều = 0
+      setValue("paymentMethode", "CK"); // mặc định nếu cả 2 đều = 0
     }
   }, [amounts, setValue]);
 
@@ -59,9 +55,9 @@ const PaymentForm = ({ control, setValue }: Props) => {
     if (index >= 0) {
       const updated = [...amounts];
       updated[index].amount = value;
-      setValue("paymentAmounts", updated);
+      setValue("payments", updated);
     } else {
-      setValue("paymentAmounts", [...amounts, { type, amount: value }]);
+      setValue("payments", [...amounts, { type, amount: value }]);
     }
   };
 
@@ -71,7 +67,7 @@ const PaymentForm = ({ control, setValue }: Props) => {
     <CustomCollapsible title={title} defaultOpen={true}>
       <Flex direction="column" gap="3">
         <Controller
-          name="paymentAmounts"
+          name="payments"
           control={control}
           render={() => (
             <Grid columns="auto 1fr" gap="3" align="center">

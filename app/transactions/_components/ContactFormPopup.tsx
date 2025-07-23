@@ -11,12 +11,13 @@ import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
 import { Contact, ContactGroup } from "@prisma/client";
 import { ContactWithGroup } from "@/types";
+import { raw } from "@prisma/client/runtime/library";
 
 interface Props {
-  onSuccess: (contact: ContactWithGroup) => void;
+  onSuccess: (contact: RawContactDataForm) => void;
   onCancel?: () => void;
   groups: ContactGroup[]; // ✅ truyền danh sách nhóm khách hàng
-  contact?: ContactWithGroup; // ➕ nếu có → là chỉnh sửa
+  contact?: RawContactDataForm; // ➕ nếu có → là chỉnh sửa
 }
 
 const ContactFormPopup = ({ onSuccess, onCancel, groups, contact }: Props) => {
@@ -29,25 +30,18 @@ const ContactFormPopup = ({ onSuccess, onCancel, groups, contact }: Props) => {
     formState: { errors },
   } = useForm<RawContactDataForm>({
     resolver: zodResolver(rawContactSchema),
-    defaultValues: {
-      name: contact?.name ?? "",
-      groupId: contact?.groupId?.toString() ?? groups[0]?.id.toString() ?? "",
-      address: contact?.address ?? "",
-      phone: contact?.phone ?? "",
-      cccd: contact?.cccd ?? "",
-      note: contact?.note ?? "",
-    },
+    defaultValues: rawContactSchema.parse(contact ?? rawContactSchema),
   });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       setSubmitting(true);
       const res = contact
-        ? await axios.patch<ContactWithGroup>(
+        ? await axios.patch<RawContactDataForm>(
             `/api/contacts/${contact.id}`,
             data
           )
-        : await axios.post<ContactWithGroup>("/api/contacts", data);
+        : await axios.post<RawContactDataForm>("/api/contacts", data);
       onSuccess(res.data);
     } catch (err) {
       setSubmitting(false);
@@ -82,7 +76,7 @@ const ContactFormPopup = ({ onSuccess, onCancel, groups, contact }: Props) => {
             </Select.Root>
           )}
         />
-        <ErrorMessage>{errors.groupId?.message}</ErrorMessage>
+        <ErrorMessage>{errors.group?.message}</ErrorMessage>
 
         <TextField.Root placeholder="Ghi chú" {...register("note")} />
 

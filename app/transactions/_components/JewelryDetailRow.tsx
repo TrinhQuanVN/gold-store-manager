@@ -1,24 +1,21 @@
-import { TransactionInputDataForm } from "@/app/validationSchemas";
-import { Jewelry, JewelryCategory, JewelryType } from "@prisma/client";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
+import { JewelryWithRelation } from "@/types";
 import { Button, Flex, Grid, Text, TextField } from "@radix-ui/themes";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
+  Control,
   Controller,
-  FieldErrors,
-  UseFormRegister,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
 import { TiDelete } from "react-icons/ti";
 import { NumericFormattedField } from "./NumericFormattedField";
-import { JewelryWithRelation } from "@/types";
-import { toNumberVN, toStringVN } from "@/utils";
 
 interface Props {
   index: number;
-  setValue: UseFormSetValue<TransactionInputDataForm>;
-  control: any;
+  setValue: UseFormSetValue<RawTransactionHeaderFormData>;
+  control: Control<RawTransactionHeaderFormData>;
   onRemove: () => void;
   lastGoldPrice: number;
 }

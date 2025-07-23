@@ -18,10 +18,10 @@ import Spinner from "@/app/components/Spinner";
 interface Props {
   contact?: Contact & { group: ContactGroup };
   groups: ContactGroup[]; // List of available groups
-  onSuccess?: () => void; // ✅ gọi khi tạo/sửa thành công
+  redirectTo?: string; // Optional redirect URL after form submission
 }
 
-const ContactForm = ({ contact, groups, onSuccess }: Props) => {
+const ContactForm = ({ contact, groups, redirectTo }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
@@ -41,6 +41,15 @@ const ContactForm = ({ contact, groups, onSuccess }: Props) => {
       phone: contact?.phone ?? "",
       cccd: contact?.cccd ?? "",
       note: contact?.note ?? "",
+      group:
+        contact && contact.group
+          ? {
+              id: contact.group.id.toString(),
+              name: contact.group.name,
+              color: contact.group.color ?? "gray",
+              description: contact.group.description ?? "",
+            }
+          : null,
     },
   });
 
@@ -54,8 +63,9 @@ const ContactForm = ({ contact, groups, onSuccess }: Props) => {
       }
       setSubmitting(false);
 
-      if (onSuccess) onSuccess(); // ✅ gọi callback
-      else {
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
         router.push("/contacts/list"); // fallback cho route mặc định
         router.refresh();
       }
@@ -68,6 +78,16 @@ const ContactForm = ({ contact, groups, onSuccess }: Props) => {
 
   return (
     <div className="max-w-xl">
+      {/* {Object.entries(errors).length > 0 && (
+        <Callout.Root color="red" className="mb-4">
+          <Callout.Text>Vui lòng kiểm tra các lỗi sau:</Callout.Text>
+          <ul className="list-disc list-inside space-y-1 pl-4 text-sm text-red-700">
+            {Object.entries(errors).map(([key, error]) => (
+              <li key={key}>{(error as any).message}</li>
+            ))}
+          </ul>
+        </Callout.Root>
+      )} */}
       {error && (
         <Callout.Root color="red" className="mb-4">
           <Callout.Text>{error}</Callout.Text>
