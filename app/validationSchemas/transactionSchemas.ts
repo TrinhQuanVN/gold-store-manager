@@ -6,7 +6,7 @@ import { rawContactGroup, rawContactSchema } from "./contactSchemas";
 export const paymentTypeEnum = z.enum(["CK", "TM"]);
 
 export const rawPaymentAmountSchema = z.object({
-  amount: z.string().min(1, "Trống !!!"),
+  amount: z.string(),
   type: paymentTypeEnum,
 });
 // .transform((data) => ({
@@ -53,8 +53,10 @@ export const rawJewelryTransactionDetailSchema = z.object({
 export const paymentMethodeEnum = z.enum(["CK", "TM", "CK_TM"]);
 
 export const rawTransactionHeaderSchema = z.object({
+  id: z.string().optional(),
   isExport: z.boolean(),
   contactId: z.string().min(1, "Xin chọn khách hàng"),
+  contactName: z.string().optional(),
   goldDetails: z.array(rawGoldTransactionDetailSchema),
   jewelryDetails: z.array(rawJewelryTransactionDetailSchema),
   payments: z
@@ -79,21 +81,27 @@ export type RawTransactionHeaderFormData = z.input<
 export const transferedTransactionHeaderSchema =
   rawTransactionHeaderSchema.transform((data) => ({
     ...data,
-    currentGoldPrice: parseFloat(data.currentGoldPrice ?? "0"),
+    contactId: parseInt(data.contactId),
+    currentGoldPrice: parseFloat(data.currentGoldPrice || "0"),
+    date: new Date(data.date),
     goldDetails: data.goldDetails.map((detail) => ({
-      ...detail,
-      price: parseFloat(detail.price ?? "0"),
-      weight: parseFloat(detail.weight ?? "0"),
-      discount: parseFloat(detail.discount ?? "0"),
-      amount: parseFloat(detail.amount ?? "0"),
+      goldId: parseInt(detail.goldId),
+      price: parseFloat(detail.price || "0"),
+      weight: parseFloat(detail.weight || "0"),
+      discount: parseFloat(detail.discount || "0"),
+      amount: parseFloat(detail.amount || "0"),
     })),
     jewelryDetails: data.jewelryDetails.map((detail) => ({
-      ...detail,
-      price: parseFloat(detail.price ?? "0"),
-      weight: parseFloat(detail.weight ?? "0"),
-      discount: parseFloat(detail.discount ?? "0"),
-      amount: parseFloat(detail.amount ?? "0"),
+      jewelryId: parseInt(detail.jewelryId),
+      price: parseFloat(detail.price || "0"),
+      discount: parseFloat(detail.discount || "0"),
+      amount: parseFloat(detail.amount || "0"),
     })),
+    payments: data.payments.map((payment) => ({
+      ...payment,
+      amount: parseFloat(payment.amount || "0"),
+    })),
+    totalAmount: parseFloat(data.totalAmount || "0"),
   }));
 
 // Schema giao dịch tổng

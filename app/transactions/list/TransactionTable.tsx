@@ -5,15 +5,14 @@ import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 import { ContactSearchQuery } from "./ContactSearchQuery";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 
 const TransactionTable = ({
   searchParams,
   transactions,
 }: {
   searchParams: ContactSearchQuery;
-  transactions: (ConvertedTransactionHeaderWithRelation & {
-    totalAmount: number;
-  })[];
+  transactions: RawTransactionHeaderFormData[];
 }) => {
   return (
     <Table.Root variant="surface">
@@ -57,32 +56,32 @@ const TransactionTable = ({
 
       <Table.Body>
         {transactions.map((t) => {
-          const goldExport = t.goldTransactionDetails
-            .map((g) => `${g.weight} chỉ ${g.gold.name}`)
+          const goldExport = t.goldDetails
+            .map((g) => `${toStringVN(+g.weight, 0, 4)} chỉ ${g.goldName}`)
             .join("; ");
-          const jewelryExport = t.jewelryTransactionDetails
-            .map((j) => `${j.jewelry.goldWeight} chỉ ${j.jewelry.name}`)
+          const jewelryExport = t.jewelryDetails
+            .map((j) => `${toStringVN(+j.weight, 0, 4)} chỉ ${j.jewelryName}`)
             .join("; ");
           const exportContent =
             t.isExport &&
             [goldExport, jewelryExport].filter(Boolean).join(" | ");
 
-          const goldImport = t.goldTransactionDetails
-            .map((g) => `${g.weight} chỉ ${g.gold.name}`)
+          const goldImport = t.goldDetails
+            .map((g) => `${toStringVN(+g.weight, 0, 4)} chỉ ${g.goldName}`)
             .join("; ");
-          const jewelryImport = t.jewelryTransactionDetails
-            .map((j) => `${j.jewelry.goldWeight} chỉ ${j.jewelry.name}`)
+          const jewelryImport = t.jewelryDetails
+            .map((j) => `${toStringVN(+j.weight, 0, 4)} chỉ ${j.jewelryName}`)
             .join("; ");
           const importContent =
             !t.isExport &&
             [goldImport, jewelryImport].filter(Boolean).join(" | ");
 
-          const cash = t.paymentAmounts
+          const cash = t.payments
             .filter((p) => p.type === "TM")
-            .reduce((sum, p) => sum + p.amount, 0);
-          const bank = t.paymentAmounts
+            .reduce((sum, p) => sum + +p.amount, 0);
+          const bank = t.payments
             .filter((p) => p.type === "CK")
-            .reduce((sum, p) => sum + p.amount, 0);
+            .reduce((sum, p) => sum + +p.amount, 0);
           const paymentText = [
             cash ? `Tiền mặt: ${toStringVN(cash)}` : "",
             bank ? `Chuyển khoản: ${toStringVN(bank)}` : "",
@@ -100,14 +99,14 @@ const TransactionTable = ({
                   {t.id}
                 </Link>
               </Table.Cell>
-              <Table.Cell>{DateToStringVN(t.createdAt)}</Table.Cell>
+              <Table.Cell>{DateToStringVN(t.date)}</Table.Cell>
               <Table.Cell>
-                {t.contact ? (
+                {t.contactId ? (
                   <Link
                     className=" text-blue-400 hover:text-blue-1000"
-                    href={`/contacts/${t.contact.id}`}
+                    href={`/contacts/${t.contactId}`}
                   >
-                    {t.contact.name}
+                    {t.contactName}
                   </Link>
                 ) : (
                   "-"
@@ -116,7 +115,8 @@ const TransactionTable = ({
               <Table.Cell>{exportContent || "-"}</Table.Cell>
               <Table.Cell>{importContent || "-"}</Table.Cell>
               <Table.Cell>{paymentText}</Table.Cell>
-              <Table.Cell>{toStringVN(t.totalAmount)}</Table.Cell>
+              <Table.Cell>{toStringVN(+t.totalAmount)}</Table.Cell>
+              <Table.Cell>{t.note || "-"}</Table.Cell>
             </Table.Row>
           );
         })}
@@ -137,6 +137,7 @@ const columns: {
   { label: "Nhập", value: "nhap" },
   { label: "Thanh toán", value: "payment" },
   { label: "Tổng tiền", value: "totalAmount" },
+  { label: "Ghi chú", value: "note" },
 ];
 
 export const columnNames = columns.map((column) => column.value);

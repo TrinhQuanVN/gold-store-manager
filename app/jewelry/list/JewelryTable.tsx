@@ -1,6 +1,6 @@
 import JewelryBadge from "@/app/components/JewelryBadge";
 import { ConvertedJewelryWithCateogryAndType } from "@/prismaRepositories/StringConverted";
-import { toStringVN } from "@/utils";
+import { DateToStringVN, toStringVN } from "@/utils";
 import { Jewelry } from "@prisma/client";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
@@ -92,7 +92,7 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
 
             <Table.Cell>{jewelry.reportXNTId || "-"}</Table.Cell>
 
-            <Table.Cell>{jewelry.createdAt}</Table.Cell>
+            <Table.Cell>{DateToStringVN(jewelry.createdAt)}</Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>

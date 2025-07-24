@@ -30,10 +30,10 @@ import { ContactWithGroup } from "@/types";
 interface Props {
   id?: number;
   transaction?: RawTransactionHeaderFormData;
-  contactGroup: ContactWithGroup[];
+  // contactGroup: ContactWithGroup[];
 }
 
-const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
+const TransactionForm = ({ id, transaction }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
@@ -122,18 +122,18 @@ const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
     setValue("totalAmount", total.toString());
   }, [goldDetails, jewelryDetails, setValue]);
 
-  // const flattenErrors = (errors: any, path = ""): string[] => {
-  //   let result: string[] = [];
-  //   for (const key in errors) {
-  //     const currentPath = path ? `${path}.${key}` : key;
-  //     if (errors[key]?.message) {
-  //       result.push(`${currentPath}: ${errors[key].message}`);
-  //     } else if (typeof errors[key] === "object") {
-  //       result = result.concat(flattenErrors(errors[key], currentPath));
-  //     }
-  //   }
-  //   return result;
-  // };
+  const flattenErrors = (errors: any, path = ""): string[] => {
+    let result: string[] = [];
+    for (const key in errors) {
+      const currentPath = path ? `${path}.${key}` : key;
+      if (errors[key]?.message) {
+        result.push(`${currentPath}: ${errors[key].message}`);
+      } else if (typeof errors[key] === "object") {
+        result = result.concat(flattenErrors(errors[key], currentPath));
+      }
+    }
+    return result;
+  };
 
   return (
     <div
@@ -144,7 +144,7 @@ const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
       } transition-colors`}
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        {/* <Callout.Root color="red" className="mb-4">
+        <Callout.Root color="red" className="mb-4">
           <ul className="list-disc ml-4 space-y-1 px-3 py-2">
             {flattenErrors(errors).map((err, idx) => (
               <li key={idx}>
@@ -152,7 +152,7 @@ const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
               </li>
             ))}
           </ul>
-        </Callout.Root> */}
+        </Callout.Root>
         {error && (
           <Callout.Root color="red" className="mb-4">
             <Callout.Text>{error}</Callout.Text>
@@ -219,7 +219,7 @@ const TransactionForm = ({ id, transaction, contactGroup }: Props) => {
         <ErrorMessage>{errors.note?.message}</ErrorMessage>
 
         <Flex direction="column" gap="4">
-          <ContactForm contactGroup={contactGroup} control={control} />
+          <ContactForm control={control} />
           <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
 
           <GoldTransactionForm

@@ -30,7 +30,10 @@ const ReportXNTGroupFormPopup = ({
     formState: { errors },
   } = useForm<rawGroupFormData>({
     resolver: zodResolver(rawGroup),
-    defaultValues: rawGroup.parse(group ?? rawGroup),
+    defaultValues: {
+      name: group?.name || "",
+      stt: group?.stt.toString() || "",
+    },
   });
 
   const onSubmit = handleSubmit(async (data) => {

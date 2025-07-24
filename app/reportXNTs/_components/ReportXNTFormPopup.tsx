@@ -7,6 +7,7 @@ import { Button, Flex, TextField, Text } from "@radix-ui/themes";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { convertToRawReportXNTForm } from "./convertToRawReportXNTHeaderForm";
 
 interface Props {
   onSuccess: (report: RawReportXNTForm) => void;
@@ -31,11 +32,16 @@ const ReportXNTFormPopup = ({
     formState: { errors },
   } = useForm<RawReportXNTForm>({
     resolver: zodResolver(rawReportXNTSchema),
-    defaultValues: rawReportXNTSchema.parse({
-      ...report,
-      unit: report?.unit ?? "chỉ",
-      groupId: report?.groupId?.toString() ?? groupId?.toString() ?? "",
-    }),
+    defaultValues: report
+      ? {
+          ...convertToRawReportXNTForm(report),
+          unit: report?.unit ?? "chỉ",
+          groupId: report?.groupId?.toString() ?? groupId?.toString() ?? "",
+        }
+      : {
+          unit: "chỉ",
+          groupId: groupId?.toString() ?? "",
+        },
   });
 
   const onSubmit = handleSubmit(async (data) => {

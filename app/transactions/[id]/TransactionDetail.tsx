@@ -41,16 +41,12 @@ export default function TransactionDetail({ transaction }: Props) {
           <DataList.Label>Khách hàng</DataList.Label>
           <DataList.Value>
             {contact?.name}
-            <ContactGroupBadge ContactGroup={contact?.group} />
+            <ContactGroupBadge
+              name={contact?.group.name}
+              color={contact?.group.color || "gray"}
+            />
           </DataList.Value>
         </DataList.Item>
-
-        {note ?? (
-          <DataList.Item>
-            <DataList.Label>Ghi chú</DataList.Label>
-            <DataList.Value>{note}</DataList.Value>
-          </DataList.Item>
-        )}
 
         <DataList.Item>
           <DataList.Label>Phương thức thanh toán</DataList.Label>
@@ -68,6 +64,11 @@ export default function TransactionDetail({ transaction }: Props) {
             ))}
             )
           </DataList.Value>
+        </DataList.Item>
+
+        <DataList.Item>
+          <DataList.Label>Ghi chú</DataList.Label>
+          <DataList.Value>{note}</DataList.Value>
         </DataList.Item>
       </DataList.Root>
 

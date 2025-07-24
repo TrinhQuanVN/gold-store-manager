@@ -13,46 +13,45 @@ conn = psycopg2.connect(
 header_id = 1
 
 cur = conn.cursor()
-cur.execute("TRUNCATE TABLE \"TaxPayer\" RESTART IDENTITY CASCADE;")
-conn.commit()
-taxpayer = [["Tên người nộp thuế: Doanh nghiệp tư nhân vàng bạc đá quý Hồng Quân",
-             "0700756585",
-             "SN 91, đường Nguyễn Văn Trỗi, phường Phủ Lý, tỉnh Ninh Bình"],
-          ]
-for name, taxcode, address in taxpayer:
-    cur.execute(
-        """
-        INSERT INTO "TaxPayer" ("name", "taxCode", "address")
-        VALUES (%s, %s, %s)
-        """,
-        (name, taxcode, address),
-    )
+# cur.execute("TRUNCATE TABLE \"TaxPayer\" RESTART IDENTITY CASCADE;")
+# conn.commit()
+# taxpayer = [["Tên người nộp thuế: Doanh nghiệp tư nhân vàng bạc đá quý Hồng Quân",
+#              "0700756585",
+#              "SN 91, đường Nguyễn Văn Trỗi, phường Phủ Lý, tỉnh Ninh Bình"],
+#           ]
+# for name, taxcode, address in taxpayer:
+#     cur.execute(
+#         """
+#         INSERT INTO "TaxPayer" ("name", "taxCode", "address")
+#         VALUES (%s, %s, %s)
+#         """,
+#         (name, taxcode, address),
+#     )
 
-conn.commit()
+# conn.commit()
 
-cur = conn.cursor()
-cur.execute("TRUNCATE TABLE \"ReportXNTGroup\" RESTART IDENTITY CASCADE;")
-conn.commit()
-groups = [["Vàng 9999 (24K)","I"],["Vàng trang sức 999 (23K)","II"],
-          ["Vàng trang sức 999 (23K)","II"],
-          ["Vàng trang sức 75% (18K)","III"],
-          ["Vàng trang sức 58,5% (14K)","VI"],
-          ["Vàng trang sức 41,6% (10K)","V"],
-          ["Bạc 999","VI"],]
-for name, stt in groups:
-    cur.execute(
-        """
-        INSERT INTO "ReportXNTGroup" ("name", "stt", "headerId")
-        VALUES (%s, %s, %s)
-        """,
-        (name, stt, header_id),
-    )
+# cur.execute("TRUNCATE TABLE \"ReportXNTGroup\" RESTART IDENTITY CASCADE;")
+# conn.commit()
+# groups = [["Vàng 9999 (24K)","1"],["Vàng trang sức 999 (23K)","2"],
+#           ["Vàng trang sức 999 (23K)","3"],
+#           ["Vàng trang sức 75% (18K)","4"],
+#           ["Vàng trang sức 58,5% (14K)","5"],
+#           ["Vàng trang sức 41,6% (10K)","6"],
+#           ["Bạc 999","7"],]
+# for name, stt in groups:
+#     cur.execute(
+#         """
+#         INSERT INTO "ReportXNTGroup" ("name", "stt", "headerId")
+#         VALUES (%s, %s, %s)
+#         """,
+#         (name, stt, header_id),
+#     )
 
-conn.commit()
+# conn.commit()
 
 # === 1. RESET bảng ReportXNT ===
-cur.execute("TRUNCATE TABLE \"ReportXNT\" RESTART IDENTITY CASCADE;")
-conn.commit()
+# cur.execute("TRUNCATE TABLE \"ReportXNT\" RESTART IDENTITY CASCADE;")
+# conn.commit()
 print("✅ Đã reset bảng ReportXNT.")
 
 # === 2. Đọc file Excel ===
@@ -80,15 +79,15 @@ for row in ws.iter_rows(min_row=row_start, values_only=True):
 
     cur.execute("""
         INSERT INTO "ReportXNT" (
-            "groupId", "stt","id", "headerId", "name", "unit",
+            "groupId", "stt","id", "name", "unit",
             "tonDauKyQuantity", "tonDauKyValue",
             "nhapQuantity", "nhapValue",
             "xuatQuantity", "xuatValue",
             "tonCuoiKyQuantity", "tonCuoiKyValue"
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        groupId, stt, str(id), header_id, str(name), "chỉ",
+        groupId, stt, id, str(name), "chỉ",
         tonDauKyQuantity or 0, tonDauKyValue or 0,
         nhapQuantity or 0, nhapValue or 0,
         xuatQuantity or 0, xuatValue or 0,

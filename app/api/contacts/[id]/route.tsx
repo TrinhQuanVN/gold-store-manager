@@ -1,4 +1,7 @@
-import { contactSchema } from "@/app/validationSchemas/contactSchemas";
+import {
+  contactSchema,
+  RawContactDataForm,
+} from "@/app/validationSchemas/contactSchemas";
 import { prisma } from "@/prisma/client";
 import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { NextRequest, NextResponse } from "next/server";
@@ -76,4 +79,41 @@ export async function DELETE(
     { message: "Contact deleted successfully" },
     { status: 200 }
   );
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const _params = await params;
+  const contactId = parseInt(_params.id);
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    include: { group: true },
+  });
+
+  if (!contact) {
+    return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+  }
+
+  const rawContact: RawContactDataForm = {
+    id: contact.id.toString(),
+    name: contact.name,
+    groupId: contact.groupId.toString(),
+    group: contact.group
+      ? {
+          id: contact.group.id.toString(),
+          name: contact.group.name,
+          description: contact.group.description ?? "",
+          color: contact.group.color ?? "gray",
+        }
+      : null,
+    phone: contact.phone ?? "",
+    cccd: contact.cccd ?? "",
+    taxcode: contact.taxcode ?? "",
+    address: contact.address ?? "",
+    note: contact.note ?? "",
+  };
+
+  return NextResponse.json(rawContact, { status: 200 });
 }

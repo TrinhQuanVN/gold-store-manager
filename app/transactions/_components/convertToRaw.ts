@@ -23,9 +23,11 @@ export function converttoRawTransactionHeaderFormData(
   }
 ): RawTransactionHeaderFormData {
   return {
+    id: transaction.id.toString(),
     paymentMethode: transaction.paymentMethode,
     isExport: transaction.isExport || true,
     contactId: transaction.contact.id.toString(),
+    contactName: transaction.contact.name,
     note: transaction.note || "",
     date: transaction.createdAt.toISOString(),
     goldDetails: transaction.goldTransactionDetails.map((g) => ({

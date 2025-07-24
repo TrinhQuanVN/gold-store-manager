@@ -15,7 +15,7 @@ import { Control, Controller } from "react-hook-form";
 const ContactSelect = dynamic(() => import("./ContactSelect"), { ssr: false });
 
 interface Props {
-  contactGroup: ContactWithGroup[];
+  // contactGroup: ContactWithGroup[];
   control: Control<RawTransactionHeaderFormData>;
 }
 

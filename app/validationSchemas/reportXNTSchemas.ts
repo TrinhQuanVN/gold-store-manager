@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const rawReportXNTSchema = z.object({
-  groupId: z.string().regex(/^\d+$/, "Phải là số").default("0"),
+  groupId: z.string().regex(/^\d+$/, "Phải là số"),
 
-  id: z.string().min(1, "id không được để trống").default("mã sản phẩm"),
+  id: z.string().min(1, "id không được để trống"),
 
-  name: z.string().min(1, "Tên không được để trống").default("tên sản phẩm"),
+  name: z.string().min(1, "Tên không được để trống"),
 
   unit: z.string().optional(),
-  stt: z.string().default("1"),
+  stt: z.string(),
 
   tonDauKyQuantity: z.string().default("0"),
   tonDauKyValue: z.string().default("0"),
@@ -21,11 +21,11 @@ export const rawReportXNTSchema = z.object({
 
   //   xuatDonGia: z.string().optional(),
 
-  tonCuoiKyQuantity: z.string().nullable(),
-  tonCuoiKyValue: z.string().nullable(),
+  tonCuoiKyQuantity: z.string().default("0"),
+  tonCuoiKyValue: z.string().default("0"),
 
-  xuatThucTe: z.string().default("0"),
-  thue: z.string().default("0"),
+  xuatThucTe: z.string().optional(),
+  thue: z.string().optional(),
 });
 
 export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({

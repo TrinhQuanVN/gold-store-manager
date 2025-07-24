@@ -47,7 +47,7 @@ const EditTransactionPage = async ({ params }: Props) => {
 
   const converted = converttoRawTransactionHeaderFormData(transaction);
 
-  return <TransactionForm transaction={converted} />;
+  return <TransactionForm transaction={converted} id={transaction.id} />;
 };
 
 export default EditTransactionPage;

@@ -1,4 +1,4 @@
-import { rawTransactionHeaderSchema } from "@/app/validationSchemas";
+import { transferedTransactionHeaderSchema } from "@/app/validationSchemas";
 import { prisma } from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,7 +9,7 @@ export async function PATCH(
   const _params = await params;
   const id = parseInt(_params.id);
   const body = await request.json();
-  const validation = rawTransactionHeaderSchema.safeParse(body);
+  const validation = transferedTransactionHeaderSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
@@ -30,7 +30,7 @@ export async function PATCH(
 
   // Kiểm tra goldId
   if (data.goldDetails?.length) {
-    const goldIds = data.goldDetails.map((g) => parseInt(g.goldId));
+    const goldIds = data.goldDetails.map((g) => g.goldId);
     const existingGolds = await prisma.gold.findMany({
       where: { id: { in: goldIds } },
       select: { id: true },
@@ -38,7 +38,7 @@ export async function PATCH(
     const validGoldIds = new Set(existingGolds.map((g) => g.id));
 
     for (const detail of data.goldDetails) {
-      if (!validGoldIds.has(parseInt(detail.goldId))) {
+      if (!validGoldIds.has(detail.goldId)) {
         return NextResponse.json(
           { error: `Invalid goldId: ${detail.goldId}` },
           { status: 400 }
@@ -49,7 +49,7 @@ export async function PATCH(
 
   // Kiểm tra jewelryId
   if (data.jewelryDetails?.length) {
-    const jewelryIds = data.jewelryDetails.map((j) => parseInt(j.jewelryId));
+    const jewelryIds = data.jewelryDetails.map((j) => j.jewelryId);
     const existingJewelry = await prisma.jewelry.findMany({
       where: { id: { in: jewelryIds } },
       select: { id: true },
@@ -57,7 +57,7 @@ export async function PATCH(
     const validJewelryIds = new Set(existingJewelry.map((j) => j.id));
 
     for (const detail of data.jewelryDetails) {
-      if (!validJewelryIds.has(parseInt(detail.jewelryId))) {
+      if (!validJewelryIds.has(detail.jewelryId)) {
         return NextResponse.json(
           { error: `Invalid jewelryId: ${detail.jewelryId}` },
           { status: 400 }
@@ -66,7 +66,7 @@ export async function PATCH(
     }
   }
 
-  const contactId = parseInt(data.contact?.id ?? "");
+  const contactId = data.contactId;
   if (!contactId) {
     return NextResponse.json({ error: "Invalid contact id" }, { status: 404 });
   }
@@ -115,7 +115,7 @@ export async function PATCH(
       await tx.goldTransactionDetail.createMany({
         data: data.goldDetails.map((g) => ({
           transactionHeaderId: id,
-          goldId: parseInt(g.goldId),
+          goldId: g.goldId,
           price: g.price,
           weight: g.weight,
           discount: g.discount ?? 0,
@@ -129,7 +129,7 @@ export async function PATCH(
       await tx.jewelryTransactionDetail.createMany({
         data: data.jewelryDetails.map((j) => ({
           transactionHeaderId: id,
-          jewelryId: parseInt(j.jewelryId),
+          jewelryId: j.jewelryId,
           price: j.price,
           discount: j.discount ?? 0,
           amount: j.amount,

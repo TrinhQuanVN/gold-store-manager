@@ -19,30 +19,30 @@ pg_conn = psycopg2.connect(
 )
 pg_cursor = pg_conn.cursor()
 
-# === JewelryType ===
-sqlite_cursor.execute("SELECT name, goldPercent, description, color FROM JewelryType")
-jewelry_types = sqlite_cursor.fetchall()
+# # === JewelryType ===
+# sqlite_cursor.execute("SELECT name, goldPercent, description, color FROM JewelryType")
+# jewelry_types = sqlite_cursor.fetchall()
 
 
-pg_cursor.execute('TRUNCATE TABLE "JewelryType" RESTART IDENTITY CASCADE;')
+# pg_cursor.execute('TRUNCATE TABLE "JewelryType" RESTART IDENTITY CASCADE;')
 
-for jt in jewelry_types:
-    pg_cursor.execute("""
-        INSERT INTO "JewelryType" ("name", "goldPercent", "description", "color")
-        VALUES (%s, %s, %s, %s)
-    """, jt)
+# for jt in jewelry_types:
+#     pg_cursor.execute("""
+#         INSERT INTO "JewelryType" ("name", "goldPercent", "description", "color")
+#         VALUES (%s, %s, %s, %s)
+#     """, jt)
 
-# === JewelryCategory ===
-sqlite_cursor.execute("SELECT name, description, color FROM JewelryCategory")
-jewelry_categories = sqlite_cursor.fetchall()
+# # === JewelryCategory ===
+# sqlite_cursor.execute("SELECT name, description, color FROM JewelryCategory")
+# jewelry_categories = sqlite_cursor.fetchall()
 
-pg_cursor.execute('TRUNCATE TABLE "JewelryCategory" RESTART IDENTITY CASCADE;')
+# pg_cursor.execute('TRUNCATE TABLE "JewelryCategory" RESTART IDENTITY CASCADE;')
 
-for jc in jewelry_categories:
-    pg_cursor.execute("""
-        INSERT INTO "JewelryCategory" ("name", "description", "color")
-        VALUES (%s, %s, %s)
-    """, jc)
+# for jc in jewelry_categories:
+#     pg_cursor.execute("""
+#         INSERT INTO "JewelryCategory" ("name", "description", "color")
+#         VALUES (%s, %s, %s)
+#     """, jc)
 
 
 # --- Lấy dữ liệu từ SQLite ---
@@ -56,7 +56,7 @@ sqlite_cursor.execute("""
 rows = sqlite_cursor.fetchall()
 print(f"🔍 Tìm thấy {len(rows)} sản phẩm còn hàng trong SQLite")
 
-pg_cursor.execute('TRUNCATE TABLE "Jewelry" RESTART IDENTITY CASCADE;')
+# pg_cursor.execute('TRUNCATE TABLE "Jewelry" RESTART IDENTITY CASCADE;')
 
 
 # --- Insert từng dòng vào PostgreSQL ---
