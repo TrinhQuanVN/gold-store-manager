@@ -40,8 +40,19 @@ const ReportXNTTable = ({ searchParams, headerId, reports }: Props) => {
               borderRight: "1px solid #e5e7eb",
             }}
           >
-            ID
+            STT
           </Table.ColumnHeaderCell>
+
+          <Table.ColumnHeaderCell
+            rowSpan={2}
+            style={{
+              verticalAlign: "middle",
+              borderRight: "1px solid #e5e7eb",
+            }}
+          >
+            Mã sản phẩm
+          </Table.ColumnHeaderCell>
+
           <Table.ColumnHeaderCell
             rowSpan={2}
             style={{
@@ -169,7 +180,12 @@ const ReportXNTTable = ({ searchParams, headerId, reports }: Props) => {
         {reports?.map((report) => {
           return (
             <Table.Row className="" key={report.id}>
-              <Table.Cell className="text-center">{report.id}</Table.Cell>
+              <Table.Cell className="text-center">{report.stt}</Table.Cell>
+
+              <Table.Cell className="text-center">
+                {report.productCode}
+              </Table.Cell>
+
               <Table.Cell className="text-center">
                 <Link
                   href={`/reportXNTs/${headerId}/group/${report.groupId}/report/${report.id}`}
@@ -179,27 +195,31 @@ const ReportXNTTable = ({ searchParams, headerId, reports }: Props) => {
               </Table.Cell>
               <Table.Cell className="text-right">
                 {report?.tonDauKyQuantity
-                  ? toStringVN(+report.tonDauKyQuantity)
+                  ? toStringVN(+report.tonDauKyQuantity, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {report?.tonDauKyValue ? toStringVN(+report.tonDauKyValue) : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {report?.nhapQuantity ? toStringVN(+report.nhapQuantity) : ""}
+                {report?.nhapQuantity
+                  ? toStringVN(+report.nhapQuantity, 0, 4)
+                  : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {report?.nhapValue ? toStringVN(+report.nhapValue) : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {report?.xuatQuantity ? toStringVN(+report.xuatQuantity) : ""}
+                {report?.xuatQuantity
+                  ? toStringVN(+report.xuatQuantity, 0, 4)
+                  : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {report?.xuatValue ? toStringVN(+report.xuatValue) : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {report?.tonCuoiKyQuantity
-                  ? toStringVN(+report.tonCuoiKyQuantity)
+                  ? toStringVN(+report.tonCuoiKyQuantity, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">

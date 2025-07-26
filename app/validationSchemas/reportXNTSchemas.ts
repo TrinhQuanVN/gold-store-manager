@@ -6,23 +6,24 @@ export const rawReportXNTSchema = z.object({
   id: z.string().min(1, "id không được để trống"),
 
   name: z.string().min(1, "Tên không được để trống"),
+  productCode: z.string().optional(),
 
   unit: z.string().optional(),
   stt: z.string(),
 
-  tonDauKyQuantity: z.string().default("0"),
-  tonDauKyValue: z.string().default("0"),
+  tonDauKyQuantity: z.string(),
+  tonDauKyValue: z.string(),
 
-  nhapQuantity: z.string().default("0"),
-  nhapValue: z.string().default("0"),
+  nhapQuantity: z.string(),
+  nhapValue: z.string(),
 
-  xuatQuantity: z.string().default("0"),
-  xuatValue: z.string().default("0"),
+  xuatQuantity: z.string(),
+  xuatValue: z.string(),
 
   //   xuatDonGia: z.string().optional(),
 
-  tonCuoiKyQuantity: z.string().default("0"),
-  tonCuoiKyValue: z.string().default("0"),
+  tonCuoiKyQuantity: z.string(),
+  tonCuoiKyValue: z.string(),
 
   xuatThucTe: z.string().optional(),
   thue: z.string().optional(),
@@ -54,6 +55,7 @@ export const reportXNTTransferedSchema = z.object({
   groupId: z.number().min(1),
   id: z.string().min(1),
   name: z.string().min(1),
+  productCode: z.string(),
   nhapQuantity: z.number().optional(),
   nhapValue: z.number().optional(),
   tonCuoiKyQuantity: z.number().optional(),

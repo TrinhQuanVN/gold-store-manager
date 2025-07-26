@@ -7,6 +7,10 @@ import DeleteReportXNTHeaderButton from "./DeleteReportXNTHeaderButton";
 import ReportXNTTable from "./reportXNTTable";
 import ReportActions from "./ReportActions";
 import { convertToRawReportXNTHeaderForm } from "../_components/convertToRawReportXNTHeaderForm";
+import AddDataFromOtherReportButton from "./AddDataFromOtherReportButton";
+import AddDataFromTransactionButton, {
+  ProductCodeNotInReport,
+} from "./AddDataFromTransactionButton";
 
 // import { getServerSession } from "next-auth";
 // import authOptions from "@/app/auth/authOptions";
@@ -37,6 +41,84 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
   if (!header) notFound();
   const convertedHeader = convertToRawReportXNTHeaderForm(header);
 
+  const oldReports = await prisma.reportXNTHeader.findMany({
+    where: {
+      id: { lt: header.id },
+      taxPayerId: header.taxPayerId, // lọc cùng đơn vị
+    },
+    select: { id: true, name: true, quarter: true, year: true },
+    orderBy: { id: "desc" },
+  });
+
+  const count = await prisma.reportXNT.count({
+    where: {
+      group: {
+        headerId: header.id, // truyền biến headerId vào đây
+      },
+    },
+  });
+
+  const hasReport = count > 0;
+
+  const usedProductCodes = await prisma.reportXNT.findMany({
+    where: {
+      group: {
+        headerId: header.id,
+      },
+    },
+    select: {
+      productCode: true,
+    },
+  });
+
+  const excludedCodes = usedProductCodes.map((r) => r.productCode);
+
+  const result = await prisma.jewelry.findMany({
+    where: {
+      reportProductCode: {
+        notIn: excludedCodes,
+        not: null,
+      },
+      transactionDetails: {
+        some: {
+          transactionHeader: {
+            createdAt: {
+              gte: header.startDate,
+              lte: header.endDate,
+            },
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      reportProductCode: true,
+    },
+  });
+
+  const formatted: ProductCodeNotInReport[] = result.map((j) => ({
+    id: j.id.toString(),
+    productCode: j.reportProductCode!,
+    productName: j.name,
+  }));
+
+  const productCodeNullCount = await prisma.jewelry.count({
+    where: {
+      OR: [{ reportProductCode: null }, { reportProductCode: "" }],
+      transactionDetails: {
+        some: {
+          transactionHeader: {
+            createdAt: {
+              gte: header.startDate,
+              lte: header.endDate,
+            },
+          },
+        },
+      },
+    },
+  });
+
   return (
     <>
       {/* Grid chứa chi tiết và nút */}
@@ -48,6 +130,20 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
           <Flex direction="column" gap="4">
             <EditReportXNTHeaderButton headerId={header.id} />
             <DeleteReportXNTHeaderButton headerId={header.id} />
+            <AddDataFromOtherReportButton
+              headerId={header.id}
+              oldReports={oldReports.map((r) => ({
+                id: r.id.toString(),
+                name: `${r.name} Quý ${r.quarter}/${r.year}`,
+              }))}
+              hasReport={hasReport}
+            />
+            <AddDataFromTransactionButton
+              headerId={header.id}
+              hasReport={hasReport}
+              productCodeNotInReport={formatted}
+              productCodeNull={productCodeNullCount > 0}
+            />
           </Flex>
         </Box>
       </Grid>

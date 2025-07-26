@@ -1,7 +1,7 @@
 import Pagination from "@/app/components/Pagination";
 import { prisma } from "@/prisma/client";
 import { Prisma } from "@prisma/client";
-import { Flex } from "@radix-ui/themes";
+import { Container, Flex } from "@radix-ui/themes";
 import ReportAction from "./ReportAction";
 import ReportTable, { ReportQuery, columnNames } from "./ReportTable";
 import { convertToRawReportXNTHeaderForm } from "../_components/convertToRawReportXNTHeaderForm";

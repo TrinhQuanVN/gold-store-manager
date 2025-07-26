@@ -4,12 +4,17 @@ import { toLowerCaseNonAccentVietnamese } from "@/utils/remove_accents";
 import { Prisma } from "@prisma/client";
 import { Flex } from "@radix-ui/themes";
 import ContactActions from "./ContactActions";
-import ContactSearchForm from "./ContactSearchForm";
 import ContactTable, { columnNames } from "./ContactTable";
 import { ContactSearchQuery } from "./ContactSearchQuery";
+import dynamic from "next/dynamic";
+
 interface Props {
   searchParams: ContactSearchQuery;
 }
+const ContactSearchForm = dynamic(() => import("./ContactSearchForm"), {
+  // ssr: false,
+  // loading: () => <ContactFormSkeleton />,
+});
 
 const ContactsPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
@@ -73,7 +78,7 @@ const ContactsPage = async ({ searchParams }: Props) => {
   );
 };
 
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 
 // export const metadata: Metadata = {
 //   title: "Contact Tracker - Contact List",

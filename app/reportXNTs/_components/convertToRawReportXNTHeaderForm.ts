@@ -16,6 +16,13 @@ export function convertToRawReportXNTHeaderForm(
     group: (ReportXNTGroup & { ReportXNTs: ReportXNT[] })[];
   }
 ): RawReportXNTHeaderForm {
+  const groups = header.group.map(convertToRawReportXNTGroupForm);
+
+  const sum = (getter: (g: RawReportXNTGroupForm) => number) =>
+    groups.reduce((acc, g) => acc + getter(g), 0);
+
+  const toNum = (v: string) => Number(v || "0");
+
   return {
     id: header.id.toString(),
     name: header.name,
@@ -24,16 +31,20 @@ export function convertToRawReportXNTHeaderForm(
     taxPayerId: header.taxPayerId.toString(),
     startDate: header.startDate.toISOString(),
     endDate: header.endDate.toISOString(),
-    tonDauKyQuantityTotal: "", // Optional nếu không tổng hợp
-    tonDauKyValueTotal: "",
-    nhapQuantityTotal: "",
-    nhapValueTotal: "",
-    xuatQuantityTotal: "",
-    xuatValueTotal: "",
-    tonCuoiKyQuantityTotal: "",
-    tonCuoiKyValueTotal: "",
-    xuatThucTe: "",
-    thue: "",
+    tonDauKyQuantityTotal: sum((g) =>
+      toNum(g.tonDauKyQuantityTotal)
+    ).toString(),
+    tonDauKyValueTotal: sum((g) => toNum(g.tonDauKyValueTotal)).toString(),
+    nhapQuantityTotal: sum((g) => toNum(g.nhapQuantityTotal)).toString(),
+    nhapValueTotal: sum((g) => toNum(g.nhapValueTotal)).toString(),
+    xuatQuantityTotal: sum((g) => toNum(g.xuatQuantityTotal)).toString(),
+    xuatValueTotal: sum((g) => toNum(g.xuatValueTotal)).toString(),
+    tonCuoiKyQuantityTotal: sum((g) =>
+      toNum(g.tonCuoiKyQuantityTotal)
+    ).toString(),
+    tonCuoiKyValueTotal: sum((g) => toNum(g.tonCuoiKyValueTotal)).toString(),
+    xuatThucTe: "0",
+    thue: "0",
     date: header.createdAt.toISOString(),
     currentGoldPrice: "0",
     taxPayer: {
@@ -42,16 +53,18 @@ export function convertToRawReportXNTHeaderForm(
       address: header.taxPayer.address ?? "",
       taxCode: header.taxPayer.taxCode,
     },
-    groups: header.group.map(convertToRawReportXNTGroupForm),
+    groups,
   };
 }
 
 export function convertToRawReportXNTForm(r: ReportXNT): RawReportXNTForm {
   return {
     groupId: r.groupId.toString(),
-    id: r.id,
+    id: r.id.toString(),
     name: r.name,
+    productCode: r.productCode ?? "",
     unit: r.unit ?? "chỉ",
+    stt: r.stt.toString(),
     tonDauKyQuantity: r.tonDauKyQuantity.toString(),
     tonDauKyValue: r.tonDauKyValue.toString(),
     nhapQuantity: r.nhapQuantity.toString(),
@@ -68,19 +81,22 @@ export function convertToRawReportXNTForm(r: ReportXNT): RawReportXNTForm {
 export function convertToRawReportXNTGroupForm(
   g: ReportXNTGroup & { ReportXNTs: ReportXNT[] }
 ): RawReportXNTGroupForm {
+  const sum = <K extends keyof ReportXNT>(key: K) =>
+    g.ReportXNTs.reduce((acc, r) => acc + Number(r[key] ?? 0), 0);
+
   return {
     headerId: g.headerId.toString(),
     id: g.id,
     name: g.name,
     stt: g.stt.toString(),
-    tonDauKyQuantityTotal: "",
-    tonDauKyValueTotal: "",
-    nhapQuantityTotal: "",
-    nhapValueTotal: "",
-    xuatQuantityTotal: "",
-    xuatValueTotal: "",
-    tonCuoiKyQuantityTotal: "",
-    tonCuoiKyValueTotal: "",
+    tonDauKyQuantityTotal: sum("tonDauKyQuantity").toString(),
+    tonDauKyValueTotal: sum("tonDauKyValue").toString(),
+    nhapQuantityTotal: sum("nhapQuantity").toString(),
+    nhapValueTotal: sum("nhapValue").toString(),
+    xuatQuantityTotal: sum("xuatQuantity").toString(),
+    xuatValueTotal: sum("xuatValue").toString(),
+    tonCuoiKyQuantityTotal: sum("tonCuoiKyQuantity").toString(),
+    tonCuoiKyValueTotal: sum("tonCuoiKyValue").toString(),
     xuatThucTe: "0",
     thue: "0",
     reports: g.ReportXNTs.map(convertToRawReportXNTForm),

@@ -36,7 +36,7 @@ const ReportXNTTable = ({ searchParams, groups }: Props) => {
               borderRight: "1px solid #e5e7eb",
             }}
           >
-            ID
+            STT
           </Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell
             rowSpan={2}
@@ -165,7 +165,7 @@ const ReportXNTTable = ({ searchParams, groups }: Props) => {
         {groups?.map((group) => {
           return (
             <Table.Row className="" key={group.id}>
-              <Table.Cell className="text-center">{group.id}</Table.Cell>
+              <Table.Cell className="text-center">{group.stt}</Table.Cell>
               <Table.Cell className="text-center">
                 <Link href={`/reportXNTs/${group.headerId}/group/${group.id}`}>
                   {group.name}
@@ -173,45 +173,49 @@ const ReportXNTTable = ({ searchParams, groups }: Props) => {
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.tonDauKyQuantityTotal
-                  ? toStringVN(+group.tonDauKyQuantityTotal)
+                  ? toStringVN(+group.tonDauKyQuantityTotal, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.tonDauKyValueTotal
-                  ? toStringVN(+group.tonDauKyValueTotal)
+                  ? toStringVN(+group.tonDauKyValueTotal, 0, 2)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.nhapQuantityTotal
-                  ? toStringVN(+group.nhapQuantityTotal)
+                  ? toStringVN(+group.nhapQuantityTotal, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.nhapValueTotal ? toStringVN(+group.nhapValueTotal) : ""}
+                {group?.nhapValueTotal
+                  ? toStringVN(+group.nhapValueTotal, 0, 2)
+                  : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.xuatQuantityTotal
-                  ? toStringVN(+group.xuatQuantityTotal)
+                  ? toStringVN(+group.xuatQuantityTotal, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.xuatValueTotal ? toStringVN(+group.xuatValueTotal) : ""}
+                {group?.xuatValueTotal
+                  ? toStringVN(+group.xuatValueTotal, 0, 2)
+                  : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.tonCuoiKyQuantityTotal
-                  ? toStringVN(+group.tonCuoiKyQuantityTotal)
+                  ? toStringVN(+group.tonCuoiKyQuantityTotal, 0, 4)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
                 {group?.tonCuoiKyValueTotal
-                  ? toStringVN(+group.tonCuoiKyValueTotal)
+                  ? toStringVN(+group.tonCuoiKyValueTotal, 0, 2)
                   : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.xuatThucTe ? toStringVN(+group.xuatThucTe) : ""}
+                {group?.xuatThucTe ? toStringVN(+group.xuatThucTe, 0, 2) : ""}
               </Table.Cell>
               <Table.Cell className="text-right">
-                {group?.thue ? toStringVN(+group.thue) : ""}
+                {group?.thue ? toStringVN(+group.thue, 0, 2) : ""}
               </Table.Cell>
             </Table.Row>
           );

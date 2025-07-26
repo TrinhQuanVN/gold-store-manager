@@ -31,11 +31,7 @@ const ContactDetailPage = async ({
   if (!group) notFound();
 
   const report = await prisma.reportXNT.findUnique({
-    where: { id: _params.reportId },
-    include: {
-      golds: true,
-      jewelries: true,
-    },
+    where: { id: parseInt(_params.reportId) },
   });
   if (!report) notFound();
 

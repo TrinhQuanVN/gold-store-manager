@@ -1,23 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  //output   = "../app/generated/prisma"
 }
-
-// datasource db {
-//   provider = "sqlite"
-//   url      = env("DATABASE_URL")
-// }
-
-// datasource db {
-//   provider = "sqlite"
-//   url      = "file:./dev.db"
-// }
 
 datasource db {
   provider = "postgresql"
@@ -28,247 +11,216 @@ model ContactGroup {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  color       String?   @default("gray") //color for ContactGroupBadge
+  color       String?   @default("gray")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-
-  contacts Contact[]
+  contacts    Contact[]
 }
 
 model Contact {
-  id Int @id @default(autoincrement())
-
-  groupId Int          @default(1) // Default to group with id 1
-  group   ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  name         String
-  unaccentName String
-  address      String?
-  cccd         String?
-  taxcode      String?
-  phone        String?
-  note         String?
-
+  id                 Int                 @id @default(autoincrement())
+  groupId            Int                 @default(1)
+  name               String
+  unaccentName       String
+  address            String?
+  cccd               String?
+  taxcode            String?
+  phone              String?
+  note               String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime?           @updatedAt
+  group              ContactGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   transactionHeaders TransactionHeader[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
 }
 
 model JewelryType {
   id          Int       @id @default(autoincrement())
   name        String
-  goldPercent Float     @default(0.0) // Gold percentage for the type
+  goldPercent Float     @default(0.0)
   description String?
-  color       String?   @default("gray") //color for GoldKaraBadge
+  color       String?   @default("gray")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-
-  jewelry Jewelry[]
+  jewelry     Jewelry[]
 }
 
 model JewelryCategory {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  color       String?   @default("gray") //color for JewerlyCategoryBadge
+  color       String?   @default("gray")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-
-  jewelry Jewelry[]
+  jewelry     Jewelry[]
 }
 
 model Jewelry {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  goldWeight  Decimal @default(0) @db.Decimal(6, 4)
-  gemWeight   Decimal @default(0) @db.Decimal(6, 4)
-  totalWeight Decimal @default(0) @db.Decimal(6, 4)
-
-  categoryId  Int
-  category    JewelryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  typeId      Int
-  jewelryType JewelryType     @relation(fields: [typeId], references: [id], onDelete: Cascade)
-
-  gemName String?
-
-  description String?
-  madeIn      String? @default("Việt Nam") // Default to "Việt Nam"
-  size        String?
-
-  reportXNTId String?
-  reportXNT   ReportXNT? @relation("ReportXNTJewelry", fields: [reportXNTId], references: [id])
-
-  supplierId String? //Mã trang sức của nhà
-
+  id                 Int                        @id @default(autoincrement())
+  name               String
+  goldWeight         Decimal                    @default(0) @db.Decimal(6, 4)
+  categoryId         Int
+  gemWeight          Decimal                    @default(0) @db.Decimal(6, 4)
+  totalWeight        Decimal                    @default(0) @db.Decimal(6, 4)
+  gemName            String?
+  description        String?
+  madeIn             String?                    @default("Việt Nam")
+  size               String?
+  supplierId         String?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime?                  @updatedAt
+  typeId             Int
+  reportProductCode  String?
+  category           JewelryCategory            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  jewelryType        JewelryType                @relation(fields: [typeId], references: [id], onDelete: Cascade)
   transactionDetails JewelryTransactionDetail[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
 }
 
 model TaxPayer {
-  id      Int     @id @default(autoincrement())
-  name    String // Tên người nộp thuế
-  taxCode String  @unique // Mã số thuế
-  address String? // Địa chỉ người nộp thuế
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
+  id               Int               @id @default(autoincrement())
+  name             String
+  taxCode          String            @unique
+  address          String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime?         @updatedAt
   reportXNTHeaders ReportXNTHeader[]
 }
 
 model ReportXNTHeader {
-  id      Int    @id @default(autoincrement())
-  name    String
-  quarter Int //quý
-  year    Int //năm
-
-  taxPayerId Int //Mã số thuế của người nộp thuế
-  taxPayer   TaxPayer @relation(fields: [taxPayerId], references: [id], onDelete: Cascade)
-
-  startDate DateTime //Ngày bắt đầu kỳ báo cáo
-  endDate   DateTime //Ngày kết thúc kỳ báo cáo
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
-  group ReportXNTGroup[]
+  id         Int              @id @default(autoincrement())
+  name       String
+  quarter    Int
+  year       Int
+  taxPayerId Int
+  startDate  DateTime
+  endDate    DateTime
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime?        @updatedAt
+  group      ReportXNTGroup[]
+  taxPayer   TaxPayer         @relation(fields: [taxPayerId], references: [id], onDelete: Cascade)
 }
 
 model ReportXNTGroup {
-  id   Int    @id @default(autoincrement())
-  name String @default("nhóm sản phẩm thuộc báo cáo")
-  stt  Int @default(1)
-
-  headerId Int
-  header   ReportXNTHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
-
+  id         Int             @id @default(autoincrement())
+  name       String          @default("nhóm sản phẩm thuộc báo cáo")
+  headerId   Int
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime?       @updatedAt
+  stt        Int             @default(1)
   ReportXNTs ReportXNT[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  header     ReportXNTHeader @relation(fields: [headerId], references: [id], onDelete: Cascade)
 }
 
 model ReportXNT {
-  id String @id
-
-  groupId Int            @default(1)
-  group   ReportXNTGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  stt  Int     @default(1)
-  name String @default("sản phẩm thuộc báo")
-  unit String? @default("chỉ")
-
-  tonDauKyQuantity Decimal @default(0) @db.Decimal(9, 4)
-  tonDauKyValue    Decimal @default(0) @db.Decimal(13, 2)
-
-  nhapQuantity Decimal @default(0) @db.Decimal(9, 4)
-  nhapValue    Decimal @default(0) @db.Decimal(13, 2)
-
-  xuatQuantity Decimal @default(0) @db.Decimal(9, 4)
-  xuatValue    Decimal @default(0) @db.Decimal(13, 2) //Xuất trong kỳ tính bằng xuatDonGia * xuatSoLuong
-
-  // xuatDonGia Float @default(0) //đơn giá xuất trong kỳ tính bàng (tonDauKyValue + nhapValue) / (tonDauKyQuantity + nhapQuantity)
-
-  tonCuoiKyQuantity Decimal @default(0) @db.Decimal(9, 4) // Tồn cuối kỳ tính bằng tonDauKyQuantity + nhapQuantity - xuatQuantity
-  tonCuoiKyValue    Decimal @default(0) @db.Decimal(13, 2) // Tồn cuối kỳ tính bằng tonDauKyValue + nhapValue - xuatValue
-
-  golds     Gold[]    @relation("ReportXNTGold")
-  jewelries Jewelry[] @relation("ReportXNTJewelry")
+  name              String         @default("sản phẩm thuộc báo")
+  unit              String?        @default("chỉ")
+  tonDauKyQuantity  Decimal        @default(0) @db.Decimal(9, 4)
+  tonDauKyValue     Decimal        @default(0) @db.Decimal(13, 2)
+  nhapQuantity      Decimal        @default(0) @db.Decimal(9, 4)
+  nhapValue         Decimal        @default(0) @db.Decimal(13, 2)
+  xuatQuantity      Decimal        @default(0) @db.Decimal(9, 4)
+  xuatValue         Decimal        @default(0) @db.Decimal(13, 2)
+  tonCuoiKyQuantity Decimal        @default(0) @db.Decimal(9, 4)
+  tonCuoiKyValue    Decimal        @default(0) @db.Decimal(13, 2)
+  groupId           Int            @default(1)
+  stt               Int            @default(1)
+  productCode       String?
+  id                Int            @id @default(autoincrement())
+  createdAt         DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime?      @default(now()) @updatedAt @db.Timestamptz(6)
+  group             ReportXNTGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 model Gold {
-  id          Int    @id @default(autoincrement())
-  name        String
-  goldPercent Float  @default(0.0) // Tỷ lệ vàng trong nguyên liệu
-
-  description String?
-
-  goldTransactionDetails GoldTransactionDetail[]
-
-  reportXNTId String?
-  reportXNT   ReportXNT? @relation("ReportXNTGold", fields: [reportXNTId], references: [id])
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id                       Int                       @id @default(autoincrement())
+  name                     String
+  goldPercent              Float                     @default(0.0)
+  description              String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime?                 @updatedAt
+  reportProductCode        String?
+  goldInventoryAdjustments GoldInventoryAdjustment[]
+  goldTransactionDetails   GoldTransactionDetail[]
 }
 
 model JewelryTransactionDetail {
-  id        Int     @id @default(autoincrement())
-  jewelryId Int
-  jewelry   Jewelry @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
-
-  price    Decimal @default(0) @db.Decimal(8, 0)
-  discount Decimal @default(0) @db.Decimal(8, 0) // Giảm giá nếu có
-  amount   Decimal @default(0) @db.Decimal(11, 0) // tổng tiền giao dịch của sản phẩm này
-
+  id                  Int               @id @default(autoincrement())
+  jewelryId           Int
+  price               Decimal           @default(0) @db.Decimal(8, 0)
+  discount            Decimal           @default(0) @db.Decimal(8, 0)
+  amount              Decimal           @default(0) @db.Decimal(11, 0)
   transactionHeaderId Int
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime?         @updatedAt
+  jewelry             Jewelry           @relation(fields: [jewelryId], references: [id], onDelete: Cascade)
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
 }
 
 model GoldTransactionDetail {
-  id     Int  @id @default(autoincrement())
-  goldId Int
-  gold   Gold @relation(fields: [goldId], references: [id], onDelete: Cascade)
-
-  price  Decimal @default(0) @db.Decimal(8, 0)
-  weight Decimal @default(0) @db.Decimal(8, 4) // Trọng lượng vàng giao dịch
-
-  discount Decimal @default(0) @db.Decimal(8, 0) // Giảm giá nếu có
-  amount   Decimal @db.Decimal(11, 0)
-
+  id                  Int               @id @default(autoincrement())
+  goldId              Int
+  price               Decimal           @default(0) @db.Decimal(8, 0)
+  weight              Decimal           @default(0) @db.Decimal(8, 4)
+  discount            Decimal           @default(0) @db.Decimal(8, 0)
+  amount              Decimal           @db.Decimal(11, 0)
   transactionHeaderId Int
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime?         @updatedAt
+  gold                Gold              @relation(fields: [goldId], references: [id], onDelete: Cascade)
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
 }
 
 model TransactionHeader {
-  id       Int     @id @default(autoincrement())
-  note     String?
-  isExport Boolean
-
-  paymentMethode PaymentMethode
-  goldPrice Decimal @default(0) @db.Decimal(8, 0)
-
-  contactId Int
-  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
-  jewelryTransactionDetails JewelryTransactionDetail[]
+  id                        Int                        @id @default(autoincrement())
+  note                      String?
+  isExport                  Boolean
+  paymentMethode            PaymentMethode
+  contactId                 Int
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime?                  @updatedAt
+  goldPrice                 Decimal                    @default(0) @db.Decimal(8, 0)
   goldTransactionDetails    GoldTransactionDetail[]
+  jewelryTransactionDetails JewelryTransactionDetail[]
   paymentAmounts            PaymentDetail[]
+  contact                   Contact                    @relation(fields: [contactId], references: [id], onDelete: Cascade)
 }
 
 model PaymentDetail {
   id                  Int               @id @default(autoincrement())
-  amount              Decimal           @db.Decimal(11, 0) // Số tiền thanh toán
+  amount              Decimal           @db.Decimal(11, 0)
   transactionHeaderId Int
+  type                PaymentType
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime?         @updatedAt
   transactionHeader   TransactionHeader @relation(fields: [transactionHeaderId], references: [id], onDelete: Cascade)
+}
 
-  type PaymentType
-
+model GoldPrice {
+  id        Int       @id @default(autoincrement())
+  name      String
+  buy       Decimal   @db.Decimal(8, 0)
+  sell      Decimal   @db.Decimal(8, 0)
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }
 
-model GoldPrice {
-  id   Int     @id @default(autoincrement())
-  name String // Tên của giá vàng, ví dụ: "Giá vàng SJC", "Giá vàng 9999"
-  buy  Decimal @db.Decimal(8, 0) // Giá vàng mua vào 99.999.999
-  sell Decimal @db.Decimal(8, 0) // Giá vàng bán ra
+model InventoryAdjustmentHeader {
+  id              Int                       @id @default(autoincrement())
+  note            String?
+  isExport        Boolean
+  createdAt       DateTime?                 @default(now()) 
+  updatedAt       DateTime?                 @updatedAt @db.Timestamp(6)
+  goldAdjustments GoldInventoryAdjustment[]
+}
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+model GoldInventoryAdjustment {
+  id                 Int                       @id @default(autoincrement())
+  goldId             Int
+  weight             Decimal?                  @default(0) @db.Decimal(8, 4)
+  adjustmentHeaderId Int
+  createdAt          DateTime?                 @default(now()) 
+  updatedAt          DateTime?                 @updatedAt 
+  header             InventoryAdjustmentHeader @relation(fields: [adjustmentHeaderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  gold               Gold                      @relation(fields: [goldId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 enum PaymentType {

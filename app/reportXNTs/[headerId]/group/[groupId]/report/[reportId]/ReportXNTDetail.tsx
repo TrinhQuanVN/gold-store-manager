@@ -2,9 +2,6 @@ import { RawReportXNTForm } from "@/app/validationSchemas";
 import { toStringVN } from "@/utils";
 import { DataList, Flex, Text, Separator } from "@radix-ui/themes";
 
-const formatNumber = (value?: string | number | null, unit?: string) =>
-  `${value ? toStringVN(+value) : "0"}${unit ? ` ${unit}` : ""}`;
-
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <Text size="3" weight="bold" mt="2" mb="1">
     {children}
@@ -31,12 +28,14 @@ const ReportXNTDetail = ({ report }: { report: RawReportXNTForm }) => {
         <DataList.Item>
           <DataList.Label>Trọng lượng</DataList.Label>
           <DataList.Value>
-            {formatNumber(report.tonDauKyQuantity, report.unit)}
+            {toStringVN(+report?.tonDauKyQuantity, 4, 4)} {report.unit}
           </DataList.Value>
         </DataList.Item>
         <DataList.Item>
           <DataList.Label>Giá trị</DataList.Label>
-          <DataList.Value>{formatNumber(report.tonDauKyValue)}</DataList.Value>
+          <DataList.Value>
+            {toStringVN(+report?.tonDauKyValue, 1, 1)}
+          </DataList.Value>
         </DataList.Item>
 
         <Separator my="2" />
@@ -45,12 +44,14 @@ const ReportXNTDetail = ({ report }: { report: RawReportXNTForm }) => {
         <DataList.Item>
           <DataList.Label>Trọng lượng</DataList.Label>
           <DataList.Value>
-            {formatNumber(report.nhapQuantity, report.unit)}
+            {toStringVN(+report?.nhapQuantity, 4, 4)} {report.unit}
           </DataList.Value>
         </DataList.Item>
         <DataList.Item>
           <DataList.Label>Giá trị</DataList.Label>
-          <DataList.Value>{formatNumber(report.nhapValue)}</DataList.Value>
+          <DataList.Value>
+            {toStringVN(+report?.nhapValue, 1, 1)}
+          </DataList.Value>
         </DataList.Item>
 
         <Separator my="2" />
@@ -59,12 +60,14 @@ const ReportXNTDetail = ({ report }: { report: RawReportXNTForm }) => {
         <DataList.Item>
           <DataList.Label>Trọng lượng</DataList.Label>
           <DataList.Value>
-            {formatNumber(report.xuatQuantity, report.unit)}
+            {toStringVN(+report?.xuatQuantity, 4, 4)} {report.unit}
           </DataList.Value>
         </DataList.Item>
         <DataList.Item>
           <DataList.Label>Giá trị</DataList.Label>
-          <DataList.Value>{formatNumber(report.xuatValue)}</DataList.Value>
+          <DataList.Value>
+            {toStringVN(+report?.xuatValue, 1, 1)}
+          </DataList.Value>
         </DataList.Item>
 
         <Separator my="2" />
@@ -73,24 +76,33 @@ const ReportXNTDetail = ({ report }: { report: RawReportXNTForm }) => {
         <DataList.Item>
           <DataList.Label>Trọng lượng</DataList.Label>
           <DataList.Value>
-            {formatNumber(report.tonCuoiKyQuantity, report.unit)}
+            {toStringVN(+report?.tonCuoiKyQuantity, 4, 4)} {report.unit}
           </DataList.Value>
         </DataList.Item>
         <DataList.Item>
           <DataList.Label>Giá trị</DataList.Label>
-          <DataList.Value>{formatNumber(report.tonCuoiKyValue)}</DataList.Value>
+          <DataList.Value>
+            {toStringVN(+report?.tonCuoiKyValue, 1, 1)}
+          </DataList.Value>
         </DataList.Item>
 
         <Separator my="2" />
 
-        <DataList.Item>
-          <DataList.Label>Xuất thực tế</DataList.Label>
-          <DataList.Value>{formatNumber(report.xuatThucTe)}</DataList.Value>
-        </DataList.Item>
-        <DataList.Item>
-          <DataList.Label>Thuế</DataList.Label>
-          <DataList.Value>{formatNumber(report.thue)}</DataList.Value>
-        </DataList.Item>
+        {report?.xuatThucTe != undefined && (
+          <DataList.Item>
+            <DataList.Label>Xuất thực tế</DataList.Label>
+            <DataList.Value>
+              {toStringVN(+report?.xuatThucTe, 1, 1)}
+            </DataList.Value>
+          </DataList.Item>
+        )}
+
+        {report?.thue != undefined && (
+          <DataList.Item>
+            <DataList.Label>Thuế</DataList.Label>
+            <DataList.Value>{toStringVN(+report?.thue, 1, 1)}</DataList.Value>
+          </DataList.Item>
+        )}
       </DataList.Root>
     </Flex>
   );

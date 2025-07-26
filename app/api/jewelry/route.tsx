@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       madeIn: data.madeIn || null,
       size: data.size || null,
       supplierId: data.supplierId ? data.supplierId : null,
-      reportXNTId: data.reportXNTId ? data.reportXNTId : null, // Optional field
+      reportProductCode: data.reportProductCode ? data.reportProductCode : null, // Optional field
     },
   });
 

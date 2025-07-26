@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const JewelryActions = () => {
   return (
-    <Flex justify="between">
+    <Flex justify="end">
       <Button>
         <Link href="/jewelry/new">Thêm trang sức</Link>
       </Button>

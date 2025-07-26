@@ -35,11 +35,11 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
     (parseInt(defaultQuarter) - 1) * 3,
     1
   ).toISOString();
-  const defaultEndDate = new Date(
-    now.getFullYear(),
-    parseInt(defaultQuarter) * 3,
-    0
-  ).toISOString();
+
+  const end = new Date(now.getFullYear(), parseInt(defaultQuarter) * 3, 0);
+  end.setHours(23, 59, 59, 999);
+  const defaultEndDate = end.toISOString();
+
   const {
     register,
     handleSubmit,
@@ -49,13 +49,14 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
     formState: { errors },
   } = useForm<RawReportXNTHeaderForm>({
     resolver: zodResolver(rawReportXNTHeaderSchema),
-    defaultValues: rawReportXNTHeaderSchema.parse({
-      quarter: defaultQuarter,
-      year: defaultYear,
-      startDate: defaultStartDate,
-      endDate: defaultEndDate,
-      ...(reportHeader ?? {}), // nếu có reportHeader sẽ override mặc định
-    }),
+    defaultValues: {
+      name: reportHeader?.name || "Báo cáo xuất nhập tồn",
+      quarter: reportHeader?.quarter || defaultQuarter,
+      year: reportHeader?.year || defaultYear,
+      startDate: reportHeader?.startDate || defaultStartDate,
+      endDate: reportHeader?.endDate || defaultEndDate,
+      taxPayerId: taxPayers.length > 0 ? taxPayers[0].id.toString() : "",
+    },
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -101,6 +102,7 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
                   if (!isNaN(q) && !isNaN(y)) {
                     const newStart = new Date(y, (q - 1) * 3, 1);
                     const newEnd = new Date(y, q * 3, 0);
+                    newEnd.setHours(23, 59, 59, 999); // ✅ set cuối ngày
                     setValue("startDate", newStart.toISOString());
                     setValue("endDate", newEnd.toISOString());
                   }
@@ -169,7 +171,7 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
             render={({ field }) => (
               <DatePicker
                 locale="vi"
-                dateFormat="dd/MM/yyyy"
+                dateFormat="dd/MM/yyyy HH:mm:ss"
                 placeholderText="Ngày bắt đầu"
                 selected={field.value ? new Date(field.value) : null}
                 onChange={(date) => {
@@ -187,7 +189,7 @@ const ReportXNTHeaderForm = ({ taxPayers, reportHeader }: Props) => {
             render={({ field }) => (
               <DatePicker
                 locale="vi"
-                dateFormat="dd/MM/yyyy"
+                dateFormat="dd/MM/yyyy HH:mm:ss"
                 placeholderText="Ngày kết thúc"
                 selected={field.value ? new Date(field.value) : null}
                 onChange={(date) => {

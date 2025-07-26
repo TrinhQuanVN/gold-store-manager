@@ -1,7 +1,7 @@
 export function toStringVN(
   value: number,
   minimumFractionDigits: number = 0,
-  maximumFractionDigits: number = 0
+  maximumFractionDigits: number = 2
 ) {
   return new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: minimumFractionDigits,

@@ -59,7 +59,7 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
 
       <Table.Header>
         <Table.Row>
-          <Table.ColumnHeaderCell
+          {/* <Table.ColumnHeaderCell
             rowSpan={2}
             style={{
               verticalAlign: "middle",
@@ -67,11 +67,12 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
             }}
           >
             ID
-          </Table.ColumnHeaderCell>
+          </Table.ColumnHeaderCell> */}
           <Table.ColumnHeaderCell
             rowSpan={2}
             style={{
               verticalAlign: "middle",
+              textAlign: "center",
               borderRight: "1px solid #e5e7eb",
             }}
           >
@@ -194,63 +195,66 @@ const ReportHeaderTable = ({ searchParams, reports }: Props) => {
       <Table.Body>
         {reports.map((report) => (
           <Table.Row key={report.id}>
-            <Table.Cell>
+            {/* <Table.Cell>
               <Text>{report.id}</Text>
-            </Table.Cell>
+            </Table.Cell> */}
             <Table.Cell>
               <Link
                 href={`/reportXNTs/${report.id}`}
                 className="text-blue-400 font-semibold hover:underline hover:text-blue-600 transition"
               >
-                {report.name} quý {report.quarter} năm {report.year}
+                {report.name} quý {report.quarter}/{report.year}
               </Link>
             </Table.Cell>
 
             <Table.Cell>
               {report?.tonDauKyQuantityTotal
-                ? toStringVN(+report.tonDauKyQuantityTotal)
+                ? toStringVN(+report.tonDauKyQuantityTotal, 0, 4)
                 : ""}
             </Table.Cell>
             <Table.Cell>
               {report?.tonDauKyValueTotal
-                ? toStringVN(+report.tonDauKyValueTotal)
+                ? toStringVN(+report.tonDauKyValueTotal, 0, 4)
                 : ""}
             </Table.Cell>
 
             <Table.Cell>
               {report?.nhapQuantityTotal
-                ? toStringVN(+report.nhapQuantityTotal)
+                ? toStringVN(+report.nhapQuantityTotal, 0, 4)
                 : ""}
             </Table.Cell>
             <Table.Cell>
-              {report?.nhapValueTotal ? toStringVN(+report.nhapValueTotal) : ""}
+              {report?.nhapValueTotal
+                ? toStringVN(+report.nhapValueTotal, 0, 4)
+                : ""}
             </Table.Cell>
 
             <Table.Cell>
               {report?.xuatQuantityTotal
-                ? toStringVN(+report.xuatQuantityTotal)
+                ? toStringVN(+report.xuatQuantityTotal, 0, 4)
                 : ""}
             </Table.Cell>
             <Table.Cell>
-              {report?.xuatValueTotal ? toStringVN(+report.xuatValueTotal) : ""}
+              {report?.xuatValueTotal
+                ? toStringVN(+report.xuatValueTotal, 0, 4)
+                : ""}
             </Table.Cell>
 
             <Table.Cell>
               {report?.tonCuoiKyQuantityTotal
-                ? toStringVN(+report.tonCuoiKyQuantityTotal)
+                ? toStringVN(+report.tonCuoiKyQuantityTotal, 0, 4)
                 : ""}
             </Table.Cell>
             <Table.Cell>
               {report?.tonCuoiKyValueTotal
-                ? toStringVN(+report.tonCuoiKyValueTotal)
+                ? toStringVN(+report.tonCuoiKyValueTotal, 0, 4)
                 : ""}
             </Table.Cell>
-
             <Table.Cell>
-              {report?.xuatThucTe ? toStringVN(+report.xuatThucTe) : ""}
+              {report?.xuatThucTe ? toStringVN(+report.xuatThucTe, 0, 4) : ""}
             </Table.Cell>
             <Table.Cell>
-              {report?.thue ? toStringVN(+report.thue) : ""}
+              {report?.thue ? toStringVN(+report.thue, 0, 4) : ""}
             </Table.Cell>
           </Table.Row>
         ))}

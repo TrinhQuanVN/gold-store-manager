@@ -20,7 +20,7 @@ export const rawReportXNTGroupSchema = z.object({
 
   stt: z.string().min(1),
 
-  tonDauKyQuantityTotal: z.string().optional(),
+  tonDauKyQuantityTotal: z.string(),
   tonDauKyValueTotal: z.string(),
 
   nhapQuantityTotal: z.string(),

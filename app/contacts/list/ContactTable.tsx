@@ -54,7 +54,12 @@ const ContactTable = ({
             <Table.Cell>
               <Flex direction="column" gap="2" align="start">
                 <Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
-                <ContactGroupBadge ContactGroup={contact.group} />
+                <ContactGroupBadge
+                  group={{
+                    name: contact.group.name,
+                    color: contact.group.color ?? "gray",
+                  }}
+                />
                 <Text>
                   Ngày tạo: {contact.createdAt.toLocaleDateString("vn-VN")}
                 </Text>

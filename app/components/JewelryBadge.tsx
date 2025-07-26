@@ -37,14 +37,12 @@ function isBadgeColor(value: string | null | undefined): value is BadgeColor {
 }
 
 interface Props {
-  jewelryType: JewelryType;
-  category: JewelryCategory;
+  type: { name: string; color: string };
+  category: { name: string; color: string };
 }
 
-const JewelryBadge = ({ jewelryType, category }: Props) => {
-  const typeColor: BadgeColor = isBadgeColor(jewelryType.color)
-    ? jewelryType.color!
-    : "gray";
+const JewelryBadge = ({ type, category }: Props) => {
+  const typeColor: BadgeColor = isBadgeColor(type.color) ? type.color : "gray";
 
   const categoryColor: BadgeColor = isBadgeColor(category.color)
     ? category.color!
@@ -53,7 +51,7 @@ const JewelryBadge = ({ jewelryType, category }: Props) => {
   return (
     <Flex gap="2" align="center" wrap="wrap">
       <Badge color={typeColor} variant="soft" radius="full">
-        {jewelryType.name}
+        {type.name}
       </Badge>
 
       <Badge color={categoryColor} variant="soft" radius="full">

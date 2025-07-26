@@ -1,11 +1,18 @@
 "use client";
 
-import { Button, Checkbox, Flex, Select, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  Flex,
+  RadioGroup,
+  TextField,
+  Select,
+  Text,
+} from "@radix-ui/themes";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { JewelryQuery } from "./JewelryTable";
 import { JewelryCategory, JewelryType } from "@prisma/client";
-import { JewelryCategoryNumber, JewelryTypeNumber } from "@/prismaRepositories";
 
 interface Props {
   searchParams: JewelryQuery;
@@ -17,105 +24,167 @@ const JewelrySearchForm = ({ searchParams, categories, types }: Props) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [field, setField] = useState<"id" | "supplierId">(
-    (searchParams.field as "id" | "supplierId") || "id"
-  );
-  const [value, setValue] = useState(searchParams.value || "");
+  const { control, handleSubmit, watch, getValues, setValue } =
+    useForm<JewelryQuery>({
+      defaultValues: {
+        id: searchParams.id ?? "",
+        supplierId: searchParams.supplierId ?? "",
+        weight: searchParams.weight ?? "",
+        reportProductCode: searchParams.reportProductCode ?? "",
+        categoryId: searchParams.categoryId ?? "",
+        jewelryTypeId: searchParams.jewelryTypeId ?? "",
+        inStock: searchParams.inStock ?? "true",
+      },
+    });
 
-  const [categoryId, setCategoryId] = useState(searchParams.categoryId || "");
-  const [jewelryTypeId, setJewelryTypeId] = useState(
-    searchParams.jewelryTypeId || ""
-  );
-  const [inStock, setInStock] = useState(
-    searchParams.inStock !== "false" // default to true
-  );
+  const watched = useWatch({ control });
 
-  const handleSearch = (formData: FormData) => {
+  // Chỉ cho phép điền 1 trong 4 trường tìm kiếm chính
+  const hasMainField =
+    !!watched.id ||
+    !!watched.supplierId ||
+    !!watched.weight ||
+    !!watched.reportProductCode;
+
+  const onSubmit = (data: JewelryQuery) => {
     const params = new URLSearchParams();
 
-    const field = formData.get("field")?.toString();
-    const value = formData.get("value")?.toString().trim();
-    const categoryId = formData.get("categoryId")?.toString();
-    const jewelryTypeId = formData.get("typeId")?.toString();
-    const inStock = formData.get("inStock") === "on" ? "true" : "false";
-
-    if (field && value) {
-      params.set("field", field);
-      params.set("value", value);
-    } else {
-      // only filter by category & type if not searching
-      if (categoryId) params.set("categoryId", categoryId);
-      if (jewelryTypeId) params.set("typeId", jewelryTypeId);
+    for (const [key, val] of Object.entries({ ...searchParams, ...data })) {
+      if (val !== undefined && val !== "" && val !== "all") {
+        params.set(key, String(val));
+      }
     }
 
-    params.set("inStock", inStock);
+    params.set("page", "1");
     params.set("orderBy", "totalWeight");
     params.set("orderDirection", "asc");
-    params.set("page", "1");
 
     startTransition(() => {
-      router.push(`?${params.toString()}`);
+      router.push(`/jewelry/list?${params.toString()}`);
     });
   };
 
-  return (
-    <form action={handleSearch}>
-      <Flex gap="3" align="end" wrap="wrap">
-        {/* DK1: Search by ID or SupplierID */}
-        <Select.Root
-          name="field"
-          defaultValue={field}
-          onValueChange={(val) => setField(val as "id" | "supplierId")}
-        >
-          <Select.Trigger />
-          <Select.Content>
-            <Select.Item value="id">ID</Select.Item>
-            <Select.Item value="supplierId">Mã</Select.Item>
-          </Select.Content>
-        </Select.Root>
-        <TextField.Root
-          name="value"
-          placeholder="Nhập từ khóa"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-        {/* DK2: Filter by category and type (only if no search) */}
-        {!value && (
-          <>
-            <Select.Root
-              name="categoryId"
-              defaultValue={categoryId}
-              onValueChange={setCategoryId}
-            >
-              <Select.Trigger placeholder="Chọn loại trang sức" />
-              <Select.Content>
-                {categories.map((c) => (
-                  <Select.Item key={c.id} value={c.id.toString()}>
-                    {c.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+  const fieldPlaceholders: Record<
+    "id" | "supplierId" | "weight" | "reportProductCode",
+    string
+  > = {
+    id: "Tìm theo ID",
+    supplierId: "Tìm theo mã nhà cung cấp",
+    weight: "Tìm theo trọng lượng",
+    reportProductCode: "Tìm theo mã báo cáo",
+  };
 
-            <Select.Root
-              name="typeId"
-              defaultValue={jewelryTypeId}
-              onValueChange={setJewelryTypeId}
-            >
-              <Select.Trigger placeholder="Chọn loại vàng" />
-              <Select.Content>
-                {types.map((t) => (
-                  <Select.Item key={t.id} value={t.id.toString()}>
-                    {t.name}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </>
-        )}
-        <Button type="submit" disabled={isPending}>
-          Tìm kiếm
-        </Button>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Flex direction="column" gap="4">
+        {/* Row 1: Main search fields */}
+        <Flex gap="3" wrap="wrap">
+          {(["id", "supplierId", "weight", "reportProductCode"] as const).map(
+            (field) => (
+              <Controller
+                key={field}
+                name={field}
+                control={control}
+                render={({ field: f }) => (
+                  <TextField.Root
+                    {...f}
+                    placeholder={fieldPlaceholders[field]}
+                    disabled={hasMainField && !f.value}
+                    style={{ width: "200px" }}
+                  />
+                )}
+              />
+            )
+          )}
+        </Flex>
+
+        {/* Row 2: Category + Type */}
+        <Flex gap="4" align="center" wrap="wrap">
+          <Flex align="center" gap="2">
+            <Text size="2">Loại trang sức:</Text>
+            <Controller
+              name="categoryId"
+              control={control}
+              render={({ field }) => (
+                <Select.Root
+                  value={field.value || "all"}
+                  onValueChange={(val) =>
+                    field.onChange(val === "all" ? "" : val)
+                  }
+                >
+                  <Select.Trigger placeholder="Loại trang sức" />
+                  <Select.Content>
+                    <Select.Item value="all">Tất cả</Select.Item>
+                    {categories.map((c) => (
+                      <Select.Item key={c.id} value={c.id.toString()}>
+                        {c.name}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              )}
+            />
+          </Flex>
+
+          <Flex align="center" gap="2">
+            <Text size="2">Loại vàng:</Text>
+            <Controller
+              name="jewelryTypeId"
+              control={control}
+              render={({ field }) => (
+                <Select.Root
+                  value={field.value || "all"}
+                  onValueChange={(val) =>
+                    field.onChange(val === "all" ? "" : val)
+                  }
+                >
+                  <Select.Trigger placeholder="Loại vàng" />
+                  <Select.Content>
+                    <Select.Item value="all">Tất cả</Select.Item>
+                    {types.map((t) => (
+                      <Select.Item key={t.id} value={t.id.toString()}>
+                        {t.name}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              )}
+            />
+          </Flex>
+        </Flex>
+
+        {/* Row 3: Stock status + Button */}
+        <Flex align="center" justify="between" wrap="wrap">
+          <Flex align="center" gap="4">
+            <Text>Trạng thái tồn kho:</Text>
+            <Controller
+              name="inStock"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup.Root
+                  {...field}
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <Flex gap="4">
+                    <RadioGroup.Item value="all" /> Tất cả
+                    <RadioGroup.Item value="true" /> Còn hàng
+                    <RadioGroup.Item value="false" /> Hết hàng
+                  </Flex>
+                </RadioGroup.Root>
+              )}
+            />
+          </Flex>
+
+          <Button
+            type="submit"
+            disabled={isPending}
+            color="violet"
+            highContrast
+          >
+            Tìm kiếm
+          </Button>
+        </Flex>
       </Flex>
     </form>
   );
