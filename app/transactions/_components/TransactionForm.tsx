@@ -25,19 +25,17 @@ import GoldTransactionForm from "./GoldTransactionForm";
 import IsExportSegment from "./IsExportSegment";
 import JewelryTransactionForm from "./JewelryTransactionForm";
 import PaymentForm from "./PaymentForm";
-import { ContactWithGroup } from "@/types";
 
 interface Props {
   id?: number;
   transaction?: RawTransactionHeaderFormData;
-  // contactGroup: ContactWithGroup[];
+  redirectTo?: string; // ✅ thêm redirectTo
 }
 
-const TransactionForm = ({ id, transaction }: Props) => {
+const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
-  // const [lastestGoldPrice, setLastestGoldPrice] = useState<number>(0);
   const {
     register,
     handleSubmit,
@@ -77,7 +75,7 @@ const TransactionForm = ({ id, transaction }: Props) => {
       } else {
         await axios.post("/api/transactions", data);
       }
-      router.push("/transactions/list");
+      router.push(redirectTo ?? "/transactions/list");
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -96,6 +94,8 @@ const TransactionForm = ({ id, transaction }: Props) => {
     control,
     name: "jewelryDetails",
   });
+
+  const bankPayments = useWatch({ control, name: "payments" });
 
   const fetchGoldPriceByDate = async (date: Date) => {
     try {

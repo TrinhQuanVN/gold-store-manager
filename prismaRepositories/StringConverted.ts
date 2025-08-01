@@ -73,7 +73,7 @@ export const convertPrismaJewelryToString = (j: Jewelry): ConvertedJewlery => ({
   madeIn: j.madeIn ?? "",
   size: j.size ?? "",
 
-  reportXNTId: j.reportXNTId ?? "",
+  reportXNTId: j.reportProductCode ?? "",
 
   supplierId: j.supplierId?.toString() ?? "",
 

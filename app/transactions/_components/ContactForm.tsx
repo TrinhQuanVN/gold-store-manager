@@ -62,11 +62,23 @@ const ContactForm = ({ control }: Props) => {
                 <Flex gap="2" align="center">
                   <Text>{contact.name}</Text>
                   <ContactGroupBadge
-                    name={contact.group?.name!}
-                    color={contact.group?.color ?? "gray"}
+                    group={{
+                      name: contact.group?.name ?? "",
+                      color: contact.group?.color ?? "gray",
+                    }}
                   />
-                  <Button size="1" variant="soft" aria-label="Sửa khách hàng">
-                    ✏️
+                  <Button
+                    size="1"
+                    variant="soft"
+                    aria-label="Sửa khách hàng"
+                    asChild
+                  >
+                    <Link
+                      className=""
+                      href={`/contacts/edit/${contact.id}?redirectTo=/transactions/new`}
+                    >
+                      ✏️
+                    </Link>
                   </Button>
                 </Flex>
               </DataList.Value>

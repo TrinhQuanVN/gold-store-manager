@@ -3,6 +3,7 @@ import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { GoldPriceSearchQuery } from "./GoldPriceSearchQuery";
+import { toStringVN } from "@/utils";
 
 const columns: {
   label: string;
@@ -75,8 +76,8 @@ const GoldPriceTable = ({
           <Table.Row key={price.id}>
             <Table.Cell>{price.id}</Table.Cell>
             <Table.Cell>{price.name}</Table.Cell>
-            <Table.Cell>{price.buy.toLocaleString("vi-VN")}</Table.Cell>
-            <Table.Cell>{price.sell.toLocaleString("vi-VN")}</Table.Cell>
+            <Table.Cell>{toStringVN(Number(price.buy))}</Table.Cell>
+            <Table.Cell>{toStringVN(Number(price.sell))}</Table.Cell>
             <Table.Cell>
               {new Date(price.createdAt).toLocaleDateString("vi-VN")}
             </Table.Cell>

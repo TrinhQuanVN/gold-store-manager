@@ -25,8 +25,8 @@ export const rawReportXNTSchema = z.object({
   tonCuoiKyQuantity: z.string(),
   tonCuoiKyValue: z.string(),
 
-  xuatThucTe: z.string().optional(),
-  thue: z.string().optional(),
+  xuatThucTe: z.string(),
+  thue: z.string(),
 });
 
 export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({
@@ -51,19 +51,31 @@ export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({
   tonCuoiKyValue: parseFloat(data.tonCuoiKyValue ?? "0"),
 }));
 
-export const reportXNTTransferedSchema = z.object({
-  groupId: z.number().min(1),
-  id: z.string().min(1),
-  name: z.string().min(1),
-  productCode: z.string(),
-  nhapQuantity: z.number().optional(),
-  nhapValue: z.number().optional(),
-  tonCuoiKyQuantity: z.number().optional(),
-  tonCuoiKyValue: z.number().optional(),
-  tonDauKyQuantity: z.number().optional(),
-  tonDauKyValue: z.number().optional(),
-  xuatQuantity: z.number().optional(),
-  xuatValue: z.number().optional(),
-});
+export const reportXNTTransferedSchema = rawReportXNTSchema.transform(
+  (data) => ({
+    groupId: parseInt(data.groupId),
+
+    id: data.id,
+    name: data.name,
+    productCode: data.productCode ?? "",
+    unit: data.unit ?? "chỉ",
+    stt: data.stt,
+
+    tonDauKyQuantity: parseFloat(data.tonDauKyQuantity || "0"),
+    tonDauKyValue: parseFloat(data.tonDauKyValue || "0"),
+
+    nhapQuantity: parseFloat(data.nhapQuantity || "0"),
+    nhapValue: parseFloat(data.nhapValue || "0"),
+
+    xuatQuantity: parseFloat(data.xuatQuantity || "0"),
+    xuatValue: parseFloat(data.xuatValue || "0"),
+
+    tonCuoiKyQuantity: parseFloat(data.tonCuoiKyQuantity || "0"),
+    tonCuoiKyValue: parseFloat(data.tonCuoiKyValue || "0"),
+
+    xuatThucTe: parseFloat(data.xuatThucTe || "0"),
+    thue: parseFloat(data.thue || "0"),
+  })
+);
 
 export type RawReportXNTForm = z.input<typeof rawReportXNTSchema>;

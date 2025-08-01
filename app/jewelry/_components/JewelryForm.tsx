@@ -3,7 +3,10 @@
 import ErrorMessage from "@/app/components/ErrorMessage";
 import { NumericFormattedField } from "@/app/components/NumericFormattedField";
 import Spinner from "@/app/components/Spinner";
-import { rawJewelrySchema } from "@/app/validationSchemas/jewelrySchemas";
+import {
+  JewleryWithCategoryAndTypeDataForm,
+  rawJewelrySchema,
+} from "@/app/validationSchemas/jewelrySchemas";
 import { ConvertedJewlery } from "@/prismaRepositories/StringConverted";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JewelryCategory, JewelryType } from "@prisma/client";
@@ -25,12 +28,13 @@ import { z } from "zod";
 type JewelryFormData = z.infer<typeof rawJewelrySchema>;
 
 interface Props {
-  jewelry?: ConvertedJewlery;
+  jewelry?: JewleryWithCategoryAndTypeDataForm;
   types: JewelryType[];
   categories: JewelryCategory[];
+  redirectTo?: string; // ✅ thêm redirectTo
 }
 
-const JewelryForm = ({ jewelry, types, categories }: Props) => {
+const JewelryForm = ({ jewelry, types, categories, redirectTo }: Props) => {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -43,21 +47,36 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
   } = useForm<JewelryFormData>({
     resolver: zodResolver(rawJewelrySchema),
     defaultValues: {
+      id: jewelry?.id?.toString(),
       name: jewelry?.name ?? "",
 
-      goldWeight: jewelry?.goldWeight.toString() ?? "",
-      gemWeight: jewelry?.gemWeight.toString() ?? "",
-      totalWeight: jewelry?.totalWeight.toString() ?? "",
+      goldWeight: jewelry?.goldWeight?.toString() ?? "",
+      gemWeight: jewelry?.gemWeight?.toString() ?? "",
+      totalWeight: jewelry?.totalWeight?.toString() ?? "",
 
-      categoryId: jewelry?.categoryId.toString() ?? "",
-      typeId: jewelry?.typeId.toString() ?? "",
+      categoryId: jewelry?.categoryId?.toString() ?? "",
+      typeId: jewelry?.typeId?.toString() ?? "",
 
       gemName: jewelry?.gemName ?? "",
-      description: jewelry?.description ?? "",
-      madeIn: jewelry?.madeIn ?? "",
-      size: jewelry?.size ?? "",
-      reportXNTId: jewelry?.reportXNTId ?? "",
-      supplierId: jewelry?.supplierId ?? "",
+      description: jewelry?.description ?? null,
+      madeIn: jewelry?.madeIn ?? null,
+      size: jewelry?.size ?? null,
+      reportProductCode: jewelry?.reportProductCode ?? null,
+
+      type: {
+        id: jewelry?.type?.id?.toString() ?? null,
+        name: jewelry?.type?.name ?? null,
+        goldPercent: jewelry?.type?.goldPercent ?? null,
+        color: jewelry?.type?.color ?? null,
+      },
+      category: {
+        id: jewelry?.category?.id?.toString() ?? null,
+        name: jewelry?.category?.name ?? null,
+        color: jewelry?.category?.color ?? null,
+      },
+
+      supplierId: jewelry?.supplierId ?? null,
+      createdAt: jewelry?.createdAt ?? null,
     },
   });
 
@@ -69,7 +88,9 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
       } else {
         await axios.post("/api/jewelry", data);
       }
-      router.push("/jewelry/list");
+
+      // ✅ Redirect tới redirectTo nếu có
+      router.push(redirectTo ?? "/jewelry/list");
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -116,6 +137,15 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
           maximumFractionDigits={4}
         />
 
+        <Label>Mã báo cáo XNT</Label>
+        <TextField.Root
+          placeholder="Mã báo cáo XNT"
+          {...register("reportProductCode")}
+        />
+
+        <Label>Mã của nhà</Label>
+        <TextField.Root placeholder="Mã của nhà " {...register("supplierId")} />
+
         <Label>Loại vàng</Label>
         <Flex direction="column">
           <Controller
@@ -160,15 +190,6 @@ const JewelryForm = ({ jewelry, types, categories }: Props) => {
 
         <Label>Tên đá quý</Label>
         <TextField.Root placeholder="Tên đá quý" {...register("gemName")} />
-
-        <Label>Mã báo cáo XNT</Label>
-        <TextField.Root
-          placeholder="Mã báo cáo XNT"
-          {...register("reportXNTId")}
-        />
-
-        <Label>Mã của nhà</Label>
-        <TextField.Root placeholder="Mã của nhà " {...register("supplierId")} />
 
         <Label>Xuất xứ</Label>
         <TextField.Root placeholder="Xuất xứ" {...register("madeIn")} />

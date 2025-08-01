@@ -11,6 +11,7 @@ import AddDataFromOtherReportButton from "./AddDataFromOtherReportButton";
 import AddDataFromTransactionButton, {
   ProductCodeNotInReport,
 } from "./AddDataFromTransactionButton";
+import ExportExcelReportHeader from "./ExportExcelReportHeader";
 
 // import { getServerSession } from "next-auth";
 // import authOptions from "@/app/auth/authOptions";
@@ -32,8 +33,11 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
     include: {
       taxPayer: true,
       group: {
+        orderBy: { stt: "asc" }, // sắp xếp group theo stt
         include: {
-          ReportXNTs: true,
+          ReportXNTs: {
+            orderBy: { stt: "asc" }, // sắp xếp ReportXNTs theo stt
+          },
         },
       },
     },
@@ -71,7 +75,9 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
     },
   });
 
-  const excludedCodes = usedProductCodes.map((r) => r.productCode);
+  const excludedCodes = usedProductCodes
+    .map((r) => r.productCode)
+    .filter((code): code is string => code !== null);
 
   const result = await prisma.jewelry.findMany({
     where: {
@@ -130,6 +136,8 @@ const ReportXNTDetailPage = async ({ params }: Props) => {
           <Flex direction="column" gap="4">
             <EditReportXNTHeaderButton headerId={header.id} />
             <DeleteReportXNTHeaderButton headerId={header.id} />
+            <ExportExcelReportHeader data={convertedHeader} />
+
             <AddDataFromOtherReportButton
               headerId={header.id}
               oldReports={oldReports.map((r) => ({

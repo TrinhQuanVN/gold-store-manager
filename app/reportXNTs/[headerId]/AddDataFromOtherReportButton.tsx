@@ -45,11 +45,11 @@ const AddDataFromOtherReportButton = ({
         <AlertDialog.Trigger>
           <Button
             color="orange"
-            size="3"
+            size="2"
             className="py-3 w-full"
             disabled={oldReports.length < 1 || isSubmitting || !hasReport}
           >
-            Lấy giá trị tồn đầu kỳ
+            Lấy tồn đầu kỳ
             {isSubmitting && <Spinner />}
           </Button>
         </AlertDialog.Trigger>

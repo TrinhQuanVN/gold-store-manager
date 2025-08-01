@@ -35,6 +35,8 @@ const NavLinks = () => {
     { label: "Trang sức", href: "/jewelry/list" },
     { label: "Khách hàng", href: "/contacts/list" },
     { label: "Báo cáo xuất nhập tồn", href: "/reportXNTs/list" },
+    { label: "Tồn kho theo tháng", href: "/inventoryReport/list" },
+    { label: "DS thanh toán", href: "/payments/list" },
   ];
 
   return (

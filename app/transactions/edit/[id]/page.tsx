@@ -18,10 +18,12 @@ const TransactionForm = dynamic(
 
 interface Props {
   params: { id: string };
+  searchParams: { redirectTo?: string };
 }
 
-const EditTransactionPage = async ({ params }: Props) => {
+const EditTransactionPage = async ({ params, searchParams }: Props) => {
   const _params = await params;
+  const _searchParams = await searchParams;
   const transaction = await prisma.transactionHeader.findUnique({
     where: { id: parseInt(_params.id) },
     include: {
@@ -47,7 +49,13 @@ const EditTransactionPage = async ({ params }: Props) => {
 
   const converted = converttoRawTransactionHeaderFormData(transaction);
 
-  return <TransactionForm transaction={converted} id={transaction.id} />;
+  return (
+    <TransactionForm
+      transaction={converted}
+      id={transaction.id}
+      redirectTo={_searchParams.redirectTo}
+    />
+  );
 };
 
 export default EditTransactionPage;

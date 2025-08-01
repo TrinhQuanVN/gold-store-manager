@@ -25,7 +25,7 @@ export function converttoRawTransactionHeaderFormData(
   return {
     id: transaction.id.toString(),
     paymentMethode: transaction.paymentMethode,
-    isExport: transaction.isExport || true,
+    isExport: transaction.isExport,
     contactId: transaction.contact.id.toString(),
     contactName: transaction.contact.name,
     note: transaction.note || "",

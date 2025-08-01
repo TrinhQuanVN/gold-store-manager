@@ -16,6 +16,9 @@ DECLARE
 
   avg_price     DECIMAL(13,2);
   xuat_value    DECIMAL(13,2);
+
+  xuatThucTe    DECIMAL(13,2);
+  calculated_thue          NUMERIC(13,0);  -- Làm tròn không có phần thập phân
 BEGIN
   FOR r IN
     SELECT *
@@ -82,6 +85,34 @@ BEGIN
 
     xuat_value := ROUND(avg_price * xuat_quantity);
 
+
+    -- ===== GIÁ TRỊ XUẤT THỰC TẾ =====
+    SELECT
+      COALESCE(SUM(gtd."amount"), 0)
+    INTO xuatThucTe
+    FROM "GoldTransactionDetail" gtd
+    JOIN "TransactionHeader" th ON gtd."transactionHeaderId" = th.id
+    WHERE
+      gold_ids IS NOT NULL AND gtd."goldId" = ANY(gold_ids)
+      AND th."isExport" = true
+      AND th."createdAt" BETWEEN in_start_date AND in_end_date;
+
+    SELECT
+      xuatThucTe + COALESCE(SUM(jtd."amount"), 0)
+    INTO xuatThucTe
+    FROM "JewelryTransactionDetail" jtd
+    JOIN "Jewelry" j ON jtd."jewelryId" = j.id
+    JOIN "TransactionHeader" th ON jtd."transactionHeaderId" = th.id
+    WHERE
+      jewelry_ids IS NOT NULL AND j.id = ANY(jewelry_ids)
+      AND th."isExport" = true
+      AND th."createdAt" BETWEEN in_start_date AND in_end_date;
+
+    -- ===== THUẾ =====
+    calculated_thue := ROUND((xuatThucTe - xuat_value) * 0.1);
+
+    -- ===== UPDATE =====
+
     UPDATE "ReportXNT"
     SET
       "nhapQuantity" = nhap_quantity,
@@ -90,15 +121,10 @@ BEGIN
       "xuatValue" = xuat_value,
       "tonCuoiKyQuantity" = r."tonDauKyQuantity" + nhap_quantity - xuat_quantity,
       "tonCuoiKyValue" = r."tonDauKyValue" + nhap_value - xuat_value,
+      "xuatThucTe" = xuatThucTe,
+      "thue" = calculated_thue,
       "updatedAt" = now()
     WHERE id = r.id;
   END LOOP;
 END;
-
-
-
-
-
-
-
-
+$$;

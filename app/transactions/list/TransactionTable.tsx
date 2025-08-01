@@ -1,17 +1,25 @@
 //import { ContactStatusBadge } from '@/app/components'
-import { ConvertedTransactionHeaderWithRelation } from "@/prismaRepositories/StringConverted";
-import { DateToStringVN, toNumberVN, toStringVN } from "@/utils";
+import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
+import { DateToStringVN, toStringVN } from "@/utils";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
-import { ContactSearchQuery } from "./ContactSearchQuery";
-import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
+import { Pencil1Icon } from "@radix-ui/react-icons";
+export interface TransactionSearchQuery {
+  isExport?: string; // sẽ convert sang boolean
+  startDate?: string; // ISO string
+  endDate?: string; // ISO string
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  page?: string;
+  pageSize?: string;
+}
 
 const TransactionTable = ({
   searchParams,
   transactions,
 }: {
-  searchParams: ContactSearchQuery;
+  searchParams: TransactionSearchQuery;
   transactions: RawTransactionHeaderFormData[];
 }) => {
   return (
@@ -51,6 +59,7 @@ const TransactionTable = ({
               </Table.ColumnHeaderCell>
             );
           })}
+          <Table.ColumnHeaderCell>Hành động</Table.ColumnHeaderCell>
         </Table.Row>
       </Table.Header>
 
@@ -91,15 +100,22 @@ const TransactionTable = ({
 
           return (
             <Table.Row key={t.id}>
-              <Table.Cell>
+              {/* <Table.Cell>
                 <Link
                   className=" text-blue-400 hover:text-blue-1000"
                   href={`/transactions/${t.id}`}
                 >
                   {t.id}
                 </Link>
+              </Table.Cell> */}
+              <Table.Cell>
+                <Link
+                  className=" text-blue-400 hover:text-blue-1000"
+                  href={`/transactions/${t.id}`}
+                >
+                  {DateToStringVN(t.date)}
+                </Link>
               </Table.Cell>
-              <Table.Cell>{DateToStringVN(t.date)}</Table.Cell>
               <Table.Cell>
                 {t.contactId ? (
                   <Link
@@ -117,6 +133,25 @@ const TransactionTable = ({
               <Table.Cell>{paymentText}</Table.Cell>
               <Table.Cell>{toStringVN(+t.totalAmount)}</Table.Cell>
               <Table.Cell>{t.note || "-"}</Table.Cell>
+              <Table.Cell>
+                <NextLink
+                  href={{
+                    pathname: `/transactions/edit/${t.id}`,
+                    query: {
+                      redirectTo: `/transactions/list?${new URLSearchParams(
+                        Object.fromEntries(
+                          Object.entries(searchParams).filter(
+                            ([_, v]) => v !== undefined && v !== null
+                          ) as [string, string][]
+                        )
+                      ).toString()}`,
+                    },
+                  }}
+                  passHref
+                >
+                  <Pencil1Icon className="cursor-pointer hover:text-blue-500" />
+                </NextLink>
+              </Table.Cell>
             </Table.Row>
           );
         })}
@@ -130,7 +165,7 @@ const columns: {
   value: string;
   className?: string;
 }[] = [
-  { label: "Mã GD", value: "id" },
+  // { label: "Mã GD", value: "id" },
   { label: "Ngày", value: "createdAt" },
   { label: "Khách hàng", value: "contact.name" },
   { label: "Xuất", value: "xuat" },

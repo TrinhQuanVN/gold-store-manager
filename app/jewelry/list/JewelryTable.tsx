@@ -1,23 +1,10 @@
 import JewelryBadge from "@/app/components/JewelryBadge";
 import { JewleryWithCategoryAndTypeDataForm } from "@/app/validationSchemas/jewelrySchemas";
-import { ConvertedJewelryWithCateogryAndType } from "@/prismaRepositories/StringConverted";
 import { DateToStringVN, toStringVN } from "@/utils";
 import { Jewelry } from "@prisma/client";
-import { ArrowUpIcon } from "@radix-ui/react-icons";
+import { ArrowUpIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
-
-// export interface JewelryQuery {
-//   orderBy: keyof Jewelry;
-//   orderDirection: "asc" | "desc";
-//   page: string;
-//   pageSize: string;
-//   field?: "id" | "supplierId";
-//   value?: string;
-//   categoryId?: string;
-//   jewelryTypeId?: string;
-//   inStock?: "true" | "false";
-// }
 
 export interface JewelryQuery {
   orderBy?: keyof Jewelry;
@@ -37,9 +24,10 @@ export interface JewelryQuery {
 interface Props {
   jewelries: JewleryWithCategoryAndTypeDataForm[];
   searchParams: JewelryQuery;
+  redirectToUrl: string; // 👈 Add this
 }
 
-const JewelryTable = ({ jewelries, searchParams }: Props) => {
+const JewelryTable = ({ jewelries, searchParams, redirectToUrl }: Props) => {
   return (
     <Table.Root variant="surface">
       <Table.Header>
@@ -74,6 +62,7 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
               )}
             </Table.ColumnHeaderCell>
           ))}
+          <Table.ColumnHeaderCell>Hành động</Table.ColumnHeaderCell>
         </Table.Row>
       </Table.Header>
 
@@ -92,8 +81,14 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
                 <Link href={`/jewelry/${jewelry.id}`}>{jewelry.name}</Link>
                 {jewelry.type && jewelry.category && (
                   <JewelryBadge
-                    category={jewelry.category}
-                    type={jewelry.type}
+                    category={{
+                      name: jewelry.category.name ?? "",
+                      color: jewelry.category.color ?? "gray",
+                    }}
+                    type={{
+                      name: jewelry.type.name ?? "",
+                      color: jewelry.type.color ?? "gray",
+                    }}
                   />
                 )}
                 {jewelry.description && <Text>{jewelry.description}</Text>}
@@ -111,6 +106,18 @@ const JewelryTable = ({ jewelries, searchParams }: Props) => {
             <Table.Cell>{jewelry.reportProductCode || "-"}</Table.Cell>
 
             <Table.Cell>{DateToStringVN(jewelry.createdAt)}</Table.Cell>
+
+            <Table.Cell>
+              <NextLink
+                href={{
+                  pathname: `/jewelry/edit/${jewelry.id}`,
+                  query: { redirectTo: redirectToUrl },
+                }}
+                passHref
+              >
+                <Pencil1Icon className="cursor-pointer hover:text-blue-500" />
+              </NextLink>
+            </Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>

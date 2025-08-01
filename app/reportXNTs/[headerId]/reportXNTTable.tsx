@@ -1,14 +1,11 @@
 "use client";
 
-import { ArrowUpIcon } from "@radix-ui/react-icons";
-import { Table, Text } from "@radix-ui/themes";
-import Link from "next/link";
-import { ReportXNT } from "@prisma/client";
-import { ReportXNTNumber } from "@/prismaRepositories";
 import { RawReportXNTGroupForm } from "@/app/validationSchemas";
-import { Collapsible } from "radix-ui";
-import { useState } from "react";
 import { toStringVN } from "@/utils";
+import { ReportXNT } from "@prisma/client";
+import { Table } from "@radix-ui/themes";
+import Link from "next/link";
+import { useMemo } from "react";
 
 export type ReportXNTOrderField = keyof ReportXNT;
 
@@ -25,6 +22,60 @@ interface Props {
 }
 
 const ReportXNTTable = ({ searchParams, groups }: Props) => {
+  const total = useMemo(() => {
+    if (!groups) {
+      return {
+        tonDauKyQuantityTotal: 0,
+        tonDauKyValueTotal: 0,
+        nhapQuantityTotal: 0,
+        nhapValueTotal: 0,
+        xuatQuantityTotal: 0,
+        xuatValueTotal: 0,
+        tonCuoiKyQuantityTotal: 0,
+        tonCuoiKyValueTotal: 0,
+        xuatThucTe: 0,
+        thue: 0,
+      };
+    }
+
+    return groups.reduce(
+      (acc, group) => ({
+        tonDauKyQuantityTotal:
+          acc.tonDauKyQuantityTotal +
+          parseFloat(group.tonDauKyQuantityTotal || "0"),
+        tonDauKyValueTotal:
+          acc.tonDauKyValueTotal + parseFloat(group.tonDauKyValueTotal || "0"),
+        nhapQuantityTotal:
+          acc.nhapQuantityTotal + parseFloat(group.nhapQuantityTotal || "0"),
+        nhapValueTotal:
+          acc.nhapValueTotal + parseFloat(group.nhapValueTotal || "0"),
+        xuatQuantityTotal:
+          acc.xuatQuantityTotal + parseFloat(group.xuatQuantityTotal || "0"),
+        xuatValueTotal:
+          acc.xuatValueTotal + parseFloat(group.xuatValueTotal || "0"),
+        tonCuoiKyQuantityTotal:
+          acc.tonCuoiKyQuantityTotal +
+          parseFloat(group.tonCuoiKyQuantityTotal || "0"),
+        tonCuoiKyValueTotal:
+          acc.tonCuoiKyValueTotal +
+          parseFloat(group.tonCuoiKyValueTotal || "0"),
+        xuatThucTe: acc.xuatThucTe + parseFloat(group.xuatThucTe || "0"),
+        thue: acc.thue + parseFloat(group.thue || "0"),
+      }),
+      {
+        tonDauKyQuantityTotal: 0,
+        tonDauKyValueTotal: 0,
+        nhapQuantityTotal: 0,
+        nhapValueTotal: 0,
+        xuatQuantityTotal: 0,
+        xuatValueTotal: 0,
+        tonCuoiKyQuantityTotal: 0,
+        tonCuoiKyValueTotal: 0,
+        xuatThucTe: 0,
+        thue: 0,
+      }
+    );
+  }, [groups]);
   return (
     <Table.Root variant="surface">
       <Table.Header>
@@ -220,6 +271,41 @@ const ReportXNTTable = ({ searchParams, groups }: Props) => {
             </Table.Row>
           );
         })}
+        <Table.Row className="font-bold bg-gray-100">
+          <Table.Cell className="text-center" colSpan={2}>
+            Tổng
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.tonDauKyQuantityTotal, 0, 4)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.tonDauKyValueTotal, 0, 2)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.nhapQuantityTotal, 0, 4)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.nhapValueTotal, 0, 2)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.xuatQuantityTotal, 0, 4)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.xuatValueTotal, 0, 2)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.tonCuoiKyQuantityTotal, 0, 4)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.tonCuoiKyValueTotal, 0, 2)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.xuatThucTe, 0, 2)}
+          </Table.Cell>
+          <Table.Cell className="text-right">
+            {toStringVN(total.thue, 0, 2)}
+          </Table.Cell>
+        </Table.Row>
       </Table.Body>
     </Table.Root>
   );

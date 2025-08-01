@@ -31,7 +31,11 @@ const ReportXNTGroupDetailPage = async ({
   const group = await prisma.reportXNTGroup.findUnique({
     where: { id: parseInt(_params.groupId) },
     include: {
-      ReportXNTs: true,
+      ReportXNTs: {
+        orderBy: {
+          stt: "asc", // hoặc "desc" tùy bạn
+        },
+      },
     },
   });
   if (!group) notFound();

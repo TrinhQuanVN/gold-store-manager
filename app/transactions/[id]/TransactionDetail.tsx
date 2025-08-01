@@ -26,6 +26,11 @@ export default function TransactionDetail({ transaction }: Props) {
     <Flex direction="column" gap="4">
       <DataList.Root>
         <DataList.Item>
+          <DataList.Label>Id</DataList.Label>
+          <DataList.Value>{transaction.id}</DataList.Value>
+        </DataList.Item>
+
+        <DataList.Item>
           <DataList.Label>Ngày giao dịch</DataList.Label>
           <DataList.Value>
             {DateToStringVN(transaction.createdAt)}
@@ -42,8 +47,10 @@ export default function TransactionDetail({ transaction }: Props) {
           <DataList.Value>
             {contact?.name}
             <ContactGroupBadge
-              name={contact?.group.name}
-              color={contact?.group.color || "gray"}
+              group={{
+                name: contact?.group.name,
+                color: contact?.group.color || "gray",
+              }}
             />
           </DataList.Value>
         </DataList.Item>
@@ -72,9 +79,6 @@ export default function TransactionDetail({ transaction }: Props) {
         </DataList.Item>
       </DataList.Root>
 
-      <Text weight="bold" mb="2">
-        Chi tiết vàng
-      </Text>
       <Table.Root>
         <Table.Header>
           <Table.Row>
@@ -93,22 +97,6 @@ export default function TransactionDetail({ transaction }: Props) {
               <Table.Cell>{toStringVN(g.amount)}</Table.Cell>
             </Table.Row>
           ))}
-        </Table.Body>
-      </Table.Root>
-
-      <Text weight="bold" mt="4" mb="2">
-        Chi tiết trang sức
-      </Text>
-      <Table.Root>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>Tên trang sức</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Trọng lượng</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Giá</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Thành tiền</Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
           {jewelryDetails.map((j) => (
             <Table.Row key={j.id}>
               <Table.Cell>

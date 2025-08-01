@@ -12,10 +12,13 @@ const ContactForm = dynamic(() => import("../../_components/ContactForm"), {
 
 interface Props {
   params: { id: string };
+  searchParams: { redirectTo?: string };
 }
 
-const EditContactPage = async ({ params }: Props) => {
+const EditContactPage = async ({ params, searchParams }: Props) => {
   const _params = await params;
+  const _searchParams = await searchParams;
+  const redirectTo = _searchParams.redirectTo ?? "";
   const contactgroups = await prisma.contactGroup.findMany();
   if (!contactgroups || contactgroups.length === 0) {
     notFound();
@@ -29,7 +32,13 @@ const EditContactPage = async ({ params }: Props) => {
   });
   if (!contact) notFound();
 
-  return <ContactForm contact={contact} groups={contactgroups} />;
+  return (
+    <ContactForm
+      contact={contact}
+      groups={contactgroups}
+      redirectTo={redirectTo}
+    />
+  );
 };
 
 export default EditContactPage;

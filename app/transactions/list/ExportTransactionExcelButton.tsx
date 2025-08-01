@@ -1,8 +1,6 @@
 "use client";
 
-import { Button, Flex } from "@radix-ui/themes";
-import Link from "next/link";
-import ExportTransactionExcelButton from "./ExportTransactionExcelButton";
+import { Button } from "@radix-ui/themes";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
@@ -12,7 +10,7 @@ interface Props {
   transactions: RawTransactionHeaderFormData[];
 }
 
-const TransactionActions = ({ transactions }: Props) => {
+const ExportTransactionExcelButton = ({ transactions }: Props) => {
   const handleExport = () => {
     const exportRows: any[][] = [
       [
@@ -89,17 +87,12 @@ const TransactionActions = ({ transactions }: Props) => {
     const filename = `BaoCao_GiaoDich.xlsx`;
     saveAs(blob, filename);
   };
+
   return (
-    <Flex justify="end" gap="3">
-      <Button>
-        <Link href="/transactions/new">Thêm giao dịch</Link>
-      </Button>
-      <Button onClick={handleExport} color="green" variant="solid">
-        Xuất Excel
-      </Button>
-      {/* <ExportTransactionExcelButton transactions={transactions} /> */}
-    </Flex>
+    <Button onClick={handleExport} color="green" variant="solid">
+      Xuất Excel
+    </Button>
   );
 };
 
-export default TransactionActions;
+export default ExportTransactionExcelButton;

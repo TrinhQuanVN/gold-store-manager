@@ -97,6 +97,7 @@ export async function PATCH(
         isExport: data.isExport,
         contactId: contact.id,
         paymentMethode: data.paymentMethode,
+        goldPrice: data.currentGoldPrice,
         createdAt: data.date,
       },
     });
@@ -107,6 +108,7 @@ export async function PATCH(
         transactionHeaderId: id,
         amount: p.amount,
         type: p.type,
+        createdAt: data.date,
       })),
     });
 
@@ -120,6 +122,7 @@ export async function PATCH(
           weight: g.weight,
           discount: g.discount ?? 0,
           amount: g.amount,
+          createdAt: data.date,
         })),
       });
     }
@@ -133,6 +136,7 @@ export async function PATCH(
           price: j.price,
           discount: j.discount ?? 0,
           amount: j.amount,
+          createdAt: data.date,
         })),
       });
     }

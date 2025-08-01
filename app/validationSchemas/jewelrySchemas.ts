@@ -29,25 +29,25 @@ export const rawJewelrySchema = z.object({
       "Tổng trọng lượng phải là số hoặc để trống"
     ),
 
-  description: z.string(),
-  madeIn: z.string(),
-  size: z.string(),
-  reportProductCode: z.string(),
+  description: z.string().nullable(),
+  madeIn: z.string().nullable(),
+  size: z.string().nullable(),
+  reportProductCode: z.string().nullable(),
 
   type: z.object({
-    id: z.string().optional(),
-    name: z.string(),
-    goldPercent: z.string(),
-    color: z.string(),
+    id: z.string().nullable(),
+    name: z.string().nullable(),
+    goldPercent: z.string().nullable(),
+    color: z.string().nullable(),
   }),
   category: z.object({
-    id: z.string().regex(/^\d+$/, "ID loại trang sức không hợp lệ"),
-    name: z.string(),
-    color: z.string(),
+    id: z.string().regex(/^\d+$/, "ID loại trang sức không hợp lệ").nullable(),
+    name: z.string().nullable(),
+    color: z.string().nullable(),
   }),
 
-  supplierId: z.string(), // ✅ mới thêm
-  createdAt: z.string(),
+  supplierId: z.string().nullable(), // ✅ mới thêm
+  createdAt: z.string().nullable(),
 });
 
 export const jewelrySchema = rawJewelrySchema.transform((data) => ({
@@ -66,7 +66,9 @@ export const jewelrySchema = rawJewelrySchema.transform((data) => ({
   supplierId: data.supplierId?.trim() || null, // ✅ chuyển chuỗi rỗng thành null
 }));
 
-export type JewleryWithCategoryAndTypeDataForm = z.input<typeof jewelrySchema>;
+export type JewleryWithCategoryAndTypeDataForm = z.input<
+  typeof rawJewelrySchema
+>;
 
 export const convertJewleryWithCategoryAndTypeToRaw = (
   data: Jewelry & { jewelryType: JewelryType; category: JewelryCategory }

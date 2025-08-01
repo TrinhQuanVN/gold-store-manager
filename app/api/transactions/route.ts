@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
             weight: detail.weight,
             price: detail.price,
             discount: detail.discount,
+            createdAt: data.date,
           },
         });
       }
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
             amount: detail.amount,
             price: detail.price,
             discount: detail.discount,
+            createdAt: data.date,
           },
         });
       }
@@ -96,6 +98,7 @@ export async function POST(request: NextRequest) {
               amount: detail.amount,
               type: detail.type,
               transactionHeaderId: transactionHeader.id,
+              createdAt: data.date,
             },
           });
         }

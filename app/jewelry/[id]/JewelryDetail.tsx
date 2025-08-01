@@ -15,8 +15,14 @@ const JewelryDetail = ({ jewelry }: Props) => {
         <Flex justify="between" align="center">
           <Heading size="5">{jewelry.name}</Heading>
           <JewelryBadge
-            category={jewelry.category}
-            jewelryType={jewelry.jewelryType}
+            category={{
+              name: jewelry.category.name,
+              color: jewelry.category.color ?? "gray",
+            }}
+            type={{
+              name: jewelry.jewelryType.name,
+              color: jewelry.jewelryType.color ?? "gray",
+            }}
           />
         </Flex>
 

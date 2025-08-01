@@ -9,10 +9,6 @@ export const rawPaymentAmountSchema = z.object({
   amount: z.string(),
   type: paymentTypeEnum,
 });
-// .transform((data) => ({
-//   ...data,
-//   amount: toNumberVN(data.amount),
-// }));
 
 // Chi tiết giao dịch vàng
 export const rawGoldTransactionDetailSchema = z.object({
@@ -23,14 +19,6 @@ export const rawGoldTransactionDetailSchema = z.object({
   discount: z.string().optional(),
   amount: z.string().min(1, "Thành tiền trống"),
 });
-// .transform((data) => ({
-//   ...data,
-//   goldId: parseInt(data.goldId ?? ""),
-//   price: toNumberVN(data.price ?? ""),
-//   weight: toNumberVN(data.weight ?? ""),
-//   discount: toNumberVN(data.discount ?? ""),
-//   amount: toNumberVN(data.amount ?? ""),
-// }));
 
 // Chi tiết giao dịch trang sức
 export const rawJewelryTransactionDetailSchema = z.object({
@@ -41,14 +29,6 @@ export const rawJewelryTransactionDetailSchema = z.object({
   discount: z.string().optional(),
   amount: z.string().min(1, "Thành tiền trống"),
 });
-// .transform((data) => ({
-//   ...data,
-//   jewelryId: parseInt(data.jewelryId ?? ""),
-//   price: toNumberVN(data.price ?? ""),
-//   weight: toNumberVN(data.weight ?? ""),
-//   discount: toNumberVN(data.discount ?? ""),
-//   amount: toNumberVN(data.amount ?? ""),
-// }));
 
 export const paymentMethodeEnum = z.enum(["CK", "TM", "CK_TM"]);
 
@@ -68,11 +48,6 @@ export const rawTransactionHeaderSchema = z.object({
   totalAmount: z.string(), // sẽ transform thành number
   paymentMethode: paymentMethodeEnum,
 });
-// .transform((data) => ({
-//   ...data,
-//   contactId: parseInt(data.contactId),
-//   totalAmount: toNumberVN(data.totalAmount ?? "0"),
-// }));
 
 export type RawTransactionHeaderFormData = z.input<
   typeof rawTransactionHeaderSchema

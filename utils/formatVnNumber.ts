@@ -52,7 +52,8 @@ export const toDateStringIso = (input: string | Date): string => {
 };
 
 export const DateToStringVN = (
-  input: string | Date | null | undefined
+  input: string | Date | null | undefined,
+  hasTime: boolean = true
 ): string => {
   if (!input) return "";
   const date = typeof input === "string" ? new Date(input) : input;
@@ -60,5 +61,7 @@ export const DateToStringVN = (
   // Kiểm tra date hợp lệ
   if (isNaN(date.getTime())) return "";
 
-  return format(date, "dd/MM/yyyy HH:mm:ss", { locale: vi });
+  return format(date, hasTime ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy", {
+    locale: vi,
+  });
 };

@@ -10,6 +10,9 @@ export * from "./transactionSchemas";
 export type * from "./transactionSchemas";
 export type * from "./contactSchemas";
 
+export * from "./jewelrySchemas";
+export type * from "./jewelrySchemas";
+
 // export { default as CustomCollapsible } from "./CustomCollapsible";
 // export { default as ErrorMessage } from "./ErrorMessage";
 // export { default as JewelryBadge } from "./JewelryBadge";

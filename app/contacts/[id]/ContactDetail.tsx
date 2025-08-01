@@ -15,10 +15,18 @@ const ContactDetail = ({ contact }: Props) => {
       <Flex direction="column" gap="4">
         <Flex justify="between" align="center">
           <Heading size="5">{contact.name}</Heading>
-          <ContactGroupBadge ContactGroup={contact.group} />
+          <ContactGroupBadge
+            group={{
+              name: contact.group.name,
+              color: contact.group.color ?? "gray",
+            }}
+          />
         </Flex>
 
         <Flex direction="column" gap="2">
+          <Text>
+            <strong>Id:</strong> {contact.id || "Chưa có"}
+          </Text>
           <Text>
             <strong>Căn cước:</strong> {contact.cccd || "Chưa có"}
           </Text>

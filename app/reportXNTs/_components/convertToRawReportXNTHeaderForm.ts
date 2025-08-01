@@ -43,8 +43,8 @@ export function convertToRawReportXNTHeaderForm(
       toNum(g.tonCuoiKyQuantityTotal)
     ).toString(),
     tonCuoiKyValueTotal: sum((g) => toNum(g.tonCuoiKyValueTotal)).toString(),
-    xuatThucTe: "0",
-    thue: "0",
+    xuatThucTe: sum((g) => toNum(g.xuatThucTe)).toString(), // ✅ thêm
+    thue: sum((g) => toNum(g.thue)).toString(), // ✅ thêm
     date: header.createdAt.toISOString(),
     currentGoldPrice: "0",
     taxPayer: {
@@ -73,8 +73,8 @@ export function convertToRawReportXNTForm(r: ReportXNT): RawReportXNTForm {
     xuatValue: r.xuatValue.toString(),
     tonCuoiKyQuantity: r.tonCuoiKyQuantity.toString(),
     tonCuoiKyValue: r.tonCuoiKyValue.toString(),
-    xuatThucTe: "0",
-    thue: "0",
+    xuatThucTe: r.xuatThucTe.toString(),
+    thue: r.thue.toString(),
   };
 }
 
@@ -97,8 +97,8 @@ export function convertToRawReportXNTGroupForm(
     xuatValueTotal: sum("xuatValue").toString(),
     tonCuoiKyQuantityTotal: sum("tonCuoiKyQuantity").toString(),
     tonCuoiKyValueTotal: sum("tonCuoiKyValue").toString(),
-    xuatThucTe: "0",
-    thue: "0",
+    xuatThucTe: sum("xuatThucTe").toString(),
+    thue: sum("thue").toString(),
     reports: g.ReportXNTs.map(convertToRawReportXNTForm),
   };
 }
