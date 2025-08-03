@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -223,6 +224,25 @@ model GoldInventoryAdjustment {
   updatedAt          DateTime?                 @updatedAt
   header             InventoryAdjustmentHeader @relation(fields: [adjustmentHeaderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   gold               Gold                      @relation(fields: [goldId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view TransactionListView {
+  id             Int             @id
+  createdAt      DateTime?
+  note           String?
+  paymentMethode PaymentMethode?
+  isExport       Boolean?
+  goldPrice      Decimal?        @db.Decimal(8, 0)
+  contactId      Int?
+  contactName    String?
+  goldAmount     Decimal?        @db.Decimal
+  jewelryAmount  Decimal?        @db.Decimal
+  totalAmount    Decimal?        @db.Decimal
+  goldDetails    Json?
+  jewelryDetails Json?
+  cashAmount     Decimal?        @db.Decimal
+  bankAmount     Decimal?        @db.Decimal
 }
 
 enum PaymentType {

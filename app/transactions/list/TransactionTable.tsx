@@ -1,10 +1,9 @@
-//import { ContactStatusBadge } from '@/app/components'
-import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
 import { DateToStringVN, toStringVN } from "@/utils";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 import { Pencil1Icon } from "@radix-ui/react-icons";
+import { TransactionListView } from "@prisma/client";
 export interface TransactionSearchQuery {
   isExport?: string; // sẽ convert sang boolean
   startDate?: string; // ISO string
@@ -15,13 +14,57 @@ export interface TransactionSearchQuery {
   pageSize?: string;
 }
 
+const renderItemDetails = (items?: any[] | null) => {
+  if (!items || !Array.isArray(items)) return "";
+  return items
+    .map((item) => {
+      if (!item?.name || typeof item?.weight !== "number") return null;
+      return `${toStringVN(item.weight, 0, 4)} chỉ ${item.name}`;
+    })
+    .filter(Boolean)
+    .join("; ");
+};
+
 const TransactionTable = ({
   searchParams,
   transactions,
 }: {
   searchParams: TransactionSearchQuery;
-  transactions: RawTransactionHeaderFormData[];
+  transactions: TransactionListView[];
 }) => {
+  const summary = transactions.reduce(
+    (acc, t) => {
+      const cash = +(t.cashAmount ?? 0);
+      const bank = +(t.bankAmount ?? 0);
+      const total = +(t.totalAmount ?? 0);
+
+      const hasExport = t.isExport && (t.goldDetails || t.jewelryDetails);
+      const hasImport = !t.isExport && (t.goldDetails || t.jewelryDetails);
+
+      return {
+        cash: acc.cash + cash,
+        bank: acc.bank + bank,
+        totalAmount: acc.totalAmount + total,
+        exportCount: acc.exportCount + (hasExport ? 1 : 0),
+        importCount: acc.importCount + (hasImport ? 1 : 0),
+      };
+    },
+    { cash: 0, bank: 0, totalAmount: 0, exportCount: 0, importCount: 0 }
+  );
+
+  const renderSummaryRow = (label: string) => (
+    <Table.Row className="bg-gray-100 font-bold">
+      <Table.Cell>{label}</Table.Cell>
+      <Table.Cell>-</Table.Cell>
+      <Table.Cell>{`Số dòng: ${summary.exportCount}`}</Table.Cell>
+      <Table.Cell>{`Số dòng: ${summary.importCount}`}</Table.Cell>
+      <Table.Cell>{toStringVN(summary.cash)}</Table.Cell>
+      <Table.Cell>{toStringVN(summary.bank)}</Table.Cell>
+      <Table.Cell>{toStringVN(summary.totalAmount)}</Table.Cell>
+      <Table.Cell>-</Table.Cell>
+      <Table.Cell>-</Table.Cell>
+    </Table.Row>
+  );
   return (
     <Table.Root variant="surface">
       <Table.Header>
@@ -64,56 +107,37 @@ const TransactionTable = ({
       </Table.Header>
 
       <Table.Body>
+        {renderSummaryRow("Tổng cộng:")}
         {transactions.map((t) => {
-          const goldExport = t.goldDetails
-            .map((g) => `${toStringVN(+g.weight, 0, 4)} chỉ ${g.goldName}`)
-            .join("; ");
-          const jewelryExport = t.jewelryDetails
-            .map((j) => `${toStringVN(+j.weight, 0, 4)} chỉ ${j.jewelryName}`)
-            .join("; ");
-          const exportContent =
-            t.isExport &&
-            [goldExport, jewelryExport].filter(Boolean).join(" | ");
+          const exportContent = t.isExport
+            ? [
+                renderItemDetails(t.goldDetails as any[]),
+                renderItemDetails(t.jewelryDetails as any[]),
+              ]
+                .filter(Boolean)
+                .join(" | ")
+            : "-";
 
-          const goldImport = t.goldDetails
-            .map((g) => `${toStringVN(+g.weight, 0, 4)} chỉ ${g.goldName}`)
-            .join("; ");
-          const jewelryImport = t.jewelryDetails
-            .map((j) => `${toStringVN(+j.weight, 0, 4)} chỉ ${j.jewelryName}`)
-            .join("; ");
-          const importContent =
-            !t.isExport &&
-            [goldImport, jewelryImport].filter(Boolean).join(" | ");
+          const importContent = !t.isExport
+            ? [
+                renderItemDetails(t.goldDetails as any[]),
+                renderItemDetails(t.jewelryDetails as any[]),
+              ]
+                .filter(Boolean)
+                .join(" | ")
+            : "-";
 
-          const cash = t.payments
-            .filter((p) => p.type === "TM")
-            .reduce((sum, p) => sum + +p.amount, 0);
-          const bank = t.payments
-            .filter((p) => p.type === "CK")
-            .reduce((sum, p) => sum + +p.amount, 0);
-          const paymentText = [
-            cash ? `Tiền mặt: ${toStringVN(cash)}` : "",
-            bank ? `Chuyển khoản: ${toStringVN(bank)}` : "",
-          ]
-            .filter(Boolean)
-            .join(" | ");
+          const cash = +(t.cashAmount ?? 0);
+          const bank = +(t.bankAmount ?? 0);
 
           return (
             <Table.Row key={t.id}>
-              {/* <Table.Cell>
-                <Link
-                  className=" text-blue-400 hover:text-blue-1000"
-                  href={`/transactions/${t.id}`}
-                >
-                  {t.id}
-                </Link>
-              </Table.Cell> */}
               <Table.Cell>
                 <Link
                   className=" text-blue-400 hover:text-blue-1000"
                   href={`/transactions/${t.id}`}
                 >
-                  {DateToStringVN(t.date)}
+                  {DateToStringVN(t.createdAt)}
                 </Link>
               </Table.Cell>
               <Table.Cell>
@@ -128,10 +152,11 @@ const TransactionTable = ({
                   "-"
                 )}
               </Table.Cell>
-              <Table.Cell>{exportContent || "-"}</Table.Cell>
-              <Table.Cell>{importContent || "-"}</Table.Cell>
-              <Table.Cell>{paymentText}</Table.Cell>
-              <Table.Cell>{toStringVN(+t.totalAmount)}</Table.Cell>
+              <Table.Cell>{exportContent}</Table.Cell>
+              <Table.Cell>{importContent}</Table.Cell>
+              <Table.Cell>{toStringVN(cash)}</Table.Cell>
+              <Table.Cell>{toStringVN(bank)}</Table.Cell>
+              <Table.Cell>{toStringVN(Number(t.totalAmount))}</Table.Cell>
               <Table.Cell>{t.note || "-"}</Table.Cell>
               <Table.Cell>
                 <NextLink
@@ -155,6 +180,7 @@ const TransactionTable = ({
             </Table.Row>
           );
         })}
+        {renderSummaryRow("Tổng cộng:")}
       </Table.Body>
     </Table.Root>
   );
@@ -165,12 +191,12 @@ const columns: {
   value: string;
   className?: string;
 }[] = [
-  // { label: "Mã GD", value: "id" },
   { label: "Ngày", value: "createdAt" },
   { label: "Khách hàng", value: "contact.name" },
   { label: "Xuất", value: "xuat" },
   { label: "Nhập", value: "nhap" },
-  { label: "Thanh toán", value: "payment" },
+  { label: "Tiền mặt", value: "cashAmount" },
+  { label: "Chuyển khoản", value: "bankAmount" },
   { label: "Tổng tiền", value: "totalAmount" },
   { label: "Ghi chú", value: "note" },
 ];

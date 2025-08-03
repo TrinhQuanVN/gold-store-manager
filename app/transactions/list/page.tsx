@@ -1,18 +1,29 @@
 import Pagination from "@/app/components/Pagination";
 import { prisma } from "@/prisma/client";
-import { transactionWithRelation } from "@/types";
 import { Flex } from "@radix-ui/themes";
-import { converttoRawTransactionHeaderFormData } from "../_components/convertToRaw";
 import TransactionActions from "./TransactionActions";
 import TransactionTable, {
   columnNames,
   TransactionSearchQuery,
 } from "./TransactionTable";
 import TransactionSearchForm from "./TransactionSearchForm";
+import { TransactionListView } from "@prisma/client";
+import { DateToStringVN, toStringVN } from "@/utils";
 
 interface Props {
   searchParams: TransactionSearchQuery;
 }
+
+const renderItemDetails = (items?: any[] | null) => {
+  if (!items || !Array.isArray(items)) return "";
+  return items
+    .map((item) => {
+      if (!item?.name || typeof item?.weight !== "number") return null;
+      return `${toStringVN(item.weight, 0, 4)} chỉ ${item.name}`;
+    })
+    .filter(Boolean)
+    .join("; ");
+};
 
 const TransactionPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
@@ -28,8 +39,6 @@ const TransactionPage = async ({ searchParams }: Props) => {
   }
 
   if (params.startDate || params.endDate) {
-    console.log("params.startDate", params.startDate);
-    console.log("params.endDate", params.endDate);
     where.createdAt = {};
     if (params.startDate) {
       where.createdAt.gte = new Date(params.startDate);
@@ -39,24 +48,23 @@ const TransactionPage = async ({ searchParams }: Props) => {
     }
   }
 
-  const transactions = await prisma.transactionHeader.findMany({
-    where,
-    orderBy: columnNames.includes(params.orderBy ?? "")
-      ? [{ [params.orderBy!]: orderDirection }, { createdAt: "desc" }]
-      : [{ createdAt: "desc" }],
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    ...transactionWithRelation,
-  });
+  const transactions: TransactionListView[] =
+    await prisma.transactionListView.findMany({
+      where,
+      orderBy: columnNames.includes(params.orderBy ?? "")
+        ? [{ [params.orderBy!]: orderDirection }, { createdAt: "desc" }]
+        : [{ createdAt: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
 
-  const allTransactions = await prisma.transactionHeader.findMany({
+  const allTransactions = await prisma.transactionListView.findMany({
     orderBy: columnNames.includes(params.orderBy ?? "")
       ? [{ [params.orderBy!]: orderDirection }, { createdAt: "asc" }]
       : [{ createdAt: "asc" }],
-    ...transactionWithRelation,
   });
 
-  const transactionCount = await prisma.transactionHeader.count({
+  const transactionCount = await prisma.transactionListView.count({
     where,
   });
 
@@ -64,14 +72,22 @@ const TransactionPage = async ({ searchParams }: Props) => {
     <Flex direction="column" gap="3">
       <TransactionSearchForm searchParams={params} />
       <TransactionActions
-        transactions={allTransactions.map(
-          converttoRawTransactionHeaderFormData
-        )}
+        transactions={allTransactions.map((t) => ({
+          id: t.id,
+          createdAt: DateToStringVN(t.createdAt) ?? DateToStringVN(new Date()),
+          note: t.note ?? "",
+          isExport: t.isExport ?? false,
+          contactName: t.contactName ?? "-",
+          goldAmount: toStringVN(Number(t.goldAmount) ?? 0),
+          jewelryAmount: toStringVN(Number(t.jewelryAmount) ?? 0),
+          totalAmount: toStringVN(Number(t.totalAmount) ?? 0),
+          goldItems: renderItemDetails(t.goldDetails as any[]),
+          jewelryItems: renderItemDetails(t.jewelryDetails as any[]),
+          cashAmount: toStringVN(Number(t.cashAmount) ?? 0),
+          bankAmount: toStringVN(Number(t.bankAmount) ?? 0),
+        }))}
       />
-      <TransactionTable
-        searchParams={params}
-        transactions={transactions.map(converttoRawTransactionHeaderFormData)}
-      />
+      <TransactionTable searchParams={params} transactions={transactions} />
       <Flex gap="2">
         <Pagination
           pageSize={pageSize}
@@ -84,10 +100,5 @@ const TransactionPage = async ({ searchParams }: Props) => {
 };
 
 export const dynamic = "force-dynamic";
-
-// export const metadata: Metadata = {
-//   title: "Contact Tracker - Contact List",
-//   description: "View all project Contacts",
-// };
 
 export default TransactionPage;

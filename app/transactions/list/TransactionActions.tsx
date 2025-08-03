@@ -2,14 +2,26 @@
 
 import { Button, Flex } from "@radix-ui/themes";
 import Link from "next/link";
-import ExportTransactionExcelButton from "./ExportTransactionExcelButton";
+// import ExportTransactionExcelButton from "./ExportTransactionExcelButton";
+import dynamic from "next/dynamic";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { RawTransactionHeaderFormData } from "@/app/validationSchemas";
-import { DateToStringVN, toStringVN } from "@/utils";
 
 interface Props {
-  transactions: RawTransactionHeaderFormData[];
+  transactions: {
+    id: number;
+    createdAt: string;
+    note: string | null;
+    isExport: boolean;
+    contactName: string;
+    goldAmount: string;
+    jewelryAmount: string;
+    totalAmount: string;
+    goldItems: string;
+    jewelryItems: string;
+    cashAmount: string;
+    bankAmount: string;
+  }[];
 }
 
 const TransactionActions = ({ transactions }: Props) => {
@@ -40,31 +52,18 @@ const TransactionActions = ({ transactions }: Props) => {
     ];
 
     transactions.forEach((t) => {
-      const goldItems = t.goldDetails.map(
-        (g) => `${toStringVN(+g.weight, 0, 4)} chỉ ${g.goldName}`
-      );
-      const jewelryItems = t.jewelryDetails.map(
-        (j) => `${toStringVN(+j.weight, 0, 4)} chỉ ${j.jewelryName}`
-      );
-      const itemSummary = [goldItems.join("; "), jewelryItems.join("; ")]
+      const itemSummary = [t.goldItems, t.jewelryItems]
         .filter(Boolean)
         .join(" | ");
 
-      const cash = t.payments
-        .filter((p) => p.type === "TM")
-        .reduce((sum, p) => sum + +p.amount, 0);
-      const bank = t.payments
-        .filter((p) => p.type === "CK")
-        .reduce((sum, p) => sum + +p.amount, 0);
-
       const row = [
         t.id,
-        DateToStringVN(t.date),
+        t.createdAt,
         t.contactName ?? "-",
         itemSummary,
-        cash,
-        bank,
-        +t.totalAmount,
+        t.cashAmount,
+        t.bankAmount,
+        t.totalAmount,
         t.note ?? "",
       ];
 
@@ -97,7 +96,6 @@ const TransactionActions = ({ transactions }: Props) => {
       <Button onClick={handleExport} color="green" variant="solid">
         Xuất Excel
       </Button>
-      {/* <ExportTransactionExcelButton transactions={transactions} /> */}
     </Flex>
   );
 };

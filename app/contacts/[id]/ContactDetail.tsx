@@ -4,6 +4,7 @@ import { Card, Flex, Text, Heading } from "@radix-ui/themes";
 import { Contact, ContactGroup } from "@prisma/client";
 import { ContactGroupBadge } from "@/app/components";
 import React from "react";
+import { toDateStringVn } from "@/utils";
 
 interface Props {
   contact: Contact & { group: ContactGroup };
@@ -43,7 +44,7 @@ const ContactDetail = ({ contact }: Props) => {
             <strong>Ghi chú:</strong> {contact.note || "Không có"}
           </Text>
           <Text size="1" color="gray">
-            Tạo lúc: {contact.createdAt.toLocaleString()}
+            Tạo lúc: {toDateStringVn(contact.createdAt)}
           </Text>
         </Flex>
       </Flex>

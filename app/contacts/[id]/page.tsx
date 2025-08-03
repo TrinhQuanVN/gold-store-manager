@@ -1,9 +1,10 @@
 import { prisma } from "@/prisma/client";
-import { Box, Flex, Grid } from "@radix-ui/themes";
+import { Box, Button, Flex, Grid } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
 import ContactDetail from "./ContactDetail";
 import DeleteContactButton from "./DeleteContactButton";
 import EditContactButton from "./EditContactButton";
+import { default as Link, default as NextLink } from "next/link";
 // import { getServerSession } from "next-auth";
 // import authOptions from "@/app/auth/authOptions";
 // import AssigneeSelect from "./AssigneeSelect";
@@ -29,6 +30,9 @@ const ContactDetailPage = async ({ params }: Props) => {
     },
   });
   if (!contact) notFound();
+  const transactionCount = await prisma.transactionHeader.count({
+    where: { contactId: contact.id },
+  });
 
   return (
     <Grid columns={{ initial: "1", sm: "5" }} gap="5">
@@ -39,6 +43,15 @@ const ContactDetailPage = async ({ params }: Props) => {
         <Flex direction="column" gap="4">
           <EditContactButton ContactId={contact.id} />
           <DeleteContactButton ContactId={contact.id} />
+          {transactionCount > 0 ? (
+            <Button asChild>
+              <NextLink href={`/contacts/${contact.id}/transactions`}>
+                DS giao dịch ({transactionCount})
+              </NextLink>
+            </Button>
+          ) : (
+            <Button disabled>Không có giao dịch</Button>
+          )}
         </Flex>
       </Box>
     </Grid>

@@ -18,7 +18,7 @@ const TransactionSearchForm = ({ searchParams }: Props) => {
 
   const { control, handleSubmit } = useForm<TransactionSearchQuery>({
     defaultValues: {
-      isExport: searchParams.isExport ?? "true",
+      isExport: searchParams.isExport ?? "all",
       startDate: searchParams.startDate ?? "",
       endDate: searchParams.endDate ?? "",
     },
@@ -29,6 +29,7 @@ const TransactionSearchForm = ({ searchParams }: Props) => {
 
     for (const [key, val] of Object.entries(data)) {
       if (val !== undefined && val !== "") {
+        if (key === "isExport" && val === "all") continue; // bỏ isExport nếu là all
         params.set(key, val.toString());
       }
     }
@@ -56,9 +57,15 @@ const TransactionSearchForm = ({ searchParams }: Props) => {
                 onValueChange={field.onChange}
               >
                 <Flex gap="4">
-                  <RadioGroup.Item value="all" /> Tất cả
-                  <RadioGroup.Item value="true" /> Xuất
-                  <RadioGroup.Item value="false" /> Nhập
+                  <label>
+                    <RadioGroup.Item value="all" /> Tất cả
+                  </label>
+                  <label>
+                    <RadioGroup.Item value="true" /> Xuất
+                  </label>
+                  <label>
+                    <RadioGroup.Item value="false" /> Nhập
+                  </label>
                 </Flex>
               </RadioGroup.Root>
             )}
@@ -66,62 +73,64 @@ const TransactionSearchForm = ({ searchParams }: Props) => {
         </Flex>
 
         {/* Row 2: Date pickers */}
-        <Flex gap="4" align="center" wrap="wrap">
-          <Controller
-            name="startDate"
-            control={control}
-            render={({ field }) => (
-              <DatePicker
-                selected={field.value ? new Date(field.value) : null}
-                onChange={(date) => {
-                  if (date) {
-                    const start = new Date(date);
-                    start.setHours(0, 0, 0, 0); // 00:00:00
-                    field.onChange(start.toISOString());
-                  } else {
-                    field.onChange("");
-                  }
-                }}
-                placeholderText="Từ ngày"
-                dateFormat="dd/MM/yyyy"
-                className="rounded-md border px-3 py-2 text-sm shadow-sm"
-              />
-            )}
-          />
+        <Flex gap="4">
+          <Flex gap="4" align="center" wrap="wrap">
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  selected={field.value ? new Date(field.value) : null}
+                  onChange={(date) => {
+                    if (date) {
+                      const start = new Date(date);
+                      start.setHours(0, 0, 0, 0); // 00:00:00
+                      field.onChange(start.toISOString());
+                    } else {
+                      field.onChange("");
+                    }
+                  }}
+                  placeholderText="Từ ngày"
+                  dateFormat="dd/MM/yyyy"
+                  className="rounded-md border px-3 py-2 text-sm shadow-sm"
+                />
+              )}
+            />
 
-          <Controller
-            name="endDate"
-            control={control}
-            render={({ field }) => (
-              <DatePicker
-                selected={field.value ? new Date(field.value) : null}
-                onChange={(date) => {
-                  if (date) {
-                    const start = new Date(date);
-                    start.setHours(23, 59, 59, 999); // 00:00:00
-                    field.onChange(start.toISOString());
-                  } else {
-                    field.onChange("");
-                  }
-                }}
-                placeholderText="Đến ngày"
-                dateFormat="dd/MM/yyyy"
-                className="rounded-md border px-3 py-2 text-sm shadow-sm"
-              />
-            )}
-          />
-        </Flex>
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  selected={field.value ? new Date(field.value) : null}
+                  onChange={(date) => {
+                    if (date) {
+                      const start = new Date(date);
+                      start.setHours(23, 59, 59, 999); // 00:00:00
+                      field.onChange(start.toISOString());
+                    } else {
+                      field.onChange("");
+                    }
+                  }}
+                  placeholderText="Đến ngày"
+                  dateFormat="dd/MM/yyyy"
+                  className="rounded-md border px-3 py-2 text-sm shadow-sm"
+                />
+              )}
+            />
+          </Flex>
 
-        {/* Submit */}
-        <Flex justify="end">
-          <Button
-            type="submit"
-            disabled={isPending}
-            color="violet"
-            highContrast
-          >
-            Tìm kiếm
-          </Button>
+          {/* Submit */}
+          <Flex justify="end">
+            <Button
+              type="submit"
+              disabled={isPending}
+              color="violet"
+              highContrast
+            >
+              Tìm kiếm
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
     </form>

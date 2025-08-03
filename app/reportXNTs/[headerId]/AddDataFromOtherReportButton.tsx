@@ -47,7 +47,7 @@ const AddDataFromOtherReportButton = ({
             color="orange"
             size="2"
             className="py-3 w-full"
-            disabled={oldReports.length < 1 || isSubmitting || !hasReport}
+            disabled={oldReports.length < 1 || isSubmitting} //|| !hasReport
           >
             Lấy tồn đầu kỳ
             {isSubmitting && <Spinner />}

@@ -5,10 +5,10 @@ import {
   RawContactDataForm,
   RawTransactionHeaderFormData,
 } from "@/app/validationSchemas";
-import { ContactWithGroup } from "@/types";
 import { Button, DataList, Flex, Text } from "@radix-ui/themes";
 import dynamic from "next/dynamic";
 import { default as Link } from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Control, Controller } from "react-hook-form";
 
@@ -21,6 +21,10 @@ interface Props {
 
 const ContactForm = ({ control }: Props) => {
   const [contact, setContact] = useState<RawContactDataForm | null>(null);
+  const pathname = usePathname();
+
+  const searchParams = useSearchParams();
+  const redirectTo = `/transactions/new?${searchParams.toString()}`;
 
   return (
     <Flex direction="column" gap="4">
@@ -43,8 +47,12 @@ const ContactForm = ({ control }: Props) => {
 
         <Button size="2" asChild>
           <Link
-            className=""
-            href={`/contacts/new?redirectTo=/transactions/new`}
+            href={{
+              pathname: "/contacts/new",
+              query: {
+                redirectTo,
+              },
+            }}
           >
             Thêm khách hàng
           </Link>

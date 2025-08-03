@@ -64,9 +64,13 @@ const ContactForm = ({ contact, groups, redirectTo }: Props) => {
       setSubmitting(false);
 
       if (redirectTo) {
-        router.push(redirectTo);
+        const nestedRedirect = new URLSearchParams(
+          redirectTo.split("?")[1] ?? ""
+        ).get("redirectTo");
+
+        router.push(nestedRedirect ?? redirectTo);
       } else {
-        router.push("/contacts/list"); // fallback cho route mặc định
+        router.push("/contacts/list");
         router.refresh();
       }
     } catch (err) {
