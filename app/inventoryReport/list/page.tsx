@@ -120,7 +120,7 @@ const InventoryReportPage = async ({ searchParams }: Props) => {
     const endValue = startValue + thuVal + nhapVal - chiVal - xuatVal;
 
     inventoryReport.push({
-      date: start.toDateString(),
+      date: start.toISOString(),
       startValue,
       thu: thuVal,
       chi: chiVal,

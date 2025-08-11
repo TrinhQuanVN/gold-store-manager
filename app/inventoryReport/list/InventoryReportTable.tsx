@@ -74,7 +74,7 @@ const InventoryReportTable = ({ data }: Props) => {
                 href={`/transactions/list?isExport=false&startDate=${
                   row.date
                 }&endDate=${new Date(
-                  new Date(row.date).setHours(0, 0, 0, 0)
+                  new Date(row.date).setHours(23, 59, 59)
                 ).toISOString()}`}
               >
                 {row.nhap === 0 ? "-" : toStringVN(row.nhap)}
@@ -85,7 +85,7 @@ const InventoryReportTable = ({ data }: Props) => {
                 href={`/transactions/list?isExport=true&startDate=${
                   row.date
                 }&endDate=${new Date(
-                  new Date(row.date).setHours(23, 59, 59, 999)
+                  new Date(row.date).setHours(23, 59, 59)
                 ).toISOString()}`}
               >
                 {row.xuat === 0 ? "-" : toStringVN(row.xuat)}
