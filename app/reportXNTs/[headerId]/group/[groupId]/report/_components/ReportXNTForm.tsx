@@ -37,23 +37,22 @@ const ReportXNTForm = ({ headerId, groupId, reportXNT }: Props) => {
     formState: { errors },
   } = useForm<RawReportXNTForm>({
     resolver: zodResolver(rawReportXNTSchema),
-    defaultValues: rawReportXNTSchema.parse(reportXNT ?? rawReportXNTSchema),
+    defaultValues: { ...reportXNT },
   });
 
   const onSubmit = handleSubmit(async (rawData) => {
     try {
       setSubmitting(true);
-      const parsed = reportXNTSchema.parse(rawData);
 
       if (reportXNT) {
         await axios.patch(
           `/api/reportXNTs/${headerId}/group/${groupId}/report/${reportXNT.id}`,
-          parsed
+          rawData
         );
       } else {
         await axios.post(
           `/api/reportXNTs/${headerId}/group/${groupId}/report`,
-          parsed
+          rawData
         );
       }
 
@@ -79,7 +78,7 @@ const ReportXNTForm = ({ headerId, groupId, reportXNT }: Props) => {
           <DataList.Label>Mã gộp sản phẩm</DataList.Label>
           <DataList.Value>
             <TextField.Root
-              {...register("id")}
+              {...register("productCode")}
               style={{ textAlign: "right" }}
             />
           </DataList.Value>

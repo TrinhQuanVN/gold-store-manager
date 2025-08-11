@@ -15,6 +15,7 @@ import {
 import { RiAddCircleLine } from "react-icons/ri";
 import GoldDetailSummaryRow from "./GoldDetailSummaryRow";
 import JewelryDetailRow from "./JewelryDetailRow";
+import CreateJewelryModal from "./CreateJewleryModal";
 
 const CustomCollapsible = dynamic(
   () => import("@/app/components/CustomCollapsible"),
@@ -28,9 +29,15 @@ interface Props {
   control: Control<RawTransactionHeaderFormData>;
   setValue: UseFormSetValue<RawTransactionHeaderFormData>;
   errors: FieldErrors<RawTransactionHeaderFormData>;
+  isExport: boolean; // thêm
 }
 
-const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
+const JewelryTransactionForm = ({
+  control,
+  errors,
+  setValue,
+  isExport,
+}: Props) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "jewelryDetails",
@@ -82,16 +89,20 @@ const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
     <CustomCollapsible title={title}>
       <Flex direction="column" gap="2">
         <Grid
-          columns="7"
+          columns={isExport ? "7" : "6"}
           gap="3"
           align="center"
           style={{
-            gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+            gridTemplateColumns: isExport
+              ? "60px 4fr 1fr 1fr 1fr 1fr 1fr" // có cột ID
+              : "4fr 1fr 1fr 1fr 1fr 1fr", // ẩn cột ID
           }}
         >
-          <Text size="2" weight="bold" align="center">
-            ID
-          </Text>
+          {isExport && (
+            <Text size="2" weight="bold" align="center">
+              ID
+            </Text>
+          )}
           <Text size="2" weight="bold" align="center">
             Tên trang sức
           </Text>
@@ -114,12 +125,13 @@ const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
         {fields.map((field, index) => (
           <Flex direction="column" key={field.id}>
             <JewelryDetailRow
-              key={field.id}
+              // key={field.id}
               index={index}
               setValue={setValue}
               control={control}
               onRemove={() => remove(index)}
               lastGoldPrice={parseFloat(currentGoldPrice) ?? 0}
+              isExport={isExport}
             />
             <ErrorMessage>
               {[
@@ -141,22 +153,55 @@ const JewelryTransactionForm = ({ control, errors, setValue }: Props) => {
         />
 
         <Flex justify="end">
-          <Button
-            type="button"
-            size="2"
-            onClick={() =>
-              append({
-                jewelryId: "",
-                weight: "",
-                price: "",
-                discount: "",
-                amount: "",
-              })
-            }
-          >
-            <RiAddCircleLine size="25" />
-            <Text>Thêm</Text>
-          </Button>
+          {isExport ? (
+            <Button
+              type="button"
+              size="2"
+              onClick={() =>
+                append({
+                  jewelryId: "",
+                  weight: "",
+                  price: "",
+                  discount: "",
+                  amount: "",
+                })
+              }
+            >
+              <RiAddCircleLine size="25" />
+              <Text>Thêm</Text>
+            </Button>
+          ) : (
+            <CreateJewelryModal
+              onCreate={(j) =>
+                append({
+                  tempId: String(Date.now()),
+                  jewelryId: "",
+                  jewelryName: `${j.name} - ${j.type.name} - ${j.category.name}`,
+                  weight: j.goldWeight.toString(),
+                  price: currentGoldPrice,
+                  discount: "0",
+                  amount: (
+                    parseFloat(j.goldWeight) * parseFloat(currentGoldPrice)
+                  ).toFixed(0),
+
+                  // CHỈ giữ primitive cho server
+                  jewelryTemp: {
+                    name: j.name,
+                    typeId: j.type.id || "0",
+                    categoryId: j.category.id || "0",
+                    goldWeight: j.goldWeight,
+                    gemWeight: j.gemWeight,
+                    totalWeight: j.totalWeight,
+                    madeIn: j.madeIn ?? "Việt Nam",
+                    size: j.size ?? null,
+                    description: j.description ?? null,
+                    supplierId: j.supplierId ?? null,
+                    reportProductCode: j.reportProductCode ?? null,
+                  },
+                })
+              }
+            />
+          )}
         </Flex>
       </Flex>
     </CustomCollapsible>

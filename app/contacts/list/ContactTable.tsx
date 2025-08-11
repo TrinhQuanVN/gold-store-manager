@@ -1,17 +1,18 @@
 //import { ContactStatusBadge } from '@/app/components'
 import ContactGroupBadge from "@/app/components/ContactGroupBadge";
-import { Contact, ContactGroup } from "@prisma/client";
+import { Contact, ContactGroup, ContactListView } from "@prisma/client";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 import { Flex, Table, Text } from "@radix-ui/themes";
 import { default as Link, default as NextLink } from "next/link";
 import { ContactSearchQuery } from "./ContactSearchQuery";
+import { toStringVN } from "@/utils";
 
 const ContactTable = ({
   searchParams,
   contacts,
 }: {
   searchParams: ContactSearchQuery;
-  contacts: (Contact & { group: ContactGroup })[];
+  contacts: ContactListView[];
 }) => {
   return (
     <Table.Root variant="surface">
@@ -51,28 +52,33 @@ const ContactTable = ({
       <Table.Body>
         {contacts.map((contact) => (
           <Table.Row key={contact.id}>
+            <Table.Cell className="">{contact.id}</Table.Cell>
             <Table.Cell>
               <Flex direction="column" gap="2" align="start">
                 <Link href={`/contacts/${contact.id}`}>{contact.name}</Link>
                 <ContactGroupBadge
                   group={{
-                    name: contact.group.name,
-                    color: contact.group.color ?? "gray",
+                    name: contact.groupName,
+                    color: contact.groupColor,
                   }}
                 />
-                <Text>
-                  Ngày tạo: {contact.createdAt.toLocaleDateString("vn-VN")}
-                </Text>
               </Flex>
             </Table.Cell>
             <Table.Cell className="">
-              <Flex direction="column" gap="2">
-                <Text>Căn cước: {contact.cccd}</Text>
-                <Text>Mã số thuế: {contact.taxcode}</Text>
-              </Flex>
+              <Text>{contact.cccd}</Text>
             </Table.Cell>
             <Table.Cell className="">{contact.address}</Table.Cell>
             <Table.Cell className="">{contact.phone}</Table.Cell>
+            <Table.Cell className="">
+              {+contact.importValue > 0
+                ? toStringVN(+contact.importValue)
+                : "-"}
+            </Table.Cell>
+            <Table.Cell className="">
+              {+contact.exportValue > 0
+                ? toStringVN(+contact.exportValue)
+                : "-"}
+            </Table.Cell>
             <Table.Cell className="">{contact.note}</Table.Cell>
           </Table.Row>
         ))}
@@ -83,12 +89,13 @@ const ContactTable = ({
 
 const columns: {
   label: string;
-  value: keyof Contact;
+  value: keyof ContactListView;
   className?: string;
 }[] = [
+  { label: "Id", value: "id" },
   { label: "Tên khách hàng", value: "name" },
   {
-    label: "Thông tin",
+    label: "Căn cước",
     value: "cccd",
   },
   {
@@ -98,6 +105,14 @@ const columns: {
   {
     label: "Điện thoại",
     value: "phone",
+  },
+  {
+    label: "Khách bán",
+    value: "importValue",
+  },
+  {
+    label: "Khách mua",
+    value: "exportValue",
   },
   {
     label: "Ghi chú",

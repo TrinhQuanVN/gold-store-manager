@@ -36,18 +36,19 @@ export async function POST(
 
   const report = await prisma.reportXNT.create({
     data: {
-      groupId: headerId,
+      groupId: groupId,
       name: data.name,
-      id: data.id,
       stt: parseInt(data.stt),
-      tonDauKyQuantity: data.tonDauKyQuantity,
-      tonDauKyValue: data.tonDauKyValue,
-      nhapQuantity: data.nhapQuantity,
-      nhapValue: data.nhapValue,
-      xuatQuantity: data.xuatQuantity,
-      xuatValue: data.xuatValue,
-      tonCuoiKyQuantity: data.tonCuoiKyQuantity,
-      tonCuoiKyValue: data.tonCuoiKyValue,
+      productCode: data.productCode,
+      unit: data.unit ?? "chỉ",
+      tonDauKyQuantity: data.tonDauKyQuantity || 0,
+      tonDauKyValue: data.tonDauKyValue || 0,
+      nhapQuantity: data.nhapQuantity || 0,
+      nhapValue: data.nhapValue || 0,
+      xuatQuantity: data.xuatQuantity || 0,
+      xuatValue: data.xuatValue || 0,
+      tonCuoiKyQuantity: data.tonCuoiKyQuantity || 0,
+      tonCuoiKyValue: data.tonCuoiKyValue || 0,
     },
   });
 

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GoldPrice } from "@prisma/client";
-import { Button, Callout, Flex, TextField } from "@radix-ui/themes";
+import { Button, Callout, Card, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 // import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -64,12 +64,7 @@ const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log("....");
-      console.log(data);
-      console.log("Form errors:", errors);
       setSubmitting(true);
-      console.log();
-
       if (transaction) {
         await axios.patch("/api/transactions/" + id, data);
       } else {
@@ -144,7 +139,7 @@ const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
       } transition-colors`}
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <Callout.Root color="red" className="mb-4">
+        {/* <Callout.Root color="red" className="mb-4">
           <ul className="list-disc ml-4 space-y-1 px-3 py-2">
             {flattenErrors(errors).map((err, idx) => (
               <li key={idx}>
@@ -152,7 +147,7 @@ const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
               </li>
             ))}
           </ul>
-        </Callout.Root>
+        </Callout.Root> */}
         {error && (
           <Callout.Root color="red" className="mb-4">
             <Callout.Text>{error}</Callout.Text>
@@ -218,21 +213,26 @@ const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
         ></TextField.Root>
         <ErrorMessage>{errors.note?.message}</ErrorMessage>
 
-        <Flex direction="column" gap="4">
+        <Flex direction="column" gap="3">
+          {/* <Card className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6"> */}
           <ContactForm control={control} />
           <ErrorMessage>{errors.contactId?.message}</ErrorMessage>
-
-          <GoldTransactionForm
-            control={control}
-            errors={errors}
-            setValue={setValue}
-          />
-
-          <JewelryTransactionForm
-            control={control}
-            errors={errors}
-            setValue={setValue}
-          />
+          {/* </Card> */}
+          <Card className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+            <GoldTransactionForm
+              control={control}
+              errors={errors}
+              setValue={setValue}
+            />
+          </Card>
+          <Card className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+            <JewelryTransactionForm
+              control={control}
+              errors={errors}
+              setValue={setValue}
+              isExport={isExport}
+            />
+          </Card>
           <ErrorMessage>{errors.goldDetails?.message}</ErrorMessage>
         </Flex>
 
@@ -246,10 +246,12 @@ const TransactionForm = ({ id, transaction, redirectTo }: Props) => {
               : "0"}
           </strong>
         </Flex>
+        <Card className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+          <PaymentForm control={control} watch={watch} setValue={setValue} />
 
-        <PaymentForm control={control} watch={watch} setValue={setValue} />
-
-        <ErrorMessage>{errors.payments?.message}</ErrorMessage>
+          <ErrorMessage>{errors.totalAmount?.message}</ErrorMessage>
+          <ErrorMessage>{errors.payments?.message}</ErrorMessage>
+        </Card>
 
         <Button type="submit" disabled={isSubmitting}>
           {transaction ? "Cập nhật" : "Tạo mới"} {isSubmitting && <Spinner />}

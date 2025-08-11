@@ -1,3 +1,4 @@
+CREATE OR REPLACE VIEW "TransactionListView" AS
 SELECT
   th.id,
   th."createdAt",
@@ -13,54 +14,44 @@ SELECT
   (
     COALESCE(sum(gtd.amount), (0) :: numeric) + COALESCE(sum(jtd.amount), (0) :: numeric)
   ) AS "totalAmount",
-  jsonb_agg(
-    DISTINCT CASE
-      WHEN (
-        (g.name IS NOT NULL)
-        AND (gtd.weight IS NOT NULL)
-        AND (gtd.price IS NOT NULL)
-      ) THEN jsonb_build_object(
-        'name',
-        g.name,
-        'weight',
-        gtd.weight,
-        'price',
-        gtd.price
-      )
-      ELSE NULL :: jsonb
-    END
-  ) FILTER (
-    WHERE
-      (
-        (g.name IS NOT NULL)
-        AND (gtd.weight IS NOT NULL)
-        AND (gtd.price IS NOT NULL)
-      )
-  ) AS "goldDetails",
-  jsonb_agg(
-    DISTINCT CASE
-      WHEN (
-        (j.name IS NOT NULL)
-        AND (j."goldWeight" IS NOT NULL)
-        AND (jtd.price IS NOT NULL)
-      ) THEN jsonb_build_object(
-        'name',
-        j.name,
-        'weight',
-        j."goldWeight",
-        'price',
-        jtd.price
-      )
-      ELSE NULL :: jsonb
-    END
-  ) FILTER (
-    WHERE
-      (
-        (j.name IS NOT NULL)
-        AND (j."goldWeight" IS NOT NULL)
-        AND (jtd.price IS NOT NULL)
-      )
-  ) AS "jewelryDetails",
+jsonb_agg(
+  DISTINCT CASE
+    WHEN (
+      g.name IS NOT NULL
+      AND gtd.weight IS NOT NULL
+      AND gtd.price IS NOT NULL
+    ) THEN jsonb_build_object(
+      'name', g.name,
+      'weight', gtd.weight,
+      'price', gtd.price
+    )
+    ELSE NULL :: jsonb
+  END
+) FILTER (
+  WHERE
+    g.name IS NOT NULL
+    AND gtd.weight IS NOT NULL
+    AND gtd.price IS NOT NULL
+) AS "goldDetails",
+jsonb_agg(
+  DISTINCT CASE
+    WHEN (
+      j.name IS NOT NULL
+      AND j."goldWeight" IS NOT NULL
+      AND jtd.price IS NOT NULL
+    ) THEN jsonb_build_object(
+      'name', j.name,
+      'weight', j."goldWeight",
+      'price', jtd.price
+    )
+    ELSE NULL :: jsonb
+  END
+) FILTER (
+  WHERE
+    j.name IS NOT NULL
+    AND j."goldWeight" IS NOT NULL
+    AND jtd.price IS NOT NULL
+) AS "jewelryDetails",
   COALESCE(
     sum(
       CASE

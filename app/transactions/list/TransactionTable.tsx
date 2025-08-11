@@ -12,6 +12,8 @@ export interface TransactionSearchQuery {
   orderDirection?: "asc" | "desc";
   page?: string;
   pageSize?: string;
+  excelFromDate?: string;
+  excelToDate?: string;
 }
 
 const renderItemDetails = (items?: any[] | null) => {

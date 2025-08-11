@@ -18,6 +18,7 @@ interface Props {
   control: Control<RawTransactionHeaderFormData>;
   onRemove: () => void;
   lastGoldPrice: number;
+  isExport: boolean;
 }
 
 const JewelryDetailRow = ({
@@ -26,14 +27,15 @@ const JewelryDetailRow = ({
   control,
   onRemove,
   lastGoldPrice,
+  isExport,
 }: Props) => {
   const detail = useWatch({ control, name: `jewelryDetails.${index}` });
   const { jewelryName, weight, price, discount } = detail ?? {};
 
   const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-    const id = e.target.value;
+    if (!isExport) return;
+    const id = e.target.value.trim();
     if (!id) {
-      //trường hợp này sẽ xoá các dòng khác nếu xoá id
       setValue(`jewelryDetails.${index}.jewelryName`, "");
       setValue(`jewelryDetails.${index}.price`, "");
       setValue(`jewelryDetails.${index}.weight`, "");
@@ -76,28 +78,36 @@ const JewelryDetailRow = ({
 
   return (
     <Grid
-      columns="7"
+      columns={isExport ? "7" : "6"}
       gap="3"
       align="start"
       style={{
-        gridTemplateColumns: "60px 4fr 1fr 1fr 1fr 1fr 1fr",
+        gridTemplateColumns: isExport
+          ? "60px 4fr 1fr 1fr 1fr 1fr 1fr"
+          : "4fr 1fr 1fr 1fr 1fr 1fr",
       }}
     >
+      {isExport && (
+        <Controller
+          control={control}
+          name={`jewelryDetails.${index}.jewelryId`}
+          render={({ field }) => (
+            <TextField.Root {...field} onBlur={handleBlur} placeholder="ID" />
+          )}
+        />
+      )}
+
       <Controller
         control={control}
-        name={`jewelryDetails.${index}.jewelryId`}
+        name={`jewelryDetails.${index}.jewelryName`}
         render={({ field }) => (
           <TextField.Root
             {...field}
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={handleBlur}
-            placeholder="id"
+            placeholder="Tên trang sức"
+            readOnly={isExport}
           />
         )}
       />
-
-      <TextField.Root value={jewelryName ?? ""} readOnly className="" />
 
       <NumericFormattedField
         name={`jewelryDetails.${index}.weight`}
@@ -105,7 +115,7 @@ const JewelryDetailRow = ({
         control={control}
         // error={errors?.jewelryDetails?.[index]?.weight?.message}
         maximumFractionDigits={4}
-        disabled
+        disabled={isExport}
       />
       <NumericFormattedField
         name={`jewelryDetails.${index}.price`}

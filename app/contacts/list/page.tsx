@@ -19,15 +19,15 @@ const ContactSearchForm = dynamic(() => import("./ContactSearchForm"), {
 const ContactsPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
 
-  console.log("columnNames type:", typeof columnNames);
-  console.log("columnNames:", columnNames);
-
   const orderDirection = params.orderDirection === "desc" ? "desc" : "asc";
 
   const page = parseInt(params.page) || 1;
   const pageSize = parseInt(params.pageSize) || 10;
 
-  const where: Prisma.ContactWhereInput = {
+  const where = {
+    ...(params.id && {
+      id: !isNaN(Number(params.id)) ? Number(params.id) : -1, // an ID that will never match
+    }),
     ...(params.name && {
       OR: [
         { name: { contains: params.name } },
@@ -46,26 +46,25 @@ const ContactsPage = async ({ searchParams }: Props) => {
     }),
   };
 
-  const contacts = await prisma.contact.findMany({
+  const contacts = await prisma.contactListView.findMany({
     where,
     orderBy: columnNames.includes(params.orderBy)
       ? [{ [params.orderBy]: orderDirection }, { createdAt: "desc" }]
       : [{ createdAt: "desc" }],
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    include: {
-      group: true,
-    },
+    ...(pageSize !== undefined && {
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
   });
 
-  const contactCount = await prisma.contact.count({
+  const contactCount = await prisma.contactListView.count({
     where,
   });
 
   return (
     <Flex direction="column" gap="3">
+      <ContactSearchForm searchParams={params} />
       <ContactActions />
-      <ContactSearchForm searchParams={params} /> {/* 👈 Thêm ở đây */}
       <ContactTable searchParams={params} contacts={contacts} />
       <Flex gap="2">
         <Pagination

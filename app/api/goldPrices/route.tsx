@@ -34,10 +34,7 @@ export async function GET(req: NextRequest) {
   if (!dateStr) {
     return NextResponse.json({ error: "Missing date" }, { status: 400 });
   }
-  console.log("date", dateStr);
   const targetDate = parseISO(dateStr); // ví dụ: 2025-07-01T14:00:00.000Z
-
-  console.log("targetDate", targetDate);
 
   const goldPrice = await prisma.goldPrice.findFirst({
     where: {

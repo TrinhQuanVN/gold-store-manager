@@ -35,7 +35,7 @@ export async function PATCH(
   const data = validation.data;
 
   const report = await prisma.reportXNT.findUnique({
-    where: { id: _params.reportId },
+    where: { id: parseInt(_params.reportId) },
   });
   if (!report) {
     return NextResponse.json(
@@ -47,9 +47,9 @@ export async function PATCH(
   }
 
   const updatedReport = await prisma.reportXNT.update({
-    where: { id: _params.reportId },
+    where: { id: parseInt(_params.reportId) },
     data: {
-      id: data.id ?? report.id,
+      productCode: data.productCode ?? report.productCode,
       name: data.name ?? report.name,
       tonDauKyQuantity: data.tonDauKyQuantity ?? report.tonDauKyQuantity,
       tonDauKyValue: data.tonDauKyValue ?? report.tonDauKyValue,
@@ -88,7 +88,7 @@ export async function DELETE(
   }
 
   const report = await prisma.reportXNT.findUnique({
-    where: { id: _params.reportId },
+    where: { id: parseInt(_params.reportId) },
   });
   if (!report) {
     return NextResponse.json(
@@ -99,7 +99,7 @@ export async function DELETE(
     );
   }
   await prisma.reportXNT.delete({
-    where: { id: _params.reportId },
+    where: { id: parseInt(_params.reportId) },
   });
   return NextResponse.json(
     { message: "reportXNT deleted successfully" },

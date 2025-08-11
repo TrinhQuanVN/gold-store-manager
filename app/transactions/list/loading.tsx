@@ -7,7 +7,7 @@ const LoadingContactPage = () => {
 
   return (
     <div>
-      <TransactionActions />
+      {/* <TransactionActions /> */}
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>

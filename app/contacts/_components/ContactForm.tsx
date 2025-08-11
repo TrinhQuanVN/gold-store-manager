@@ -106,9 +106,10 @@ const ContactForm = ({ contact, groups, redirectTo }: Props) => {
           ></TextField.Root>
           <ErrorMessage>{errors.name?.message}</ErrorMessage>
 
-          <TextField.Root placeholder="CCCD" {...register("cccd")}>
-            <TextField.Slot></TextField.Slot>
-          </TextField.Root>
+          <TextField.Root
+            placeholder="CCCD"
+            {...register("cccd")}
+          ></TextField.Root>
 
           <TextField.Root
             placeholder="Địa chỉ"

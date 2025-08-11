@@ -19,6 +19,34 @@ interface Props {
 }
 
 const InventoryReportTable = ({ data }: Props) => {
+  const total = data.reduce(
+    (acc, row) => {
+      acc.thu += row.thu;
+      acc.chi += row.chi;
+      acc.nhap += row.nhap;
+      acc.xuat += row.xuat;
+      return acc;
+    },
+    {
+      thu: 0,
+      chi: 0,
+      nhap: 0,
+      xuat: 0,
+    }
+  );
+
+  const renderTotalRow = (label: string) => (
+    <Table.Row className="bg-green-100 font-bold border-y border-gray-400">
+      <Table.Cell>{label}</Table.Cell>
+      <Table.Cell>{"-"}</Table.Cell>
+      <Table.Cell>{toStringVN(total.thu)}</Table.Cell>
+      <Table.Cell>{toStringVN(total.chi)}</Table.Cell>
+      <Table.Cell>{toStringVN(total.nhap)}</Table.Cell>
+      <Table.Cell>{toStringVN(total.xuat)}</Table.Cell>
+      <Table.Cell>{"-"}</Table.Cell>
+    </Table.Row>
+  );
+
   return (
     <Table.Root>
       <Table.Header>
@@ -68,6 +96,7 @@ const InventoryReportTable = ({ data }: Props) => {
             </Table.Cell>
           </Table.Row>
         ))}
+        {renderTotalRow("Tổng cộng")}
       </Table.Body>
     </Table.Root>
   );

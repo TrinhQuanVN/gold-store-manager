@@ -39,7 +39,6 @@ const GoldPriceForm = ({ goldPrice }: Props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      console.log("Submitting data:", data);
       setSubmitting(true);
       if (goldPrice) {
         await axios.patch("/api/goldPrices/" + goldPrice.id, data);

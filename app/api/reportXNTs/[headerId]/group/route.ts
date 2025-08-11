@@ -6,7 +6,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { headerId: string } }
 ) {
-  console.log("...");
   const _params = await params;
   const headerId = parseInt(_params.headerId);
   const body = await request.json();

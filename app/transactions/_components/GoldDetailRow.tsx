@@ -72,7 +72,7 @@ const GoldDetailRow = ({
         render={({ field }) => (
           <TextField.Root
             {...field}
-            value={field.value}
+            value={field.value ?? ""}
             // disabled={!firstInit}
             onChange={field.onChange}
             onBlur={handleBlur}

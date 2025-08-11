@@ -115,7 +115,7 @@ const GoldTransactionForm = ({ control, errors, setValue }: Props) => {
         {fields.map((field, index) => (
           <Flex direction="column" key={field.id}>
             <GoldDetailRow
-              key={field.id}
+              // key={field.id}
               index={index}
               setValue={setValue}
               control={control}

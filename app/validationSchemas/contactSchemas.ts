@@ -20,8 +20,18 @@ export const rawContactSchema = z.object({
   name: z.string().min(1, "Xin nhập tên khách hàng").max(255),
   groupId: z.string().min(1, "Xin chọn nhóm khách hàng"),
   group: rawContactGroup.nullable(),
-  phone: z.string().nullable(),
-  cccd: z.string().nullable(),
+  phone: z
+    .string()
+    .nullable()
+    .refine((val) => !val || /^\d{10}$/.test(val), {
+      message: "Số điện thoại phải gồm 10 chữ số",
+    }),
+  cccd: z
+    .string()
+    .nullable()
+    .refine((val) => !val || /^\d{12}$/.test(val), {
+      message: "CCCD phải gồm 12 chữ số",
+    }),
   taxcode: z.string().nullable(),
   address: z.string().nullable(),
   note: z.string().nullable(),

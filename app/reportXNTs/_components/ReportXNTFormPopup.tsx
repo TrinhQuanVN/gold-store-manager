@@ -67,7 +67,10 @@ const ReportXNTFormPopup = ({
     <form onSubmit={onSubmit}>
       <Flex direction="column" gap="3">
         <Text>Mã sản phẩm trong báo cáo</Text>
-        <TextField.Root placeholder="Mã sản phẩm" {...register("id")} />
+        <TextField.Root
+          placeholder="Mã sản phẩm"
+          {...register("productCode")}
+        />
         <ErrorMessage>{errors.id?.message}</ErrorMessage>
 
         <Text>Tên sản phẩm trong báo cáo</Text>

@@ -72,5 +72,5 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json(jewelry, { status: 201 });
+  return NextResponse.json(jewelry, { status: 200 });
 }

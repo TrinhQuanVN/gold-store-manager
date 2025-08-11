@@ -14,9 +14,6 @@ interface Props {
 const ContactsPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
 
-  console.log("columnNames type:", typeof columnNames);
-  console.log("columnNames:", columnNames);
-
   const orderDirection = params.orderDirection === "desc" ? "desc" : "asc";
 
   const page = parseInt(params.page) || 1;

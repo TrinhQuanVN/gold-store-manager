@@ -11,22 +11,22 @@ export const rawReportXNTSchema = z.object({
   unit: z.string().optional(),
   stt: z.string(),
 
-  tonDauKyQuantity: z.string(),
-  tonDauKyValue: z.string(),
+  tonDauKyQuantity: z.string().optional().nullable(),
+  tonDauKyValue: z.string().optional().nullable(),
 
-  nhapQuantity: z.string(),
+  nhapQuantity: z.string().optional().nullable(),
   nhapValue: z.string(),
 
-  xuatQuantity: z.string(),
-  xuatValue: z.string(),
+  xuatQuantity: z.string().optional().nullable(),
+  xuatValue: z.string().optional().nullable(),
 
   //   xuatDonGia: z.string().optional(),
 
-  tonCuoiKyQuantity: z.string(),
-  tonCuoiKyValue: z.string(),
+  tonCuoiKyQuantity: z.string().optional().nullable(),
+  tonCuoiKyValue: z.string().optional().nullable(),
 
-  xuatThucTe: z.string(),
-  thue: z.string(),
+  xuatThucTe: z.string().optional().nullable(),
+  thue: z.string().optional().nullable(),
 });
 
 export const reportXNTSchema = rawReportXNTSchema.transform((data) => ({

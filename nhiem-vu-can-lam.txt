@@ -35,5 +35,12 @@
 1. Cần truyền vào jewelry hay gold transaction table price dựa vào date của transaction. như thế giảm api get goldPrice
 6. làm payment cho new transaction
 
-
+chatGPT:
+hãy sử dụng các chức năng của nextjs 15, form react hook, theme eleemnt của radix-ui, 
+khi tạo mới hay viết lại 1 page.tsx cần tuân thủ theo racfe extension của vsc
+cập nhật lại radix-ui theme: textField.root bây giờ ko cần textfield.input bên trong
+hãy sử dụng tối đa các công cụ của theme radix-ui 
+radix-ui không có label
+trong page muốn dùng searchParms hay params phải await trước khi dùng 
+do đó cần tạo _params = await params
 

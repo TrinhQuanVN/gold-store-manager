@@ -42,21 +42,19 @@ const ReportXNTGroupForm = ({ headerId, groupId, group }: Props) => {
     formState: { errors },
   } = useForm<rawGroupFormData>({
     resolver: zodResolver(rawGroup),
-    defaultValues: rawGroup.parse(group ?? rawGroup),
+    defaultValues: { ...group },
   });
 
   const onSubmit = handleSubmit(async (rawData) => {
     try {
       setSubmitting(true);
-      const parsed = reportXNTSchema.parse(rawData);
-
       if (group && groupId) {
         await axios.patch(
           `/api/reportXNTs/${headerId}/group/${groupId}`,
-          parsed
+          rawData
         );
       } else {
-        await axios.post(`/api/reportXNTs/${headerId}/group`, parsed);
+        await axios.post(`/api/reportXNTs/${headerId}/group`, rawData);
       }
 
       router.push(`/reportXNTs/${headerId}`);

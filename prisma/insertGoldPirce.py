@@ -13,8 +13,8 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # 👉 Xoá toàn bộ dữ liệu bảng GoldPrice
-cur.execute('TRUNCATE TABLE "GoldPrice" RESTART IDENTITY CASCADE;')
-print("🧹 Đã xoá toàn bộ dữ liệu cũ trong bảng GoldPrice")
+# cur.execute('TRUNCATE TABLE "GoldPrice" RESTART IDENTITY CASCADE;')
+# print("🧹 Đã xoá toàn bộ dữ liệu cũ trong bảng GoldPrice")
 
 # Đọc nội dung file s.sql
 with open(r"C:\Users\Admin\Downloads\GiaVangBanLe (1).sql", "r", encoding="utf-8") as f:

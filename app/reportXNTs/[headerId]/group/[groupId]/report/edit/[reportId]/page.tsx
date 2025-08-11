@@ -31,7 +31,7 @@ const EditReportXNTPage = async ({ params }: Props) => {
   if (!group) notFound();
 
   const reportXNT = await prisma.reportXNT.findUnique({
-    where: { id: _params.reportId },
+    where: { id: parseInt(_params.reportId) },
   });
   if (!reportXNT) notFound();
 

@@ -12,7 +12,7 @@ model ContactGroup {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  color       String?   @default("gray")
+  color       String    @default("gray")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   contacts    Contact[]
@@ -74,6 +74,12 @@ model Jewelry {
   category           JewelryCategory            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   jewelryType        JewelryType                @relation(fields: [typeId], references: [id], onDelete: Cascade)
   transactionDetails JewelryTransactionDetail[]
+
+  createdByTransactionId Int?
+  createdByTransaction     TransactionHeader?  @relation("JewelryCreatedByTransaction", fields: [createdByTransactionId], references: [id], onDelete: Cascade)
+
+  @@index([createdByTransactionId])
+
 }
 
 model TaxPayer {
@@ -185,6 +191,7 @@ model TransactionHeader {
   jewelryTransactionDetails JewelryTransactionDetail[]
   paymentAmounts            PaymentDetail[]
   contact                   Contact                    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+   jewelryCreated     Jewelry[]  @relation("JewelryCreatedByTransaction")
 }
 
 model PaymentDetail {
@@ -229,20 +236,54 @@ model GoldInventoryAdjustment {
 /// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 view TransactionListView {
   id             Int             @id
-  createdAt      DateTime?
+  createdAt      DateTime
   note           String?
-  paymentMethode PaymentMethode?
-  isExport       Boolean?
-  goldPrice      Decimal?        @db.Decimal(8, 0)
-  contactId      Int?
-  contactName    String?
-  goldAmount     Decimal?        @db.Decimal
-  jewelryAmount  Decimal?        @db.Decimal
-  totalAmount    Decimal?        @db.Decimal
-  goldDetails    Json?
-  jewelryDetails Json?
-  cashAmount     Decimal?        @db.Decimal
-  bankAmount     Decimal?        @db.Decimal
+  paymentMethode PaymentMethode
+  isExport       Boolean
+  goldPrice      Decimal         @db.Decimal(8, 0)
+  contactId      Int
+  contactName    String
+  contactCccd    String?
+  goldAmount     Decimal         @db.Decimal
+  jewelryAmount  Decimal         @db.Decimal
+  totalAmount    Decimal         @db.Decimal
+  goldDetails    Json
+  jewelryDetails Json
+  cashAmount     Decimal         @db.Decimal
+  bankAmount     Decimal         @db.Decimal
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view ContactListView {
+  id           Int      @id
+  groupId      Int
+  name         String
+  unaccentName String
+  address      String?
+  cccd         String?
+  taxcode      String?
+  phone        String?
+  note         String?
+  groupName    String
+  groupColor   String
+  importValue  Decimal  @db.Decimal
+  exportValue  Decimal  @db.Decimal
+  createdAt    DateTime
+}
+
+view JewelryReportCodeSuggestionView {
+  reportProductCode String  @id
+  name              String
+  categoryId        Int
+  typeId            Int
+  description       String?
+  goldWeight        Decimal
+  gemWeight         Decimal
+  totalWeight       Decimal
+  gemName           String?
+  size              String?
+  madeIn            String?
+  supplierId        String?
 }
 
 enum PaymentType {

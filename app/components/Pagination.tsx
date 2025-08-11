@@ -95,9 +95,10 @@ const Pagination = ({ itemCount, pageSize, currentPage }: Props) => {
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const pageCount = Math.ceil(itemCount / pageSize);
   const currentSize = searchParams.get("pageSize") || "10";
   const pageSizes = ["10", "20", "50", "100"];
+
+  const pageCount = Math.ceil(itemCount / +currentSize);
 
   const changePage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -118,25 +119,20 @@ const Pagination = ({ itemCount, pageSize, currentPage }: Props) => {
 
   return (
     <Flex align="center" gap="4" wrap="wrap" justify="between" mt="4">
-      {/* Page size selector */}
       <Flex align="center" gap="2">
         <Text size="2">Số dòng trên trang:</Text>
-        <Select.Root
-          defaultValue={currentSize}
-          onValueChange={handlePageSizeChange}
-        >
+        <Select.Root value={currentSize} onValueChange={handlePageSizeChange}>
           <Select.Trigger />
           <Select.Content>
             {pageSizes.map((size) => (
               <Select.Item key={size} value={size}>
-                {size} / trang
+                {`${size} / trang`}
               </Select.Item>
             ))}
           </Select.Content>
         </Select.Root>
       </Flex>
 
-      {/* Pagination buttons */}
       <Flex align="center" gap="2">
         <Text size="2">
           Page {currentPage} of {pageCount}

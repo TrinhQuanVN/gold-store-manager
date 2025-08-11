@@ -1,6 +1,24 @@
 DROP VIEW IF EXISTS "TransactionListView";
 
 CREATE OR REPLACE VIEW "TransactionListView" AS
+WITH gold_sum AS (
+  SELECT "transactionHeaderId", SUM(amount) AS goldAmount
+  FROM "GoldTransactionDetail"
+  GROUP BY "transactionHeaderId"
+),
+jewelry_sum AS (
+  SELECT "transactionHeaderId", SUM(amount) AS jewelryAmount
+  FROM "JewelryTransactionDetail"
+  GROUP BY "transactionHeaderId"
+),
+payment_sum AS (
+  SELECT 
+    "transactionHeaderId",
+    SUM(CASE WHEN type = 'TM' THEN amount ELSE 0 END) AS cashAmount,
+    SUM(CASE WHEN type = 'CK' THEN amount ELSE 0 END) AS bankAmount
+  FROM "PaymentDetail"
+  GROUP BY "transactionHeaderId"
+)
 SELECT 
   th.id,
   th."createdAt",
@@ -11,46 +29,31 @@ SELECT
   th."contactId",
   c.name AS "contactName",
 
-  COALESCE(SUM(gtd.amount), 0) AS "goldAmount",
-  COALESCE(SUM(jtd.amount), 0) AS "jewelryAmount",
-  COALESCE(SUM(gtd.amount), 0) + COALESCE(SUM(jtd.amount), 0) AS "totalAmount",
+  COALESCE(gs.goldAmount, 0) AS "goldAmount",
+  COALESCE(js.jewelryAmount, 0) AS "jewelryAmount",
+  COALESCE(gs.goldAmount, 0) + COALESCE(js.jewelryAmount, 0) AS "totalAmount",
 
-  jsonb_agg(DISTINCT
-    CASE
-      WHEN g.name IS NOT NULL AND gtd.weight IS NOT NULL THEN
-        jsonb_build_object(
-          'name', g.name,
-          'weight', (gtd.weight - 0)::numeric
-        )
-      ELSE NULL
-    END
-  ) FILTER (WHERE g.name IS NOT NULL AND gtd.weight IS NOT NULL) AS "goldDetails",
+  -- goldDetails giữ nguyên như cũ
+  (
+    SELECT jsonb_agg(DISTINCT jsonb_build_object('name', g.name, 'weight', gtd.weight))
+    FROM "GoldTransactionDetail" gtd
+    JOIN "Gold" g ON g.id = gtd."goldId"
+    WHERE gtd."transactionHeaderId" = th.id
+  ) AS "goldDetails",
 
-  jsonb_agg(DISTINCT
-    CASE
-      WHEN j.name IS NOT NULL AND j."goldWeight" IS NOT NULL THEN
-        jsonb_build_object(
-          'name', j.name,
-          'weight', (j."goldWeight" - 0)::numeric
-        )
-      ELSE NULL
-    END
-  ) FILTER (WHERE j.name IS NOT NULL AND j."goldWeight" IS NOT NULL) AS "jewelryDetails",
+  (
+    SELECT jsonb_agg(DISTINCT jsonb_build_object('name', j.name, 'weight', j."goldWeight"))
+    FROM "JewelryTransactionDetail" jtd
+    JOIN "Jewelry" j ON j.id = jtd."jewelryId"
+    WHERE jtd."transactionHeaderId" = th.id
+  ) AS "jewelryDetails",
 
-  COALESCE(SUM(
-    CASE WHEN pd.type = 'TM'::"PaymentType" THEN pd.amount ELSE 0 END
-  ), 0) AS "cashAmount",
-
-  COALESCE(SUM(
-    CASE WHEN pd.type = 'CK'::"PaymentType" THEN pd.amount ELSE 0 END
-  ), 0) AS "bankAmount"
+  COALESCE(ps.cashAmount, 0) AS "cashAmount",
+  COALESCE(ps.bankAmount, 0) AS "bankAmount"
 
 FROM "TransactionHeader" th
 LEFT JOIN "Contact" c ON th."contactId" = c.id
-LEFT JOIN "GoldTransactionDetail" gtd ON gtd."transactionHeaderId" = th.id
-LEFT JOIN "Gold" g ON g.id = gtd."goldId"
-LEFT JOIN "JewelryTransactionDetail" jtd ON jtd."transactionHeaderId" = th.id
-LEFT JOIN "Jewelry" j ON j.id = jtd."jewelryId"
-LEFT JOIN "PaymentDetail" pd ON pd."transactionHeaderId" = th.id
+LEFT JOIN gold_sum gs ON gs."transactionHeaderId" = th.id
+LEFT JOIN jewelry_sum js ON js."transactionHeaderId" = th.id
+LEFT JOIN payment_sum ps ON ps."transactionHeaderId" = th.id;
 
-GROUP BY th.id, th."createdAt", th.note, th."paymentMethode", th."isExport", th."goldPrice", th."contactId", c.name;

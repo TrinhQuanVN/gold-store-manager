@@ -29,10 +29,10 @@ export const rawJewelrySchema = z.object({
       "Tổng trọng lượng phải là số hoặc để trống"
     ),
 
-  description: z.string().nullable(),
-  madeIn: z.string().nullable(),
-  size: z.string().nullable(),
-  reportProductCode: z.string().nullable(),
+  description: z.string().nullable().optional(),
+  madeIn: z.string().nullable().optional(),
+  size: z.string().nullable().optional(),
+  reportProductCode: z.string().nullable().optional(),
 
   type: z.object({
     id: z.string().nullable(),

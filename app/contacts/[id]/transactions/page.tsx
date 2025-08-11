@@ -12,7 +12,8 @@ interface Props {
 }
 
 const ContactTransactionsPage = async ({ params }: Props) => {
-  const contactId = parseInt(params.id);
+  const _params = await params;
+  const contactId = parseInt(_params.id);
   const contact = await prisma.contact.findUnique({
     where: { id: contactId },
     include: { group: true },
